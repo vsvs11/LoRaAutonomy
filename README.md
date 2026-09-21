@@ -97,5 +97,5 @@ Please check [docs/](docs/) before submitting changes affecting the network pack
 
 ## 💬 Community & Devlog
 
-* **Telegram Devlog:** [t.me/your_channel_name](https://t.me/lora_autonomy) *(Development logs, hardware testing, and discussions)*
+* **Telegram Devlog:** [t.me/lora_autonomy](https://t.me/lora_autonomy) *(Development logs, hardware testing, and discussions)*
 * **License:** Distributed under the MIT License.
