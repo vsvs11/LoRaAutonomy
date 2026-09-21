@@ -95,6 +95,13 @@ Please check [docs/](docs/) before submitting changes affecting the network pack
 
 ---
 
+## 💖 Support the Project
+
+If you find this project interesting and want to support hardware prototyping (custom PCBs, LoRa transceivers, testing gear):
+
+* **DonationAlerts:** [donationalerts.com/r/vsvs11](https://www.donationalerts.com/r/vsvs11)
+---
+
 ## 💬 Community & Devlog
 
 * **Telegram Devlog:** [t.me/lora_autonomy](https://t.me/lora_autonomy) *(Development logs, hardware testing, and discussions)*
