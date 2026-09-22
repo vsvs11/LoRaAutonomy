@@ -22,7 +22,6 @@ Unlike monolithic firmware solutions, LoRaAutonomy focuses on:
 ## 🛠 Target Hardware
 
 * **Primary MCU:** ESP32 / ESP32-S3 (ESP-IDF)
-* **Co-processor / IO:** RP2040 (custom HID / peripheral bridge)
 * **RF Transceivers:** Semtech SX1262 / SX1276 / SX1278 (SPI)
 * **Operating System:** FreeRTOS (SMP configuration on dual-core targets)
 
