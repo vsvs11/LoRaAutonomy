@@ -20,9 +20,10 @@ int kill_task(TaskHandle_t handle);//уничтожение задачи
 
 int kill_subsystem(subsys_id_t subsys_id);//уничтожение подсистемы
 
-int create_queue(UBaseType_t len_queue, UBaseType_t item_size,
-                QueueHandle_t *out_queue);//создание очереди
-
 void start();//стартовая функция
 
 void supervisor(void *pvParameters);//главная задача супервизора
+
+
+int create_queue(UBaseType_t len_queue, UBaseType_t item_size,
+                QueueHandle_t *out_queue);//создание очереди

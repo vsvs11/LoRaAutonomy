@@ -119,3 +119,18 @@ void supervisor(void *pvParameters){
     }
 
 }
+
+int create_queue(UBaseType_t queue_len, UBaseType_t item_size, QueueHandle_t *out_queue) {
+    if (out_queue == NULL || queue_len == 0 || item_size == 0) {
+        return -1;
+    }
+
+    QueueHandle_t q = xQueueCreate(queue_len, item_size);
+    if (q == NULL) {
+        ESP_LOGE(TAG_KERNEL, "Failed to allocate FreeRTOS queue");
+        return -1;
+    }
+
+    *out_queue = q;
+    return 1;
+}
