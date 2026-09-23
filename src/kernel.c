@@ -5,6 +5,7 @@
 #define SUBSYS_COUNT 4
 #define HEARTBEAT_TIMEOUT_MS 5000
 
+TaskHandle_t *disp = NULL;
 
 typedef struct {
     uint64_t last_seen_ms;
@@ -86,7 +87,7 @@ int kill_subsystem(subsys_id_t subsystem_id){
 }
 
 void start(void){//возможно перемешение стартовой функции в main.c
- 
+    create_task("Display",display,NULL,15000,1,disp,SUBSYS_CORE);
 }
 
 void supervisor(void *pvParameters){

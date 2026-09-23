@@ -9,3 +9,4 @@
 //void IRAM_ATTR button_isr_handler(void *arg);
 void hard(void *pvParameters);
 void power(void *pvParameters);//тестовая задача
+void display(void *pvParameters);
