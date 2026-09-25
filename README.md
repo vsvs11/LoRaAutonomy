@@ -32,12 +32,17 @@ Unlike monolithic firmware solutions, LoRaAutonomy focuses on:
 ```text
 ├── docs/             # Protocol frames, task lifecycle, and architecture specifications
 ├── src/
-│   ├── kernel.c      # Subsystem task scheduler and memory manager
-│   ├── kernel.h      # Kernel interface and lifecycle declarations
-│   ├── list.c / .h   # Active task tracking structures
-│   ├── subsystems.h  # Subsystem masks and definitions
-│   └── main.c        # Hardware init and core bootloader
-├── platformio.ini    # PlatformIO build matrix
+|   ├── drivers/
+|   |   ├── ili9341.c     #ILI9341 display driver
+|   |   ├── ili9341.h     # ILI9341 display interface
+|   |   ├── sx1276.c      #LoRa driver
+|   |   └── sx1276.h      #LoRa interface
+│   ├── kernel.c          # Subsystem task scheduler and memory manager
+│   ├── kernel.h          # Kernel interface and lifecycle declarations
+│   ├── list.c / .h       # Active task tracking structures
+│   ├── subsystems.h      # Subsystem masks and definitions
+│   └── main.c            # Hardware init and core bootloader
+├── platformio.ini        # PlatformIO build matrix
 └── README.md
 ```
 
