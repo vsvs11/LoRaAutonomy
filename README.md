@@ -35,8 +35,8 @@ Unlike monolithic firmware solutions, LoRaAutonomy focuses on:
 |   ├── drivers/
 |   |   ├── ili9341.c     #ILI9341 display driver
 |   |   ├── ili9341.h     # ILI9341 display interface
-|   |   ├── sx1276.c      #LoRa driver
-|   |   └── sx1276.h      #LoRa interface
+|   |   ├── sx127x.c      #LoRa driver
+|   |   └── sx127x.h      #LoRa interface
 │   ├── kernel.c          # Subsystem task scheduler and memory manager
 │   ├── kernel.h          # Kernel interface and lifecycle declarations
 │   ├── list.c / .h       # Active task tracking structures
