@@ -70,7 +70,7 @@ Unlike monolithic firmware solutions, LoRaAutonomy focuses on:
 ### Build & Flash
 ```bash
 # Clone the repository
-git clone [https://github.com/YOUR_USERNAME/LoRaAutonomy.git](https://github.com/YOUR_USERNAME/LoRaAutonomy.git)
+git clone [https://github.com/vsvs11/LoRaAutonomy.git](https://github.com/vsvs11/LoRaAutonomy.git)
 cd LoRaAutonomy
 
 # Build firmware
