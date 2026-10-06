@@ -1,0 +1,3 @@
+LoRaAutonomy Device v1.1
+
+1. Update power management BQ27441 (OLD) -> PMIC nPM1300 (NEW)
