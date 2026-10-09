@@ -7,6 +7,7 @@
 #include "esp_attr.h"
 #include "list.h"
 #include "drivers/ili9341.h"
+#include "drivers/sx127x.h"
 
 static const char *TAG = "POWER_LOG";
 
@@ -53,4 +54,21 @@ void display(void *pvParameters){
     for (;;){
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
+}
+
+void lora(void *pvParameters){
+    lora_config_t conf = {
+    .bw_idx = 7,             // 7 соответствует полосе 125 кГц
+    .cr_idx = 5,             // 5 соответствует кодированию 4/5 (библиотека сама вычтет 4)
+    .crc_on = true,          // Включит CRC (в коде сработает условие 1 << 2)
+    .freq = 433,             // Частота 433 МГц (в Герцах)
+    .sf = 7                  // Коэффициент SF7 (оптимально для тестов)
+    };
+    lora_init(&conf);
+    int ver = lora_reg_read(0x42);
+    for (;;){
+        ESP_LOGI(TAG, "%x", ver);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+
 }

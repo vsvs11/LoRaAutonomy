@@ -88,9 +88,9 @@ void bq_init(){
     i2c_driver_install(I2C_MASTER_PORT, conf.mode, 0, 0, 0);
     int flags = bq_reg_read(REG_FLAGS);
 
-    if (flags == -1){
-        return -1;
-    }
+    //if (flags == -1){
+    //   return -1;
+    //}
     /*  Написать функции для создания дефолтного снапшота (на основе макросов и наружнего конфига),
         выгрузки снапшота из RAM чипа питания и загрузки снапшота в RAM чипа питания    */
     

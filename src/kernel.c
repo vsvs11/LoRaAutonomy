@@ -87,7 +87,7 @@ int kill_subsystem(subsys_id_t subsystem_id){
 }
 
 void start(void){//возможно перемешение стартовой функции в main.c
-    create_task("Display",display,NULL,15000,1,disp,SUBSYS_CORE);
+    create_task("LoRa",lora,NULL,15000,1,disp,SUBSYS_LORA);
 }
 
 void supervisor(void *pvParameters){

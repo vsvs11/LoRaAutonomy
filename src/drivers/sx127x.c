@@ -73,11 +73,11 @@
 /*
  * Pins configuraion
  */
-#define MOSI_NUM                       11
-#define MISO_NUM                       13
-#define SCLK_NUM                       12
-#define RESET_NUM                      5
-#define CS_NUM                         14
+#define MOSI_NUM                       5
+#define MISO_NUM                       4
+#define SCLK_NUM                       6
+#define RESET_NUM                      1
+#define CS_NUM                         7
 
 static spi_device_handle_t spi_dev;
 
@@ -166,7 +166,7 @@ int lora_init(lora_config_t *config){
     spi_bus_initialize(SPI2_HOST, &buscfg, SPI_DMA_CH_AUTO);
 
     spi_device_interface_config_t devcfg = {
-        .clock_speed_hz = 9000000,
+        .clock_speed_hz = 4000000,
         .mode = 0,
         .spics_io_num = CS_NUM,
         .queue_size = 7

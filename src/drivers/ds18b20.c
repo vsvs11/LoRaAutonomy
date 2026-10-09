@@ -108,5 +108,6 @@ int ds18b20_init(void){
     };
     gpio_config(&gpio_conf);
     gpio_set_level(DS18B20_PIN, 1);
+    return 1;
 
 }
