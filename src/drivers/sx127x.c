@@ -86,7 +86,7 @@ static long __frequency;
 
 void lora_reg_write(int reg, int data){
     /*
-     * Write register 
+     * Write register
      */
     uint8_t out[2] = {0x80 | reg, data};
     uint8_t in[2];
@@ -118,10 +118,10 @@ int lora_reg_read(int reg){
 }
 
 void lora_idle(void){
-    lora_reg_write(REG_OP_MODE, 0x81);   
+    lora_reg_write(REG_OP_MODE, 0x81);
 }
 
-void lora_sleep(void){ 
+void lora_sleep(void){
    lora_reg_write(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_SLEEP);
 }
 
@@ -139,15 +139,15 @@ void lora_set_preamble_length(long length){
 }
 
 int lora_init(lora_config_t *config){
-    /* 
+    /*
      * Initialization SPI device and LoRa chip
      */
     gpio_config_t gpio_conf = {
         .pin_bit_mask = (1ULL << RESET_NUM),
-        .mode = GPIO_MODE_OUTPUT,            
-        .pull_up_en = GPIO_PULLUP_DISABLE,     
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
-        .intr_type = GPIO_INTR_DISABLE       
+        .intr_type = GPIO_INTR_DISABLE
     };
     gpio_config(&gpio_conf);
     gpio_set_level(RESET_NUM,0);
@@ -195,7 +195,7 @@ int lora_init(lora_config_t *config){
     lora_reg_write(REG_FIFO_TX_BASE_ADDR, 0x00);            //tx FIFO
     lora_reg_write(REG_FIFO_RX_BASE_ADDR, 0x00);            //rx FIFO
     lora_idle();
-    
+
     return 1;
 }
 
@@ -208,11 +208,11 @@ void lora_send_packet(uint8_t *buf, int size){
    lora_idle();
    lora_reg_write(REG_FIFO_ADDR_PTR, 0);
 
-   for(int i=0; i<size; i++) 
+   for(int i=0; i<size; i++)
       lora_reg_write(REG_FIFO, *buf++);
-   
+
    lora_reg_write(REG_PAYLOAD_LENGTH, size);
-   
+
    /*
     * Start transmission and wait for conclusion.
     */
@@ -225,17 +225,33 @@ void lora_send_packet(uint8_t *buf, int size){
 
 int lora_receive_packet(uint8_t *buf, int size) {
     int len = 0;
-    lora_reg_write(REG_FIFO_ADDR_PTR, lora_reg_read(REG_FIFO_RX_CURRENT_ADDR));
     int irq = lora_reg_read(REG_IRQ_FLAGS);
-    lora_reg_write(REG_IRQ_FLAGS, irq); // Reset flags
 
-    if ((irq & IRQ_PAYLOAD_CRC_ERROR_MASK) == 0) {
-        len = lora_reg_read(REG_RX_NB_BYTES);
-        if (len > size) len = size;
-        for (int i = 0; i < len; i++) {
-            buf[i] = (uint8_t)lora_reg_read(REG_FIFO);
-        }
+    // Если пакет еще не принят — сразу выходим, ничего не трогая
+    if ((irq & IRQ_RX_DONE_MASK) == 0) {
+        return 0;
     }
+
+    // Сбрасываем флаги прерываний (запись единицы сбрасывает бит)
+    lora_reg_write(REG_IRQ_FLAGS, irq);
+
+    // Проверяем ошибку контрольной суммы
+    if ((irq & IRQ_PAYLOAD_CRC_ERROR_MASK) != 0) {
+        // Ошибка CRC — битый пакет
+        return -1;
+    }
+
+    // Выставляем FIFO на начало принятого пакета
+    lora_reg_write(REG_FIFO_ADDR_PTR, lora_reg_read(REG_FIFO_RX_CURRENT_ADDR));
+
+    // Считываем реальный размер принятого пакета
+    len = lora_reg_read(REG_RX_NB_BYTES);
+    if (len > size) len = size;
+
+    for (int i = 0; i < len; i++) {
+        buf[i] = (uint8_t)lora_reg_read(REG_FIFO);
+    }
+
     return len;
 }
 /**

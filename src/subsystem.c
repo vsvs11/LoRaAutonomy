@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "stdint.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
@@ -66,9 +67,19 @@ void lora(void *pvParameters){
     };
     lora_init(&conf);
     int ver = lora_reg_read(0x42);
+    if (ver != 0x12){
+        for (;;){
+            ESP_LOGI(TAG, "Error read register");
+            vTaskDelay(pdMS_TO_TICKS(1000));
+        }
+    }
+    uint8_t packet[] = {0x01, 0x13, 0x34, 0xAB, 0x04};
     for (;;){
-        ESP_LOGI(TAG, "%x", ver);
+         ESP_LOGI(TAG, "SEND");
+        lora_send_packet(packet, sizeof(packet));
+         ESP_LOGI(TAG, "OK");
         vTaskDelay(pdMS_TO_TICKS(1000));
+
     }
 
 }
