@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include "stdint.h"
 #include "freertos/FreeRTOS.h"
@@ -9,6 +10,7 @@
 #include "list.h"
 #include "drivers/ili9341.h"
 #include "drivers/sx127x.h"
+#include "subsystems/lora_packet.h"
 
 static const char *TAG = "POWER_LOG";
 
@@ -73,10 +75,32 @@ void lora(void *pvParameters){
             vTaskDelay(pdMS_TO_TICKS(1000));
         }
     }
-    uint8_t packet[] = {0x01, 0x13, 0x34, 0xAB, 0x04};
+    uint8_t data[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+    // 1. Выделяем сплошной кусок памяти: Заголовок + Данные
+    // tx_buffer физически занимает 8 + 10 = 18 байт
+    uint8_t tx_buffer[sizeof(packet_handle_t) + sizeof(data)];
+
+    // 2. Накладываем "трафарет" нашей структуры на начало буфера
+    packet_handle_t *paket = (packet_handle_t *)tx_buffer;
+
+    // 3. Заполняем заголовок
+    paket->id_recipient = 0x02;
+    paket->id_sender = 0x01;
+    paket->type_paket = 0x01;
+    paket->flags = 0xFFFF;
+    paket->num_packet = 0;
+    paket->crc = 0xFF; // Заглушка, по-хорошему тут вызов calc_crc8()
+    paket->payload_len = sizeof(data);
+
+    // 4. Физически копируем данные в хвост структуры (в flexible array)
+    memcpy(paket->payload, data, sizeof(data));
+
+    // Полный размер пакета для отправки (8 байт заголовка + 10 байт данных)
+    size_t total_tx_size = sizeof(packet_handle_t) + paket->payload_len;
     for (;;){
          ESP_LOGI(TAG, "SEND");
-        lora_send_packet(packet, sizeof(packet));
+        lora_send_packet(tx_buffer,total_tx_size);
          ESP_LOGI(TAG, "OK");
         vTaskDelay(pdMS_TO_TICKS(1000));
 
