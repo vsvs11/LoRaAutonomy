@@ -1,6 +1,7 @@
 #include "esp_log.h"
 #include "kernel.h"
 #include "subsystems.h"
+#include "subsystems/lora_tdma/tdma.h"
 
 #define SUBSYS_COUNT 4
 #define HEARTBEAT_TIMEOUT_MS 5000
@@ -87,7 +88,7 @@ int kill_subsystem(subsys_id_t subsystem_id){
 }
 
 void start(void){//возможно перемешение стартовой функции в main.c
-    create_task("LoRa",lora,NULL,15000,1,disp,SUBSYS_LORA);
+    create_task("LoRa",tdma,NULL,15000,1,disp,SUBSYS_LORA);
 }
 
 void supervisor(void *pvParameters){

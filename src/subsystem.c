@@ -10,7 +10,7 @@
 #include "list.h"
 #include "drivers/ili9341.h"
 #include "drivers/sx127x.h"
-#include "subsystems/lora_packet.h"
+#include "subsystems/lora_tdma/lora_packet.h"
 
 static const char *TAG = "POWER_LOG";
 
