@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -9,7 +10,6 @@
 #include "freertos/task.h"
 
 
-#define TASKS_MAX 15 //предел задач
 
 typedef enum {
     SUBSYS_CORE = 0,    // Само ядро

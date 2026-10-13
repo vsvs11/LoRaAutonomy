@@ -7,22 +7,15 @@
 #include "esp_heap_caps.h"
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include "config.h"
 #include "font5x7.h"
-
-
-#define MOSI_NUM 11
-#define SCLK_NUM 12
-#define RESET_NUM 5
-#define DC_NUM 4
-#define CS_NUM 18
-#define MAX_TRANSFER_SZ 15000
 
 
 static spi_device_handle_t spi_dev;
 uint8_t cmd;
 
 void display_cmd(uint8_t cmd) {
-    gpio_set_level(DC_NUM, 0); 
+    gpio_set_level(DISP_DC_NUM, 0); 
 
     spi_transaction_t t = {
         .length = 8,        
@@ -32,7 +25,7 @@ void display_cmd(uint8_t cmd) {
 }
 
 void display_data_byte(uint8_t data) {
-    gpio_set_level(DC_NUM, 1); 
+    gpio_set_level(DISP_DC_NUM, 1); 
     spi_transaction_t t = {
         .flags = SPI_TRANS_USE_TXDATA,
         .length = 8,
@@ -42,7 +35,7 @@ void display_data_byte(uint8_t data) {
 }
 
 void display_data(void *data, size_t len){
-    gpio_set_level(DC_NUM, 1); 
+    gpio_set_level(DISP_DC_NUM, 1); 
 
     spi_transaction_t t_data = {
         .length = len * 8, 
@@ -53,29 +46,29 @@ void display_data(void *data, size_t len){
 
 void display_init(void){
     gpio_config_t gpio_conf = {
-        .pin_bit_mask = (1ULL << DC_NUM) | (1ULL << RESET_NUM),
+        .pin_bit_mask = (1ULL << DISP_DC_NUM) | (1ULL << DISP_RESET_NUM),
         .mode = GPIO_MODE_OUTPUT,            
         .pull_up_en = GPIO_PULLUP_DISABLE,     
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
         .intr_type = GPIO_INTR_DISABLE       
     };
     gpio_config(&gpio_conf);
-    gpio_set_level(DC_NUM,0);
-    gpio_set_level(RESET_NUM,1);
+    gpio_set_level(DISP_DC_NUM,0);
+    gpio_set_level(DISP_RESET_NUM,1);
 
     spi_bus_config_t buscfg = {
-        .mosi_io_num = MOSI_NUM,
-        .sclk_io_num = SCLK_NUM,
+        .mosi_io_num = DISP_MOSI_NUM,
+        .sclk_io_num = DISP_SCLK_NUM,
         .quadwp_io_num = -1,
         .quadhd_io_num = -1,
-        .max_transfer_sz = 15000
+        .max_transfer_sz = DISP_MAX_TRANSFER_SZ
     };
     spi_bus_initialize(SPI2_HOST, &buscfg, SPI_DMA_CH_AUTO);
 
     spi_device_interface_config_t devcfg = {
-        .clock_speed_hz = 80000000,
+        .clock_speed_hz = DISP_FREQ,
         .mode = 0,
-        .spics_io_num = CS_NUM,
+        .spics_io_num = DISP_CS_NUM,
         .queue_size = 7
     };
     spi_bus_add_device(SPI2_HOST, &devcfg, &spi_dev);

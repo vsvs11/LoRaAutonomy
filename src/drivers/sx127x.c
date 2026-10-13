@@ -9,6 +9,7 @@
 #include "driver/gpio.h"
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include "config.h"
 #include <drivers/sx127x.h>
 
 
@@ -70,14 +71,6 @@
 
 #define TIMEOUT_RESET                  100
 
-/*
- * Pins configuraion
- */
-#define MOSI_NUM                       5
-#define MISO_NUM                       4
-#define SCLK_NUM                       6
-#define RESET_NUM                      1
-#define CS_NUM                         7
 
 static spi_device_handle_t spi_dev;
 
@@ -143,22 +136,22 @@ int lora_init(lora_config_t *config){
      * Initialization SPI device and LoRa chip
      */
     gpio_config_t gpio_conf = {
-        .pin_bit_mask = (1ULL << RESET_NUM),
+        .pin_bit_mask = (1ULL << SX_RESET_NUM),
         .mode = GPIO_MODE_OUTPUT,
         .pull_up_en = GPIO_PULLUP_DISABLE,
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
         .intr_type = GPIO_INTR_DISABLE
     };
     gpio_config(&gpio_conf);
-    gpio_set_level(RESET_NUM,0);
+    gpio_set_level(SX_RESET_NUM,0);
     esp_rom_delay_us(200);
-    gpio_set_level(RESET_NUM,1);
+    gpio_set_level(SX_RESET_NUM,1);
     esp_rom_delay_us(5000);
 
     spi_bus_config_t buscfg = {
-        .mosi_io_num = MOSI_NUM,
-        .miso_io_num = MISO_NUM,
-        .sclk_io_num = SCLK_NUM,
+        .mosi_io_num = SX_MOSI_NUM,
+        .miso_io_num = SX_MISO_NUM,
+        .sclk_io_num = SX_SCLK_NUM,
         .quadwp_io_num = -1,
         .quadhd_io_num = -1,
         .max_transfer_sz = 257
@@ -166,9 +159,9 @@ int lora_init(lora_config_t *config){
     spi_bus_initialize(SPI2_HOST, &buscfg, SPI_DMA_CH_AUTO);
 
     spi_device_interface_config_t devcfg = {
-        .clock_speed_hz = 4000000,
+        .clock_speed_hz = SX_FREQ,
         .mode = 0,
-        .spics_io_num = CS_NUM,
+        .spics_io_num = SX_CS_NUM,
         .queue_size = 7
     };
     spi_bus_add_device(SPI2_HOST, &devcfg, &spi_dev);

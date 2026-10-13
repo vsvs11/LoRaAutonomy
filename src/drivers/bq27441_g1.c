@@ -5,6 +5,7 @@
 #include "esp_rom_sys.h"
 #include "esp_system.h"
 #include "driver/i2c.h"
+#include "config.h"
 #include "soc/gpio_struct.h"
 
 /*  Standard register   */
@@ -39,11 +40,6 @@
 #define I2C_MASTER_PORT                         I2C_NUM_0
 #define BQ27441_ADDR                            0x55 // Базовый 7-битный адрес чипа
 
-/*  Pins Configuration  */
-
-#define SCL_NUM                                 22
-#define SDA_NUM                                 21
-#define I2C_FREQ                                100000
 
 int bq_reg_write(uint8_t reg, uint16_t *data, size_t size){
     int size_buff =  1 + size * 2;
@@ -78,11 +74,11 @@ int bq_reg_read(uint8_t reg){
 void bq_init(){
     i2c_config_t conf = {
         .mode = I2C_MODE_MASTER,
-        .sda_io_num = SDA_NUM,
-        .scl_io_num = SCL_NUM,
+        .sda_io_num = BQ_SDA_NUM,
+        .scl_io_num = BQ_SCL_NUM,
         .sda_pullup_en = GPIO_PULLUP_ENABLE, // Включаем внутренние подтяжки ESP32
         .scl_pullup_en = GPIO_PULLUP_ENABLE, // (но лучше иметь внешние резисторы на плате)
-        .master.clk_speed = I2C_FREQ,
+        .master.clk_speed = BQ_I2C_FREQ,
     };
     i2c_param_config(I2C_MASTER_PORT, &conf);
     i2c_driver_install(I2C_MASTER_PORT, conf.mode, 0, 0, 0);

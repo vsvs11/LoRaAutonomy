@@ -1,10 +1,10 @@
+#include "config.h"
 #include "esp_log.h"
 #include "kernel.h"
 #include "subsystems.h"
 #include "subsystems/lora_tdma/tdma.h"
 
-#define SUBSYS_COUNT 4
-#define HEARTBEAT_TIMEOUT_MS 5000
+
 
 TaskHandle_t *disp = NULL;
 
