@@ -1,0 +1,1521 @@
+
+// ====== FILE: ./kernel.h ======
+#pragma once
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
+#include "esp_timer.h"
+#include "freertos/semphr.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <stddef.h>
+#include "list.h"
+
+void sys_heartbeat(subsys_id_t subsys);//рапорт о работе
+
+int create_task(const char* name, TaskFunction_t func,void *arg,
+                uint32_t stack_bytes, UBaseType_t priority,
+                TaskHandle_t *out_handle, subsys_id_t subsys_id);//создание задачи
+
+int kill_task(TaskHandle_t handle);//уничтожение задачи
+
+int kill_subsystem(subsys_id_t subsys_id);//уничтожение подсистемы
+
+void start();//стартовая функция
+
+void supervisor(void *pvParameters);//главная задача супервизора
+
+
+int create_queue(UBaseType_t len_queue, UBaseType_t item_size,
+                QueueHandle_t *out_queue);//создание очереди
+// ====== FILE: ./subsystems.h ======
+/*Данные файлы subsystem являются тестовыми,некими полигонами и нечего общего с основной частью в виде ядра и т.д не имеют*/
+#pragma once
+
+#include "driver/gpio.h"
+#include "list.h"
+
+#define BUTTON_PIN GPIO_NUM_15
+
+//void IRAM_ATTR button_isr_handler(void *arg);
+void hard(void *pvParameters);
+void power(void *pvParameters);//тестовая задача
+void display(void *pvParameters);
+void lora(void *pvParameters);
+
+// ====== FILE: ./config.h ======
+#pragma once
+
+            /*  kernel  */
+#define SUBSYS_COUNT                   4
+#define HEARTBEAT_TIMEOUT_MS           5000
+
+            /*  list  */
+#define TASKS_MAX                      15
+
+        /*  drivers/ili9341  */
+#define DISP_MOSI_NUM                  11
+#define DISP_SCLK_NUM                  12
+#define DISP_RESET_NUM                 5
+#define DISP_DC_NUM                    4
+#define DISP_CS_NUM                    18
+#define DISP_MAX_TRANSFER_SZ           15000
+#define DISP_FREQ                      60000000
+
+        /*  drivers/sx127x  */
+#define SX_MOSI_NUM                    5
+#define SX_MISO_NUM                    4
+#define SX_SCLK_NUM                    6
+#define SX_RESET_NUM                   1
+#define SX_CS_NUM                      7
+#define SX_FREQ                        4000000
+
+       /*  drivers/dq27441_g1  */
+#define BQ_SCL_NUM                     22
+#define BQ_SDA_NUM                     21
+#define BQ_I2C_FREQ                    100000
+// ====== FILE: ./kernel.c ======
+#include "config.h"
+#include "esp_log.h"
+#include "kernel.h"
+#include "subsystems.h"
+#include "subsystems/lora_tdma/tdma.h"
+
+
+
+TaskHandle_t *disp = NULL;
+
+typedef struct {
+    uint64_t last_seen_ms;
+    bool is_monitored;
+} subsys_health_t;//структура жизненного состаяния подсистемы
+
+static const char *TAG_KERNEL = "KERNEL";
+
+// 2. Спинлок ядра для синхронизации в SMP (ESP32-S3)
+static portMUX_TYPE kernel_spinlock = portMUX_INITIALIZER_UNLOCKED;
+
+static subsys_health_t subsys_health[SUBSYS_COUNT] = {0};
+
+void sys_heartbeat(subsys_id_t subsys){
+    if (subsys <= SUBSYS_CORE || subsys >= SUBSYS_COUNT) {
+        return;
+    }
+
+    uint64_t now_ms = esp_timer_get_time() / 1000;
+
+    portENTER_CRITICAL(&kernel_spinlock);
+    subsys_health[subsys].last_seen_ms = now_ms;
+    subsys_health[subsys].is_monitored = true;
+    portEXIT_CRITICAL(&kernel_spinlock);
+}
+
+int create_task(const char* name, TaskFunction_t func, void *arg, uint32_t stack_bytes, UBaseType_t priority, TaskHandle_t *out_handle, subsys_id_t subsys_id){
+    TaskHandle_t created_handle = NULL;
+    BaseType_t res = xTaskCreate(
+        func,
+        name,
+        stack_bytes,
+        arg,
+        priority,
+        &created_handle   
+    );
+    if (res != pdPASS) {
+        return -1;
+    }
+    int status = task_add(name, func, stack_bytes, priority, created_handle, subsys_id);
+    if (status == -1){
+        vTaskDelete(created_handle);
+        return -1;
+    }
+    if (out_handle != NULL) {
+        *out_handle = created_handle;
+    }
+    return 1;
+    
+}
+int kill_task(TaskHandle_t handle){
+    if(handle == NULL){
+        return -1;
+    }
+    int status = task_delete(handle);
+    if (status == -1){
+        return -1;
+    }
+    vTaskDelete(handle);
+    return 1;
+    
+}
+int kill_subsystem(subsys_id_t subsystem_id){
+    if (subsystem_id == SUBSYS_CORE){
+        return -1;
+    }
+    TaskHandle_t targets[TASKS_MAX];
+    int count = 0;
+    list_tasks_t *tasks = list_get();
+    for (int i = 0;i < TASKS_MAX;i++){
+        if (tasks[i].handle != NULL && tasks[i].subsys_id == subsystem_id){
+            targets[count++] = tasks[i].handle;
+        }
+    }
+    for (int i = 0;i < count;i++){
+        kill_task(targets[i]);
+    }
+    return count;
+}
+
+void start(void){//возможно перемешение стартовой функции в main.c
+    create_task("LoRa",tdma,NULL,15000,1,disp,SUBSYS_LORA);
+}
+
+void supervisor(void *pvParameters){
+    (void)pvParameters;
+
+    for (;;) {
+        vTaskDelay(pdMS_TO_TICKS(1000));
+
+        uint64_t now_ms = esp_timer_get_time() / 1000;
+
+        for (int i = 1; i < SUBSYS_COUNT; i++) {
+            portENTER_CRITICAL(&kernel_spinlock);
+            bool monitored = subsys_health[i].is_monitored;
+            uint64_t last = subsys_health[i].last_seen_ms;
+            portEXIT_CRITICAL(&kernel_spinlock);
+
+            if (monitored && (now_ms - last > HEARTBEAT_TIMEOUT_MS)) {
+                ESP_LOGI(TAG_KERNEL, "Subsystem %d hung! Heartbeat timed out (%llu ms). Killing...", 
+                         i, now_ms - last);
+
+                // Отключаем мониторинг, чтобы не спамить повторным киллом
+                portENTER_CRITICAL(&kernel_spinlock);
+                subsys_health[i].is_monitored = false;
+                portEXIT_CRITICAL(&kernel_spinlock);
+
+                // Прибиваем все дочерние таски зависшего модуля
+                kill_subsystem((subsys_id_t)i);
+            }
+        }
+    }
+
+}
+
+int create_queue(UBaseType_t queue_len, UBaseType_t item_size, QueueHandle_t *out_queue) {
+    if (out_queue == NULL || queue_len == 0 || item_size == 0) {
+        return -1;
+    }
+
+    QueueHandle_t q = xQueueCreate(queue_len, item_size);
+    if (q == NULL) {
+        ESP_LOGE(TAG_KERNEL, "Failed to allocate FreeRTOS queue");
+        return -1;
+    }
+
+    *out_queue = q;
+    return 1;
+}
+
+// ====== FILE: ./font5x7.h ======
+#pragma once
+
+#include <stdint.h>
+
+static const uint8_t font[]  = {
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x3E, 0x5B, 0x4F, 0x5B, 0x3E, 0x3E, 0x6B,
+    0x4F, 0x6B, 0x3E, 0x1C, 0x3E, 0x7C, 0x3E, 0x1C, 0x18, 0x3C, 0x7E, 0x3C,
+    0x18, 0x1C, 0x57, 0x7D, 0x57, 0x1C, 0x1C, 0x5E, 0x7F, 0x5E, 0x1C, 0x00,
+    0x18, 0x3C, 0x18, 0x00, 0xFF, 0xE7, 0xC3, 0xE7, 0xFF, 0x00, 0x18, 0x24,
+    0x18, 0x00, 0xFF, 0xE7, 0xDB, 0xE7, 0xFF, 0x30, 0x48, 0x3A, 0x06, 0x0E,
+    0x26, 0x29, 0x79, 0x29, 0x26, 0x40, 0x7F, 0x05, 0x05, 0x07, 0x40, 0x7F,
+    0x05, 0x25, 0x3F, 0x5A, 0x3C, 0xE7, 0x3C, 0x5A, 0x7F, 0x3E, 0x1C, 0x1C,
+    0x08, 0x08, 0x1C, 0x1C, 0x3E, 0x7F, 0x14, 0x22, 0x7F, 0x22, 0x14, 0x5F,
+    0x5F, 0x00, 0x5F, 0x5F, 0x06, 0x09, 0x7F, 0x01, 0x7F, 0x00, 0x66, 0x89,
+    0x95, 0x6A, 0x60, 0x60, 0x60, 0x60, 0x60, 0x94, 0xA2, 0xFF, 0xA2, 0x94,
+    0x08, 0x04, 0x7E, 0x04, 0x08, 0x10, 0x20, 0x7E, 0x20, 0x10, 0x08, 0x08,
+    0x2A, 0x1C, 0x08, 0x08, 0x1C, 0x2A, 0x08, 0x08, 0x1E, 0x10, 0x10, 0x10,
+    0x10, 0x0C, 0x1E, 0x0C, 0x1E, 0x0C, 0x30, 0x38, 0x3E, 0x38, 0x30, 0x06,
+    0x0E, 0x3E, 0x0E, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5F,
+    0x00, 0x00, 0x00, 0x07, 0x00, 0x07, 0x00, 0x14, 0x7F, 0x14, 0x7F, 0x14,
+    0x24, 0x2A, 0x7F, 0x2A, 0x12, 0x23, 0x13, 0x08, 0x64, 0x62, 0x36, 0x49,
+    0x56, 0x20, 0x50, 0x00, 0x08, 0x07, 0x03, 0x00, 0x00, 0x1C, 0x22, 0x41,
+    0x00, 0x00, 0x41, 0x22, 0x1C, 0x00, 0x2A, 0x1C, 0x7F, 0x1C, 0x2A, 0x08,
+    0x08, 0x3E, 0x08, 0x08, 0x00, 0x80, 0x70, 0x30, 0x00, 0x08, 0x08, 0x08,
+    0x08, 0x08, 0x00, 0x00, 0x60, 0x60, 0x00, 0x20, 0x10, 0x08, 0x04, 0x02,
+    0x3E, 0x51, 0x49, 0x45, 0x3E, 0x00, 0x42, 0x7F, 0x40, 0x00, 0x72, 0x49,
+    0x49, 0x49, 0x46, 0x21, 0x41, 0x49, 0x4D, 0x33, 0x18, 0x14, 0x12, 0x7F,
+    0x10, 0x27, 0x45, 0x45, 0x45, 0x39, 0x3C, 0x4A, 0x49, 0x49, 0x31, 0x41,
+    0x21, 0x11, 0x09, 0x07, 0x36, 0x49, 0x49, 0x49, 0x36, 0x46, 0x49, 0x49,
+    0x29, 0x1E, 0x00, 0x00, 0x14, 0x00, 0x00, 0x00, 0x40, 0x34, 0x00, 0x00,
+    0x00, 0x08, 0x14, 0x22, 0x41, 0x14, 0x14, 0x14, 0x14, 0x14, 0x00, 0x41,
+    0x22, 0x14, 0x08, 0x02, 0x01, 0x59, 0x09, 0x06, 0x3E, 0x41, 0x5D, 0x59,
+    0x4E, 0x7C, 0x12, 0x11, 0x12, 0x7C, 0x7F, 0x49, 0x49, 0x49, 0x36, 0x3E,
+    0x41, 0x41, 0x41, 0x22, 0x7F, 0x41, 0x41, 0x41, 0x3E, 0x7F, 0x49, 0x49,
+    0x49, 0x41, 0x7F, 0x09, 0x09, 0x09, 0x01, 0x3E, 0x41, 0x41, 0x51, 0x73,
+    0x7F, 0x08, 0x08, 0x08, 0x7F, 0x00, 0x41, 0x7F, 0x41, 0x00, 0x20, 0x40,
+    0x41, 0x3F, 0x01, 0x7F, 0x08, 0x14, 0x22, 0x41, 0x7F, 0x40, 0x40, 0x40,
+    0x40, 0x7F, 0x02, 0x1C, 0x02, 0x7F, 0x7F, 0x04, 0x08, 0x10, 0x7F, 0x3E,
+    0x41, 0x41, 0x41, 0x3E, 0x7F, 0x09, 0x09, 0x09, 0x06, 0x3E, 0x41, 0x51,
+    0x21, 0x5E, 0x7F, 0x09, 0x19, 0x29, 0x46, 0x26, 0x49, 0x49, 0x49, 0x32,
+    0x03, 0x01, 0x7F, 0x01, 0x03, 0x3F, 0x40, 0x40, 0x40, 0x3F, 0x1F, 0x20,
+    0x40, 0x20, 0x1F, 0x3F, 0x40, 0x38, 0x40, 0x3F, 0x63, 0x14, 0x08, 0x14,
+    0x63, 0x03, 0x04, 0x78, 0x04, 0x03, 0x61, 0x59, 0x49, 0x4D, 0x43, 0x00,
+    0x7F, 0x41, 0x41, 0x41, 0x02, 0x04, 0x08, 0x10, 0x20, 0x00, 0x41, 0x41,
+    0x41, 0x7F, 0x04, 0x02, 0x01, 0x02, 0x04, 0x40, 0x40, 0x40, 0x40, 0x40,
+    0x00, 0x03, 0x07, 0x08, 0x00, 0x20, 0x54, 0x54, 0x78, 0x40, 0x7F, 0x28,
+    0x44, 0x44, 0x38, 0x38, 0x44, 0x44, 0x44, 0x28, 0x38, 0x44, 0x44, 0x28,
+    0x7F, 0x38, 0x54, 0x54, 0x54, 0x18, 0x00, 0x08, 0x7E, 0x09, 0x02, 0x18,
+    0xA4, 0xA4, 0x9C, 0x78, 0x7F, 0x08, 0x04, 0x04, 0x78, 0x00, 0x44, 0x7D,
+    0x40, 0x00, 0x20, 0x40, 0x40, 0x3D, 0x00, 0x7F, 0x10, 0x28, 0x44, 0x00,
+    0x00, 0x41, 0x7F, 0x40, 0x00, 0x7C, 0x04, 0x78, 0x04, 0x78, 0x7C, 0x08,
+    0x04, 0x04, 0x78, 0x38, 0x44, 0x44, 0x44, 0x38, 0xFC, 0x18, 0x24, 0x24,
+    0x18, 0x18, 0x24, 0x24, 0x18, 0xFC, 0x7C, 0x08, 0x04, 0x04, 0x08, 0x48,
+    0x54, 0x54, 0x54, 0x24, 0x04, 0x04, 0x3F, 0x44, 0x24, 0x3C, 0x40, 0x40,
+    0x20, 0x7C, 0x1C, 0x20, 0x40, 0x20, 0x1C, 0x3C, 0x40, 0x30, 0x40, 0x3C,
+    0x44, 0x28, 0x10, 0x28, 0x44, 0x4C, 0x90, 0x90, 0x90, 0x7C, 0x44, 0x64,
+    0x54, 0x4C, 0x44, 0x00, 0x08, 0x36, 0x41, 0x00, 0x00, 0x00, 0x77, 0x00,
+    0x00, 0x00, 0x41, 0x36, 0x08, 0x00, 0x02, 0x01, 0x02, 0x04, 0x02, 0x3C,
+    0x26, 0x23, 0x26, 0x3C, 0x1E, 0xA1, 0xA1, 0x61, 0x12, 0x3A, 0x40, 0x40,
+    0x20, 0x7A, 0x38, 0x54, 0x54, 0x55, 0x59, 0x21, 0x55, 0x55, 0x79, 0x41,
+    0x22, 0x54, 0x54, 0x78, 0x42, // a-umlaut
+    0x21, 0x55, 0x54, 0x78, 0x40, 0x20, 0x54, 0x55, 0x79, 0x40, 0x0C, 0x1E,
+    0x52, 0x72, 0x12, 0x39, 0x55, 0x55, 0x55, 0x59, 0x39, 0x54, 0x54, 0x54,
+    0x59, 0x39, 0x55, 0x54, 0x54, 0x58, 0x00, 0x00, 0x45, 0x7C, 0x41, 0x00,
+    0x02, 0x45, 0x7D, 0x42, 0x00, 0x01, 0x45, 0x7C, 0x40, 0x7D, 0x12, 0x11,
+    0x12, 0x7D, // A-umlaut
+    0xF0, 0x28, 0x25, 0x28, 0xF0, 0x7C, 0x54, 0x55, 0x45, 0x00, 0x20, 0x54,
+    0x54, 0x7C, 0x54, 0x7C, 0x0A, 0x09, 0x7F, 0x49, 0x32, 0x49, 0x49, 0x49,
+    0x32, 0x3A, 0x44, 0x44, 0x44, 0x3A, // o-umlaut
+    0x32, 0x4A, 0x48, 0x48, 0x30, 0x3A, 0x41, 0x41, 0x21, 0x7A, 0x3A, 0x42,
+    0x40, 0x20, 0x78, 0x00, 0x9D, 0xA0, 0xA0, 0x7D, 0x3D, 0x42, 0x42, 0x42,
+    0x3D, // O-umlaut
+    0x3D, 0x40, 0x40, 0x40, 0x3D, 0x3C, 0x24, 0xFF, 0x24, 0x24, 0x48, 0x7E,
+    0x49, 0x43, 0x66, 0x2B, 0x2F, 0xFC, 0x2F, 0x2B, 0xFF, 0x09, 0x29, 0xF6,
+    0x20, 0xC0, 0x88, 0x7E, 0x09, 0x03, 0x20, 0x54, 0x54, 0x79, 0x41, 0x00,
+    0x00, 0x44, 0x7D, 0x41, 0x30, 0x48, 0x48, 0x4A, 0x32, 0x38, 0x40, 0x40,
+    0x22, 0x7A, 0x00, 0x7A, 0x0A, 0x0A, 0x72, 0x7D, 0x0D, 0x19, 0x31, 0x7D,
+    0x26, 0x29, 0x29, 0x2F, 0x28, 0x26, 0x29, 0x29, 0x29, 0x26, 0x30, 0x48,
+    0x4D, 0x40, 0x20, 0x38, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08,
+    0x38, 0x2F, 0x10, 0xC8, 0xAC, 0xBA, 0x2F, 0x10, 0x28, 0x34, 0xFA, 0x00,
+    0x00, 0x7B, 0x00, 0x00, 0x08, 0x14, 0x2A, 0x14, 0x22, 0x22, 0x14, 0x2A,
+    0x14, 0x08, 0x55, 0x00, 0x55, 0x00, 0x55, 
+    0xAA, 0x55, 0xAA, 0x55, 0xAA,
+    0xFF, 0x55, 0xFF, 0x55, 0xFF,
+    0x00, 0x00, 0x00, 0xFF, 0x00, 0x10, 0x10, 0x10, 0xFF, 0x00, 0x14, 0x14,
+    0x14, 0xFF, 0x00, 0x10, 0x10, 0xFF, 0x00, 0xFF, 0x10, 0x10, 0xF0, 0x10,
+    0xF0, 0x14, 0x14, 0x14, 0xFC, 0x00, 0x14, 0x14, 0xF7, 0x00, 0xFF, 0x00,
+    0x00, 0xFF, 0x00, 0xFF, 0x14, 0x14, 0xF4, 0x04, 0xFC, 0x14, 0x14, 0x17,
+    0x10, 0x1F, 0x10, 0x10, 0x1F, 0x10, 0x1F, 0x14, 0x14, 0x14, 0x1F, 0x00,
+    0x10, 0x10, 0x10, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x1F, 0x10, 0x10, 0x10,
+    0x10, 0x1F, 0x10, 0x10, 0x10, 0x10, 0xF0, 0x10, 0x00, 0x00, 0x00, 0xFF,
+    0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0xFF, 0x10, 0x00,
+    0x00, 0x00, 0xFF, 0x14, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0x00, 0x1F,
+    0x10, 0x17, 0x00, 0x00, 0xFC, 0x04, 0xF4, 0x14, 0x14, 0x17, 0x10, 0x17,
+    0x14, 0x14, 0xF4, 0x04, 0xF4, 0x00, 0x00, 0xFF, 0x00, 0xF7, 0x14, 0x14,
+    0x14, 0x14, 0x14, 0x14, 0x14, 0xF7, 0x00, 0xF7, 0x14, 0x14, 0x14, 0x17,
+    0x14, 0x10, 0x10, 0x1F, 0x10, 0x1F, 0x14, 0x14, 0x14, 0xF4, 0x14, 0x10,
+    0x10, 0xF0, 0x10, 0xF0, 0x00, 0x00, 0x1F, 0x10, 0x1F, 0x00, 0x00, 0x00,
+    0x1F, 0x14, 0x00, 0x00, 0x00, 0xFC, 0x14, 0x00, 0x00, 0xF0, 0x10, 0xF0,
+    0x10, 0x10, 0xFF, 0x10, 0xFF, 0x14, 0x14, 0x14, 0xFF, 0x14, 0x10, 0x10,
+    0x10, 0x1F, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x10, 0xFF, 0xFF, 0xFF, 0xFF,
+    0xFF, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0xFF, 0xFF, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x38, 0x44, 0x44,
+    0x38, 0x44, 0xFC, 0x4A, 0x4A, 0x4A, 0x34, // sharp-s or beta
+    0x7E, 0x02, 0x02, 0x06, 0x06, 0x02, 0x7E, 0x02, 0x7E, 0x02, 0x63, 0x55,
+    0x49, 0x41, 0x63, 0x38, 0x44, 0x44, 0x3C, 0x04, 0x40, 0x7E, 0x20, 0x1E,
+    0x20, 0x06, 0x02, 0x7E, 0x02, 0x02, 0x99, 0xA5, 0xE7, 0xA5, 0x99, 0x1C,
+    0x2A, 0x49, 0x2A, 0x1C, 0x4C, 0x72, 0x01, 0x72, 0x4C, 0x30, 0x4A, 0x4D,
+    0x4D, 0x30, 0x30, 0x48, 0x78, 0x48, 0x30, 0xBC, 0x62, 0x5A, 0x46, 0x3D,
+    0x3E, 0x49, 0x49, 0x49, 0x00, 0x7E, 0x01, 0x01, 0x01, 0x7E, 0x2A, 0x2A,
+    0x2A, 0x2A, 0x2A, 0x44, 0x44, 0x5F, 0x44, 0x44, 0x40, 0x51, 0x4A, 0x44,
+    0x40, 0x40, 0x44, 0x4A, 0x51, 0x40, 0x00, 0x00, 0xFF, 0x01, 0x03, 0xE0,
+    0x80, 0xFF, 0x00, 0x00, 0x08, 0x08, 0x6B, 0x6B, 0x08, 0x36, 0x12, 0x36,
+    0x24, 0x36, 0x06, 0x0F, 0x09, 0x0F, 0x06, 0x00, 0x00, 0x18, 0x18, 0x00,
+    0x00, 0x00, 0x10, 0x10, 0x00, 0x30, 0x40, 0xFF, 0x01, 0x01, 0x00, 0x1F,
+    0x01, 0x01, 0x1E, 0x00, 0x19, 0x1D, 0x17, 0x12, 0x00, 0x3C, 0x3C, 0x3C,
+    0x3C, 0x00, 0x00, 0x00, 0x00, 0x00 // #255 NBSP
+};
+
+// ====== FILE: ./subsystems/lora_tdma/lora_packet.h ======
+#pragma once
+
+#include <stdio.h>
+#include <stddef.h>
+#include <stdint.h>
+
+typedef struct __attribute__((packed)) {
+    uint8_t id_recipient;
+    uint8_t id_sender;
+    uint8_t type_paket;
+    uint16_t flags;
+    uint8_t num_packet;
+    uint8_t crc;
+    uint8_t payload_len;
+    uint8_t payload[];
+
+} packet_handle_t;
+
+// ====== FILE: ./subsystems/lora_tdma/tdma.c ======
+#include "esp_timer.h"
+#include <stdint.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include "stdint.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
+#include "esp_log.h"
+#include "driver/gpio.h"
+#include "esp_attr.h"
+#include "drivers/sx127x.h"
+#include "subsystems/lora_tdma/tdma.h"
+#include "subsystems/lora_tdma/lora_packet.h"
+
+#define DIO_NUM     2
+#define TIME_SLOT   1000000
+#define NUM_NODES   3
+#define ID          0x01
+#define ESP_INTR_FLAG   0
+
+static const char *TAG = "TDMA_LOG";
+uint8_t data[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+int flag = 0;
+int len = 0;
+uint8_t message[256];
+static volatile bool dio_tr = false;
+
+static void IRAM_ATTR gpio_isr_handler(void *arg){
+    dio_tr = true;
+}
+
+void tdma(void *pvParameters){
+    gpio_config_t g_conf = {
+        .intr_type = GPIO_INTR_POSEDGE,
+        .pin_bit_mask = (1ULL << DIO_NUM),
+        .mode = GPIO_MODE_INPUT,
+        .pull_down_en = GPIO_PULLDOWN_ENABLE,
+        .pull_up_en = GPIO_PULLUP_DISABLE
+    };
+    gpio_config(&g_conf);
+    gpio_install_isr_service(ESP_INTR_FLAG);
+    gpio_isr_handler_add(DIO_NUM, gpio_isr_handler, NULL);
+    lora_config_t conf = {
+    .bw_idx = 7,             // 7 соответствует полосе 125 кГц
+    .cr_idx = 5,             // 5 соответствует кодированию 4/5 (библиотека сама вычтет 4)
+    .crc_on = true,          // Включит CRC (в коде сработает условие 1 << 2)
+    .freq = 433,             // Частота 433 МГц (в Герцах)
+    .sf = 7                  // Коэффициент SF7 (оптимально для тестов)
+    };
+    lora_init(&conf);
+    int ver = lora_reg_read(0x42);
+    if (ver != 0x12){
+        for (;;){
+            ESP_LOGI(TAG, "Error read register");
+            vTaskDelay(pdMS_TO_TICKS(1000));
+        }
+    }
+    
+    uint8_t tx_buffer[sizeof(packet_handle_t) + sizeof(data)];
+    packet_handle_t *paket = (packet_handle_t *)tx_buffer;
+    paket->id_recipient = 0x02;
+    paket->id_sender = 0x01;
+    paket->type_paket = 0x01;
+    paket->flags = 0xFFFF;
+    paket->num_packet = 0;
+    paket->crc = 0xFF; 
+    paket->payload_len = sizeof(data);
+    memcpy(paket->payload, data, sizeof(data));
+    size_t total_tx_size = sizeof(packet_handle_t) + paket->payload_len;
+    for (;;){
+        /*if (esp_timer_get_time() > TIME_SLOT){
+            int64_t start_time = esp_timer_get_time();
+            int32_t slot = (uint32_t)(start_time / TIME_SLOT);
+            int32_t nod = slot % NUM_NODES;
+
+            ESP_LOGI(TAG, "slot - %d", slot);
+            ESP_LOGI(TAG, "id - 0x%x", nod);
+            if (nod == ID){
+                ESP_LOGI(TAG, "send");
+                if (flag <= 0 && esp_timer_get_time() > slot * TIME_SLOT + TIME_SLOT / 2){
+                    lora_send_packet(tx_buffer,total_tx_size);
+                    ESP_LOGI(TAG, "OK SEND");
+                    flag++;
+                }
+            }else{
+                ESP_LOGI(TAG, "sleep");
+                flag = 0;
+                if (dio_tr){
+                    len = lora_receive_packet(message,sizeof(message));
+                }
+                if (len > 0){
+                    ESP_LOGI(TAG, "OK RESEIVE");
+                    //for (int i = 0; i < 5; i++){
+                    //    ESP_LOGI(TAG, "%x", message[i]);
+                    //}
+                }
+            }
+            vTaskDelay(pdMS_TO_TICKS(10));
+        }*/
+        ESP_LOGI(TAG, "SEND");
+        lora_send_packet(tx_buffer,total_tx_size);
+        ESP_LOGI(TAG, "OK");
+        ESP_LOGI(TAG, "VER(0x42)=0x%02x | OPMODE(0x01)=0x%02x | IRQ(0x12)=0x%02x",
+         lora_reg_read(0x42), lora_reg_read(0x01), lora_reg_read(0x12));
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
+// ====== FILE: ./subsystems/lora_tdma/tdma.h ======
+#pragma once
+
+void tdma(void *pvParameters);
+
+// ====== FILE: ./subsystems/lora_tdma/lora_packet.c ======
+
+// ====== FILE: ./subsystem.c ======
+#include <stdint.h>
+#include <stdio.h>
+#include "stdint.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
+#include "esp_log.h"
+#include "subsystems.h"
+#include "esp_attr.h"
+#include "list.h"
+#include "drivers/ili9341.h"
+#include "drivers/sx127x.h"
+#include "subsystems/lora_tdma/lora_packet.h"
+
+static const char *TAG = "POWER_LOG";
+
+void hard(void *pvParameters){
+    for (;;){
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
+
+void power(void *pvParameters) {
+    (void)pvParameters; // Глушим варнинг о неиспользуемом аргументе
+
+    for (;;) {
+        // Забираем УКАЗАТЕЛЬ на массив
+        list_tasks_t *task_list = list_get();
+
+        ESP_LOGI(TAG, "--- Active Tasks Dump ---");
+
+        for (int i = 0; i < TASKS_MAX; i++) {
+            // Проверяем, что слот реально занят таской, чтобы не читать пустую память
+            if (task_list[i].name != NULL && task_list[i].handle != NULL) {
+                ESP_LOGI(TAG, "[Slot %d] Name: %s | Func: %p | Stack: %lu | Prio: %u",
+                         i,
+                         task_list[i].name,
+                         (void *)task_list[i].func,
+                         (unsigned long)task_list[i].stack_bytes,
+                         (unsigned int)task_list[i].priority);
+            }
+        }
+
+        // Задержка на весь дамп: спим 2 секунды перед следующим выводом
+        vTaskDelay(pdMS_TO_TICKS(2000));
+    }
+}
+
+void display(void *pvParameters){
+    display_init();
+    display_fill_screen(0x0000);
+    display_fill_rect(20,50,140,170,0xFFFF);
+    display_fill_rect(21,51,139,169,0x0000);
+    display_fill_circle(250,100,50,0xF800);
+    display_draw_line(20,210,200,20,0x07E0);
+    display_draw_string(100,200,"Hello,World!",0xFFFF,0x0000, 2);
+    for (;;){
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
+
+void lora(void *pvParameters){
+    lora_config_t conf = {
+    .bw_idx = 7,             // 7 соответствует полосе 125 кГц
+    .cr_idx = 5,             // 5 соответствует кодированию 4/5 (библиотека сама вычтет 4)
+    .crc_on = true,          // Включит CRC (в коде сработает условие 1 << 2)
+    .freq = 433,             // Частота 433 МГц (в Герцах)
+    .sf = 7                  // Коэффициент SF7 (оптимально для тестов)
+    };
+    lora_init(&conf);
+    int ver = lora_reg_read(0x42);
+    if (ver != 0x12){
+        for (;;){
+            ESP_LOGI(TAG, "Error read register");
+            vTaskDelay(pdMS_TO_TICKS(1000));
+        }
+    }
+    uint8_t data[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+    // 1. Выделяем сплошной кусок памяти: Заголовок + Данные
+    // tx_buffer физически занимает 8 + 10 = 18 байт
+    uint8_t tx_buffer[sizeof(packet_handle_t) + sizeof(data)];
+
+    // 2. Накладываем "трафарет" нашей структуры на начало буфера
+    packet_handle_t *paket = (packet_handle_t *)tx_buffer;
+
+    // 3. Заполняем заголовок
+    paket->id_recipient = 0x02;
+    paket->id_sender = 0x01;
+    paket->type_paket = 0x01;
+    paket->flags = 0xFFFF;
+    paket->num_packet = 0;
+    paket->crc = 0xFF; // Заглушка, по-хорошему тут вызов calc_crc8()
+    paket->payload_len = sizeof(data);
+
+    // 4. Физически копируем данные в хвост структуры (в flexible array)
+    memcpy(paket->payload, data, sizeof(data));
+
+    // Полный размер пакета для отправки (8 байт заголовка + 10 байт данных)
+    size_t total_tx_size = sizeof(packet_handle_t) + paket->payload_len;
+    for (;;){
+         ESP_LOGI(TAG, "SEND");
+        lora_send_packet(tx_buffer,total_tx_size);
+         ESP_LOGI(TAG, "OK");
+        vTaskDelay(pdMS_TO_TICKS(1000));
+
+    }
+
+}
+
+// ====== FILE: ./main.c ======
+#include "kernel.h"
+
+void app_main(void) {
+    start();
+}
+
+// ====== FILE: ./list.h ======
+#pragma once
+
+#include "config.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
+
+
+typedef enum {
+    SUBSYS_CORE = 0,    // Само ядро
+    SUBSYS_POWER,       // Контроль батареи, зарядка, сон
+    SUBSYS_LORA,        // Радиостек (RX, TX)
+    SUBSYS_SENSORS      // Датчики
+} subsys_id_t;
+
+typedef struct list_all_task {
+    const char* name;
+    TaskFunction_t func;
+    uint32_t stack_bytes;
+    UBaseType_t priority;
+    TaskHandle_t handle;
+    subsys_id_t subsys_id;
+
+} list_tasks_t;//структура таблицы задач
+
+int task_add(const char* name,TaskFunction_t func,
+            uint32_t stack_bytes, UBaseType_t priority, 
+            TaskHandle_t out_handle, subsys_id_t subsys_id);//добавление задачи в таблицу
+
+int task_delete(TaskHandle_t out_handle);//удаление задачи из таблицы
+
+list_tasks_t *list_get(void);//передача таблицы 
+
+
+
+// ====== FILE: ./list.c ======
+#include <string.h>
+#include "list.h"
+
+list_tasks_t list[TASKS_MAX] = {0};//создание блока структуры list
+
+static portMUX_TYPE kernel_spinlock = portMUX_INITIALIZER_UNLOCKED;
+static uint8_t num = 0;//счет задач
+
+
+int task_add(const char* name,TaskFunction_t func, uint32_t stack,UBaseType_t priority,TaskHandle_t out_handle, subsys_id_t subsys_id){//добавление задачи в список
+    if (num >= TASKS_MAX){
+        return -1;
+    }
+    list[num].name = name;
+    list[num].func = func;
+    list[num].stack_bytes = stack;
+    list[num].priority = priority;
+    list[num].handle = out_handle;
+    list[num].subsys_id = subsys_id;
+    num++;
+    return 1;
+    
+}
+
+int task_delete(TaskHandle_t out_handle){
+    if (out_handle == NULL) {
+        return -1;
+    }
+    portENTER_CRITICAL(&kernel_spinlock);
+    int found_idx = -1;
+    for (int i = 0; i < num; i++) {
+        if (list[i].handle == out_handle) {
+            found_idx = i;
+            break;
+        }
+    }
+    if (found_idx == -1) {
+        portEXIT_CRITICAL(&kernel_spinlock);
+        return -1;
+    }
+    for (int i = found_idx; i < num - 1; i++) {
+        list[i] = list[i + 1];
+    }
+    memset(&list[num - 1], 0, sizeof(list_tasks_t));
+    num--;
+    portEXIT_CRITICAL(&kernel_spinlock);
+    return 0;
+
+
+
+
+}
+
+list_tasks_t *list_get(void){//выгрузка списка задач 
+    return list;
+}
+// ====== FILE: ./CMakeLists.txt ======
+# This file was automatically generated for projects
+# without default 'CMakeLists.txt' file.
+
+FILE(GLOB_RECURSE app_sources ${CMAKE_SOURCE_DIR}/src/*.*)
+
+idf_component_register(SRCS ${app_sources})
+
+// ====== FILE: ./drivers/sx127x.h ======
+#pragma once
+
+#include <stddef.h>
+#include <stdbool.h>
+
+typedef struct {
+    int freq;
+    int bw_idx;
+    int cr_idx;
+    int sf;
+    bool crc_on;
+} lora_config_t;
+
+
+void lora_reg_write(int reg, int data);
+
+int lora_reg_read(int reg);
+
+void lora_idle(void);
+
+void lora_sleep(void);
+
+void lora_receive(void);
+
+void lora_set_preamble_length(long length);
+
+int lora_init(lora_config_t *config);
+
+void lora_send_packet(uint8_t *buf, int size);
+
+int lora_receive_packet(uint8_t *buf, int size);
+
+int lora_packet_rssi(void);
+
+float lora_packet_snr(void);
+
+void lora_close(void);
+// ====== FILE: ./drivers/ili9341.h ======
+#pragma once
+
+
+void display_init(void);
+
+void display_cmd(uint8_t cmd);
+
+void display_data_byte(uint8_t data);
+
+void display_data(void *data, size_t len);
+
+void display_set_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
+
+void display_fill_screen(uint16_t color);
+
+void display_fill_rect(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
+
+void display_fill_circle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t color);
+
+void display_draw_line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color);
+
+void display_draw_char(int16_t x, int16_t y, char c, uint16_t color, uint16_t bg, uint8_t size);
+
+void display_draw_string(int16_t x, int16_t y, const char *str, uint16_t color, uint16_t bg, uint8_t size);
+// ====== FILE: ./drivers/bq27441_g1.c ======
+#include <stdio.h>
+#include <string.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include "esp_rom_sys.h"
+#include "esp_system.h"
+#include "driver/i2c.h"
+#include "config.h"
+#include "soc/gpio_struct.h"
+
+/*  Standard register   */
+
+// Read Of Write Register in 2-byte chunks
+
+#define REG_CONTROL                              0x00
+#define REG_TEMPERATURE                          0x02
+#define REG_VOLTAGE                              0x04
+#define REG_FLAGS                                0x06
+#define REG_NOMINAL_AVAILABLE_CAPACITY           0x08
+#define REG_FULL_AVAILABLE_CAPACITY              0x0A
+#define REG_REMAINING_CAPACITY                   0x0C
+#define REG_FULL_CHARGE_CAPACITY                 0x0E
+#define REG_AVERAGE_CURRENT                      0x10
+#define REG_STANDBY_CURRENT                      0x12
+#define REG_MAX_LOAD_CURRENT                     0x14
+#define REG_AVERAGE_POWER                        0x18
+#define REG_STATE_OF_CHARGE                      0x1C
+#define REG_INTERNAL_TEMPERATURE                 0x1E
+#define REG_STATE_OF_HEALTH                      0x20
+#define REG_REMAINING_CAPACITY_UNFILTERED        0x28
+#define REG_REMAINING_CAPACITY_FILTERED          0x2A
+#define REG_FULL_CHARGE_CAPACITY_UNFILTERED      0x2C
+#define REG_FULL_CHARGE_CAPACITY_FILTERED        0x2E
+#define REG_STATE_OF_CHARGE_UNFILTERED           0x30
+#define REG_TRUE_REMAINING_CAPACITY              0x6A
+
+
+
+
+#define I2C_MASTER_PORT                         I2C_NUM_0
+#define BQ27441_ADDR                            0x55 // Базовый 7-битный адрес чипа
+
+
+int bq_reg_write(uint8_t reg, uint16_t *data, size_t size){
+    int size_buff =  1 + size * 2;
+    uint8_t buff[size_buff];
+
+    buff[0] = reg;
+    int a = 0;
+    for (int i = 1; i < size_buff; i+=2){
+        buff[1 + (a * 2)]     = (uint8_t)(data[a] & 0xFF);
+        buff[1 + (a * 2) + 1] = (uint8_t)((data[a] >> 8) & 0xFF);
+        a++;
+    }
+
+    esp_err_t err = i2c_master_write_to_device(I2C_MASTER_PORT, BQ27441_ADDR, buff, size_buff, pdMS_TO_TICKS(100));
+      if (err == ESP_OK){
+        return 1;
+    }else{
+        return -1;
+    }
+}
+
+int bq_reg_read(uint8_t reg){
+    uint8_t data[2] = {0};
+    esp_err_t err =  i2c_master_write_read_device(I2C_MASTER_PORT, BQ27441_ADDR, &reg, 1, data, 2, pdMS_TO_TICKS(100));
+    if (err == ESP_OK){
+        return (data[1] << 8) | data[0];
+    }else{
+        return -1;
+    }
+
+}
+void bq_init(){
+    i2c_config_t conf = {
+        .mode = I2C_MODE_MASTER,
+        .sda_io_num = BQ_SDA_NUM,
+        .scl_io_num = BQ_SCL_NUM,
+        .sda_pullup_en = GPIO_PULLUP_ENABLE, // Включаем внутренние подтяжки ESP32
+        .scl_pullup_en = GPIO_PULLUP_ENABLE, // (но лучше иметь внешние резисторы на плате)
+        .master.clk_speed = BQ_I2C_FREQ,
+    };
+    i2c_param_config(I2C_MASTER_PORT, &conf);
+    i2c_driver_install(I2C_MASTER_PORT, conf.mode, 0, 0, 0);
+    int flags = bq_reg_read(REG_FLAGS);
+
+    //if (flags == -1){
+    //   return -1;
+    //}
+    /*  Написать функции для создания дефолтного снапшота (на основе макросов и наружнего конфига),
+        выгрузки снапшота из RAM чипа питания и загрузки снапшота в RAM чипа питания    */
+    
+    
+}
+
+// ====== FILE: ./drivers/ds18b20.c ======
+#include "driver/gpio.h"
+#include "esp_rom_sys.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
+#define DS18B20_PIN  GPIO_NUM_4
+
+static portMUX_TYPE ds_mux = portMUX_INITIALIZER_UNLOCKED;
+
+
+bool ds18b20_reset(void){
+    bool presence = false;
+    
+    portENTER_CRITICAL(&ds_mux);
+    gpio_set_level(DS18B20_PIN, 0);       
+    portEXIT_CRITICAL(&ds_mux);
+    esp_rom_delay_us(480);                
+
+    portENTER_CRITICAL(&ds_mux);
+    gpio_set_level(DS18B20_PIN, 1);      
+    esp_rom_delay_us(70);                 
+    presence = (gpio_get_level(DS18B20_PIN) == 0);
+    portEXIT_CRITICAL(&ds_mux);
+
+    esp_rom_delay_us(410);             
+    return presence;
+}
+
+
+void ds18b20_write_bit(uint8_t bit){
+    portENTER_CRITICAL(&ds_mux);
+    gpio_set_level(DS18B20_PIN, 0);
+    if (bit) {
+        esp_rom_delay_us(6);             
+        gpio_set_level(DS18B20_PIN, 1);
+        portEXIT_CRITICAL(&ds_mux);
+        esp_rom_delay_us(64);
+    } else {
+        esp_rom_delay_us(60);            
+        gpio_set_level(DS18B20_PIN, 1);
+        portEXIT_CRITICAL(&ds_mux);
+        esp_rom_delay_us(10);
+    }
+}
+
+
+uint8_t ds18b20_read_bit(void){
+    uint8_t bit = 0;
+    portENTER_CRITICAL(&ds_mux);
+    gpio_set_level(DS18B20_PIN, 0);      
+    esp_rom_delay_us(2);
+    gpio_set_level(DS18B20_PIN, 1);       
+    esp_rom_delay_us(10);                
+    bit = gpio_get_level(DS18B20_PIN);
+    portEXIT_CRITICAL(&ds_mux);
+    esp_rom_delay_us(55);
+    return bit;
+}
+
+
+void ds18b20_write_byte(uint8_t data){
+    for (int i = 0; i < 8; i++) {
+        ds18b20_write_bit(data & 0x01);
+        data >>= 1;
+    }
+}
+
+
+uint8_t ds18b20_read_byte(void){
+    uint8_t data = 0;
+    for (int i = 0; i < 8; i++) {
+        if (ds18b20_read_bit()) {
+            data |= (1 << i);
+        }
+    }
+    return data;
+}
+
+float ds18b20_read_temp(void){
+    if (!ds18b20_reset()) {
+        return -999.0f; 
+    }
+    ds18b20_write_byte(0xCC);
+    ds18b20_write_byte(0x44);
+
+    vTaskDelay(pdMS_TO_TICKS(750));
+
+    if (!ds18b20_reset()) {
+        return -999.0f;
+    }
+    ds18b20_write_byte(0xCC); // Skip ROM
+    ds18b20_write_byte(0xBE); // Read Scratchpad
+
+    uint8_t lsb = ds18b20_read_byte();
+    uint8_t msb = ds18b20_read_byte();
+    int16_t raw_temp = (int16_t)((msb << 8) | lsb);
+
+    return (float)raw_temp * 0.0625f;
+}
+
+int ds18b20_init(void){
+    gpio_config_t gpio_conf = {
+        .pin_bit_mask = (1ULL << DS18B20_PIN),
+        .mode = GPIO_MODE_INPUT_OUTPUT_OD, 
+        .pull_up_en = GPIO_PULLUP_ENABLE, 
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE   
+    };
+    gpio_config(&gpio_conf);
+    gpio_set_level(DS18B20_PIN, 1);
+    return 1;
+
+}
+// ====== FILE: ./drivers/ili9341.c ======
+#include <stdio.h>
+#include <string.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include "driver/gpio.h"        
+#include "driver/spi_master.h"
+#include "esp_heap_caps.h"
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include "config.h"
+#include "font5x7.h"
+
+
+static spi_device_handle_t spi_dev;
+uint8_t cmd;
+
+void display_cmd(uint8_t cmd) {
+    gpio_set_level(DISP_DC_NUM, 0); 
+
+    spi_transaction_t t = {
+        .length = 8,        
+        .tx_buffer = &cmd   
+    };
+    spi_device_polling_transmit(spi_dev, &t);
+}
+
+void display_data_byte(uint8_t data) {
+    gpio_set_level(DISP_DC_NUM, 1); 
+    spi_transaction_t t = {
+        .flags = SPI_TRANS_USE_TXDATA,
+        .length = 8,
+        .tx_data = { data }
+    };
+    spi_device_polling_transmit(spi_dev, &t);
+}
+
+void display_data(void *data, size_t len){
+    gpio_set_level(DISP_DC_NUM, 1); 
+
+    spi_transaction_t t_data = {
+        .length = len * 8, 
+        .tx_buffer = data
+    };
+    spi_device_transmit(spi_dev, &t_data);
+}
+
+void display_init(void){
+    gpio_config_t gpio_conf = {
+        .pin_bit_mask = (1ULL << DISP_DC_NUM) | (1ULL << DISP_RESET_NUM),
+        .mode = GPIO_MODE_OUTPUT,            
+        .pull_up_en = GPIO_PULLUP_DISABLE,     
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE       
+    };
+    gpio_config(&gpio_conf);
+    gpio_set_level(DISP_DC_NUM,0);
+    gpio_set_level(DISP_RESET_NUM,1);
+
+    spi_bus_config_t buscfg = {
+        .mosi_io_num = DISP_MOSI_NUM,
+        .sclk_io_num = DISP_SCLK_NUM,
+        .quadwp_io_num = -1,
+        .quadhd_io_num = -1,
+        .max_transfer_sz = DISP_MAX_TRANSFER_SZ
+    };
+    spi_bus_initialize(SPI2_HOST, &buscfg, SPI_DMA_CH_AUTO);
+
+    spi_device_interface_config_t devcfg = {
+        .clock_speed_hz = DISP_FREQ,
+        .mode = 0,
+        .spics_io_num = DISP_CS_NUM,
+        .queue_size = 7
+    };
+    spi_bus_add_device(SPI2_HOST, &devcfg, &spi_dev);
+    
+    display_cmd(0x11);
+    display_cmd(0x36);              // MADCTL
+    display_data_byte(0x28);        // Альбомная ориентация (MV = 1) + BGR
+    vTaskDelay(pdMS_TO_TICKS(120));
+    display_cmd(0x3A);
+    display_data_byte(0x55);
+    display_cmd(0x29);
+    vTaskDelay(pdMS_TO_TICKS(20));
+    
+}
+
+void display_set_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
+    uint8_t caset[4] = { (uint8_t)(x0 >> 8), (uint8_t)(x0 & 0xFF), (uint8_t)(x1 >> 8), (uint8_t)(x1 & 0xFF) };
+    uint8_t raset[4] = { (uint8_t)(y0 >> 8), (uint8_t)(y0 & 0xFF), (uint8_t)(y1 >> 8), (uint8_t)(y1 & 0xFF) };
+
+    display_cmd(0x2A); 
+    display_data(caset, 4);
+
+    display_cmd(0x2B); 
+    display_data(raset, 4);
+
+    display_cmd(0x2C); 
+}
+
+
+void display_fill_screen(uint16_t color) {
+    display_set_window(0, 0, 319, 239);
+
+    const size_t chunk_pixels = 320 * 20;
+    const size_t chunk_bytes = chunk_pixels * sizeof(uint16_t);
+
+    uint16_t *line_buf = (uint16_t *)heap_caps_malloc(chunk_bytes, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
+    if (!line_buf) {
+        printf("Error DMA memory!\n");
+        return;
+    }
+
+    uint16_t swapped_color = (color >> 8) | (color << 8);
+    for (size_t i = 0; i < chunk_pixels; i++) {
+        line_buf[i] = swapped_color;
+    }
+
+    for (int i = 0; i < 12; i++) {
+        display_data(line_buf, chunk_bytes);
+    }
+
+    free(line_buf);
+}
+
+void display_fill_rect(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color) {
+    if (x0 > x1 || y0 > y1) return;
+
+    display_set_window(x0, y0, x1, y1);
+
+    size_t w = (size_t)(x1 - x0 + 1);
+    size_t h = (size_t)(y1 - y0 + 1);
+    size_t total_pixels = w * h;
+
+    #define CHUNK_PIXELS 64
+    static uint16_t chunk[CHUNK_PIXELS];
+
+    uint16_t swapped_color = (color >> 8) | (color << 8);
+    for (size_t i = 0; i < CHUNK_PIXELS; i++) {
+        chunk[i] = swapped_color;
+    }
+
+    while (total_pixels > 0) {
+        size_t to_send = (total_pixels > CHUNK_PIXELS) ? CHUNK_PIXELS : total_pixels;
+        display_data(chunk, to_send * sizeof(uint16_t));
+        total_pixels -= to_send;
+    }
+}
+
+void display_fill_circle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t color) {
+    int16_t x = 0;
+    int16_t y = r;
+    int16_t d = 3 - 2 * r;
+
+    while (y >= x) {
+        // Горизонтальные линии между симметричными точками
+        display_fill_rect(x0 - x, y0 + y, x0 + x, y0 + y, color);
+        display_fill_rect(x0 - x, y0 - y, x0 + x, y0 - y, color);
+        display_fill_rect(x0 - y, y0 + x, x0 + y, y0 + x, color);
+        display_fill_rect(x0 - y, y0 - x, x0 + y, y0 - x, color);
+
+        if (d < 0) {
+            d += 4 * x + 6;
+        } else {
+            d += 4 * (x - y) + 10;
+            y--;
+        }
+        x++;
+    }
+
+}
+
+void display_draw_line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color) {
+    // Строгие горизонтальные и вертикальные линии выгоднее лить сразу пачкой
+    if (y0 == y1) {
+        if (x0 > x1) { int16_t t = x0; x0 = x1; x1 = t; }
+        display_fill_rect(x0, y0, x1, y0, color);
+        return;
+    }
+    if (x0 == x1) {
+        if (y0 > y1) { int16_t t = y0; y0 = y1; y1 = t; }
+        display_fill_rect(x0, y0, x0, y1, color);
+        return;
+    }
+
+    // Алгоритм Брезенхема для произвольного наклона
+    int16_t dx = abs(x1 - x0);
+    int16_t sx = (x0 < x1) ? 1 : -1;
+    int16_t dy = -abs(y1 - y0);
+    int16_t sy = (y0 < y1) ? 1 : -1;
+    int16_t err = dx + dy;
+
+    for (;;) {
+        // Ставим один пиксель
+        display_fill_rect(x0, y0, x0, y0, color);
+
+        if (x0 == x1 && y0 == y1) break;
+
+        int16_t e2 = 2 * err;
+        if (e2 >= dy) {
+            err += dy;
+            x0 += sx;
+        }
+        if (e2 <= dx) {
+            err += dx;
+            y0 += sy;
+        }
+    }
+}
+
+void display_draw_char(int16_t x, int16_t y, char c, uint16_t color, uint16_t bg, uint8_t size) {
+   
+    const uint8_t *bitmap = &font[(uint8_t)c * 5];
+
+    
+    for (int8_t i = 0; i < 5; i++) {
+        uint8_t line = bitmap[i]; 
+
+        
+        for (int8_t j = 0; j < 8; j++) {
+            if (line & 0x01) {
+               
+                if (size == 1) {
+                    display_fill_rect(x + i, y + j, x + i, y + j, color);
+                } else {
+                    display_fill_rect(x + i * size, y + j * size, x + (i + 1) * size - 1, y + (j + 1) * size - 1, color);
+                }
+            } else if (bg != color) {
+                
+                if (size == 1) {
+                    display_fill_rect(x + i, y + j, x + i, y + j, bg);
+                } else {
+                    display_fill_rect(x + i * size, y + j * size, x + (i + 1) * size - 1, y + (j + 1) * size - 1, bg);
+                }
+            }
+            line >>= 1;
+        }
+    }
+
+   
+    if (bg != color) {
+        display_fill_rect(x + 5 * size, y, x + 6 * size - 1, y + 8 * size - 1, bg);
+    }
+}
+void display_draw_string(int16_t x, int16_t y, const char *str, uint16_t color, uint16_t bg, uint8_t size) {
+    int16_t cursor_x = x;
+    int16_t cursor_y = y;
+
+    while (*str) {
+        if (*str == '\n') {
+            cursor_y += 8 * size + 2; 
+            cursor_x = x;
+        } else {
+            display_draw_char(cursor_x, cursor_y, *str, color, bg, size);
+            cursor_x += 6 * size;    
+        }
+        str++;
+    }
+}
+// ====== FILE: ./drivers/sx127x.c ======
+#include <stdio.h>
+#include <string.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include "esp_rom_sys.h"
+#include "esp_system.h"
+#include "driver/spi_master.h"
+#include "soc/gpio_struct.h"
+#include "driver/gpio.h"
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include "config.h"
+#include <drivers/sx127x.h>
+
+
+/*
+ * Register definitions
+ */
+#define REG_FIFO                       0x00
+#define REG_OP_MODE                    0x01
+#define REG_FRF_MSB                    0x06
+#define REG_FRF_MID                    0x07
+#define REG_FRF_LSB                    0x08
+#define REG_PA_CONFIG                  0x09
+#define REG_LNA                        0x0c
+#define REG_FIFO_ADDR_PTR              0x0d
+#define REG_FIFO_TX_BASE_ADDR          0x0e
+#define REG_FIFO_RX_BASE_ADDR          0x0f
+#define REG_FIFO_RX_CURRENT_ADDR       0x10
+#define REG_IRQ_FLAGS                  0x12
+#define REG_RX_NB_BYTES                0x13
+#define REG_PKT_SNR_VALUE              0x19
+#define REG_PKT_RSSI_VALUE             0x1a
+#define REG_MODEM_CONFIG_1             0x1d
+#define REG_MODEM_CONFIG_2             0x1e
+#define REG_PREAMBLE_MSB               0x20
+#define REG_PREAMBLE_LSB               0x21
+#define REG_PAYLOAD_LENGTH             0x22
+#define REG_MODEM_CONFIG_3             0x26
+#define REG_RSSI_WIDEBAND              0x2c
+#define REG_DETECTION_OPTIMIZE         0x31
+#define REG_DETECTION_THRESHOLD        0x37
+#define REG_SYNC_WORD                  0x39
+#define REG_DIO_MAPPING_1              0x40
+#define REG_VERSION                    0x42
+
+/*
+ * Transceiver modes
+ */
+#define MODE_LONG_RANGE_MODE           0x80
+#define MODE_SLEEP                     0x00
+#define MODE_STDBY                     0x01
+#define MODE_TX                        0x03
+#define MODE_RX_CONTINUOUS             0x05
+#define MODE_RX_SINGLE                 0x06
+
+/*
+ * PA configuration
+ */
+#define PA_BOOST                       0x80
+
+/*
+ * IRQ masks
+ */
+#define IRQ_TX_DONE_MASK               0x08
+#define IRQ_PAYLOAD_CRC_ERROR_MASK     0x20
+#define IRQ_RX_DONE_MASK               0x40
+
+#define PA_OUTPUT_RFO_PIN              0
+#define PA_OUTPUT_PA_BOOST_PIN         1
+
+#define TIMEOUT_RESET                  100
+
+
+static spi_device_handle_t spi_dev;
+
+//static int __implicit;
+static long __frequency;
+
+void lora_reg_write(int reg, int data){
+    /*
+     * Write register
+     */
+    uint8_t out[2] = {0x80 | reg, data};
+    uint8_t in[2];
+
+    spi_transaction_t t = {
+        .flags = 0,
+        .length = 8 * sizeof(out),
+        .tx_buffer = out,
+        .rx_buffer = in
+    };
+    spi_device_polling_transmit(spi_dev, &t);
+}
+
+int lora_reg_read(int reg){
+    /*
+     * Read register
+     */
+    uint8_t out[2] = {reg, 0xFF};
+    uint8_t in[2];
+
+    spi_transaction_t t = {
+        .flags = 0,
+        .length = 8 * sizeof(out),
+        .tx_buffer = out,
+        .rx_buffer = in
+    };
+    spi_device_polling_transmit(spi_dev, &t);
+    return in[1];
+}
+
+void lora_idle(void){
+    lora_reg_write(REG_OP_MODE, 0x81);
+}
+
+void lora_sleep(void){
+   lora_reg_write(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_SLEEP);
+}
+
+/**
+ * Sets the radio transceiver in receive mode.
+ * Incoming packets will be received.
+ */
+void lora_receive(void){
+   lora_reg_write(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_RX_CONTINUOUS);
+}
+
+void lora_set_preamble_length(long length){
+   lora_reg_write(REG_PREAMBLE_MSB, (uint8_t)(length >> 8));
+   lora_reg_write(REG_PREAMBLE_LSB, (uint8_t)(length >> 0));
+}
+
+int lora_init(lora_config_t *config){
+    /*
+     * Initialization SPI device and LoRa chip
+     */
+    gpio_config_t gpio_conf = {
+        .pin_bit_mask = (1ULL << SX_RESET_NUM),
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE
+    };
+    gpio_config(&gpio_conf);
+    gpio_set_level(SX_RESET_NUM,0);
+    esp_rom_delay_us(200);
+    gpio_set_level(SX_RESET_NUM,1);
+    esp_rom_delay_us(5000);
+
+    spi_bus_config_t buscfg = {
+        .mosi_io_num = SX_MOSI_NUM,
+        .miso_io_num = SX_MISO_NUM,
+        .sclk_io_num = SX_SCLK_NUM,
+        .quadwp_io_num = -1,
+        .quadhd_io_num = -1,
+        .max_transfer_sz = 257
+    };
+    spi_bus_initialize(SPI2_HOST, &buscfg, SPI_DMA_CH_AUTO);
+
+    spi_device_interface_config_t devcfg = {
+        .clock_speed_hz = SX_FREQ,
+        .mode = 0,
+        .spics_io_num = SX_CS_NUM,
+        .queue_size = 7
+    };
+    spi_bus_add_device(SPI2_HOST, &devcfg, &spi_dev);
+    uint32_t frf = (uint32_t)(((uint64_t)config->freq * 1000000ULL << 19) / 32000000ULL);
+    __frequency = config->freq;
+
+    uint8_t freq_msb = (uint8_t)(frf >> 16);
+    uint8_t freq_mid = (uint8_t)(frf >> 8);
+    uint8_t freq_lsb = (uint8_t)(frf >> 0);
+    uint8_t bw_cr = (config->bw_idx << 4) | ((config->cr_idx - 4) << 1) | 0x00;
+    uint8_t sf = (config->sf << 4) | (config->crc_on ? (1 << 2) : 0);
+
+    /*  initialization and frequency adjustment  */
+
+    lora_reg_write(REG_OP_MODE, 0x80);                      //включаем лору и переводим спящий режим
+    lora_reg_write(REG_FRF_MSB, freq_msb);                  //freq msb
+    lora_reg_write(REG_FRF_MID, freq_mid);                  //freq mid
+    lora_reg_write(REG_FRF_LSB, freq_lsb);                  //freq lsb
+    lora_reg_write(REG_PA_CONFIG, 0x8F);                    //pa config
+    lora_reg_write(REG_MODEM_CONFIG_1, bw_cr);              //BW и CR
+    lora_reg_write(REG_MODEM_CONFIG_2, sf);                 //SF
+    lora_reg_write(REG_MODEM_CONFIG_3, 0x04);               //AGS
+    lora_reg_write(REG_SYNC_WORD, 0x12);                    //Sync Word
+    lora_reg_write(REG_FIFO_TX_BASE_ADDR, 0x00);            //tx FIFO
+    lora_reg_write(REG_FIFO_RX_BASE_ADDR, 0x00);            //rx FIFO
+    lora_idle();
+
+    return 1;
+}
+
+
+
+void lora_send_packet(uint8_t *buf, int size){
+   /*
+    * Transfer data to radio.
+    */
+   lora_idle();
+   lora_reg_write(REG_FIFO_ADDR_PTR, 0);
+
+   for(int i=0; i<size; i++)
+      lora_reg_write(REG_FIFO, *buf++);
+
+   lora_reg_write(REG_PAYLOAD_LENGTH, size);
+
+   /*
+    * Start transmission and wait for conclusion.
+    */
+   lora_reg_write(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_TX);
+   while((lora_reg_read(REG_IRQ_FLAGS) & IRQ_TX_DONE_MASK) == 0)
+      vTaskDelay(pdMS_TO_TICKS(2));
+
+   lora_reg_write(REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
+}
+
+int lora_receive_packet(uint8_t *buf, int size) {
+    int len = 0;
+    int irq = lora_reg_read(REG_IRQ_FLAGS);
+
+    // Если пакет еще не принят — сразу выходим, ничего не трогая
+    if ((irq & IRQ_RX_DONE_MASK) == 0) {
+        return 0;
+    }
+
+    // Сбрасываем флаги прерываний (запись единицы сбрасывает бит)
+    lora_reg_write(REG_IRQ_FLAGS, irq);
+
+    // Проверяем ошибку контрольной суммы
+    if ((irq & IRQ_PAYLOAD_CRC_ERROR_MASK) != 0) {
+        // Ошибка CRC — битый пакет
+        return -1;
+    }
+
+    // Выставляем FIFO на начало принятого пакета
+    lora_reg_write(REG_FIFO_ADDR_PTR, lora_reg_read(REG_FIFO_RX_CURRENT_ADDR));
+
+    // Считываем реальный размер принятого пакета
+    len = lora_reg_read(REG_RX_NB_BYTES);
+    if (len > size) len = size;
+
+    for (int i = 0; i < len; i++) {
+        buf[i] = (uint8_t)lora_reg_read(REG_FIFO);
+    }
+
+    return len;
+}
+/**
+ * Return last packet's RSSI.
+ */
+int lora_packet_rssi(void){
+   return (lora_reg_read(REG_PKT_RSSI_VALUE) - (__frequency < 868E6 ? 164 : 157));
+}
+
+/**
+ * Return last packet's SNR (signal to noise ratio).
+ */
+float lora_packet_snr(void){
+   return ((int8_t)lora_reg_read(REG_PKT_SNR_VALUE)) * 0.25;
+}
+
+/**
+ * Shutdown hardware.
+ */
+void lora_close(void){
+   lora_sleep();
+}
+
+// ====== FILE: ./drivers/ds18b20.h ======
+#pragma once
+
+#include <stdbool.h>
+#include <stdint.h>
+
+
+bool ds18b20_reset(void);
+
+void ds18b20_write_bit(uint8_t bit);
+
+uint8_t ds18b20_read_bit(void);
+
+void ds18b20_write_byte(uint8_t data);
+
+uint8_t ds18b20_read_byte(void);
+
+float ds18b20_read_temp(void);
+
+int ds18b20_init(void);
+// ====== FILE: ./drivers/bq27441_g1.h ======

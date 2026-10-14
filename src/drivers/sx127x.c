@@ -44,6 +44,7 @@
 #define REG_DIO_MAPPING_1              0x40
 #define REG_VERSION                    0x42
 
+
 /*
  * Transceiver modes
  */
@@ -266,4 +267,28 @@ float lora_packet_snr(void){
  */
 void lora_close(void){
    lora_sleep();
+}
+
+void lora_start_rx_continuous(void) {
+    lora_idle();
+    lora_reg_write(REG_IRQ_FLAGS, 0xFF);        
+    lora_reg_write(REG_DIO_MAPPING_1, 0x00);      // DIO0 -> RxDone
+    lora_reg_write(REG_FIFO_RX_BASE_ADDR, 0x00);
+    lora_reg_write(REG_FIFO_ADDR_PTR, 0x00);
+    lora_reg_write(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_RX_CONTINUOUS); // 0x85
+}
+
+void lora_send_packet_async(uint8_t *buf, int size) {
+    lora_idle();
+    lora_reg_write(REG_IRQ_FLAGS, 0xFF);         
+    lora_reg_write(REG_DIO_MAPPING_1, 0x40);      // DIO0 -> TxDone 
+
+    lora_reg_write(REG_FIFO_TX_BASE_ADDR, 0x00);
+    lora_reg_write(REG_FIFO_ADDR_PTR, 0x00);
+    for (int i = 0; i < size; i++) {
+        lora_reg_write(REG_FIFO, *buf++);
+    }
+    lora_reg_write(REG_PAYLOAD_LENGTH, size);
+
+    lora_reg_write(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_TX);
 }
