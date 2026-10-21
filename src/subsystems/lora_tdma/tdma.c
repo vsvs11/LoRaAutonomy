@@ -122,26 +122,39 @@ void tdma(void *pvParameters){
                 uint8_t irq = lora_reg_read(0x12);
                 if (irq == 0) break;
 
-                // Сразу сбрасываем флаги в чипе (ножка DIO0 падает в 0)
-                lora_reg_write(0x12, irq);
+                ESP_LOGI(TAG, "[DIO0] Сработал IRQ(0x12)=0x%02x", irq);
 
-                // Если завершилась наша передача (TxDone = 0x08)
+                // 1. Если завершилась наша передача (TxDone = 0x08)
                 if (irq & IRQ_TX_DONE_MASK) {
+                    lora_reg_write(0x12, IRQ_TX_DONE_MASK); // Сбрасываем только флаг TX
                     ESP_LOGI(TAG, "[DIO0] Пакет успешно улетел в эфир! Возврат в RX.");
                     lora_start_rx_continuous();
                 }
 
-                // Если принят пакет из эфира (RxDone = 0x40)
+                // 2. Если принят пакет из эфира (RxDone = 0x40)
                 if (irq & IRQ_RX_DONE_MASK) {
-                    if (irq & IRQ_PAYLOAD_CRC_ERROR_MASK) {
-                        ESP_LOGW(TAG, "[DIO0] Ошибка CRC, пакет отброшен.");
-                    } else {
-                        int len = lora_receive_packet(rx_message, sizeof(rx_message));
-                        if (len > 0) {
-                            packet_handle_t *incoming = (packet_handle_t *)rx_message;
-                            ESP_LOGI(TAG, "[DIO0] ПРИНЯТ ПАКЕТ от Node 0x%02x (длина %d байт)", incoming->id_sender, len);
+                    // НЕ сбрасываем 0x12 здесь — его сама проверит и сбросит lora_receive_packet()!
+                    int len = lora_receive_packet(rx_message, sizeof(rx_message));
+                    if (len > 0) {
+                        packet_handle_t *incoming = (packet_handle_t *)rx_message;
+                        ESP_LOGI(TAG, ">>> [DIO0] ПРИНЯТ ПАКЕТ от Node 0x%02x | №%u | длина %d байт | RSSI=%d dBm",
+                                 incoming->id_sender, incoming->num_packet, len, lora_packet_rssi());
+
+                        // Автосинхронизация слотов по эфиру: подстраиваемся под Node 0
+                        if (MY_NODE_ID != 0 && incoming->id_sender == 0) {
+                            s_current_slot = 1; // Следующий слот после Node 0 — это слот 1
+                            esp_timer_stop(s_slot_timer);
+                            esp_timer_start_periodic(s_slot_timer, TIME_SLOT_US);
                         }
+                    } else if (len == -1) {
+                        ESP_LOGW(TAG, "[DIO0] Ошибка CRC, пакет отброшен.");
                     }
+                }
+
+                // На случай любых других побочных флагов (например, ValidHeader 0x10)
+                uint8_t rem = lora_reg_read(0x12);
+                if (rem != 0) {
+                    lora_reg_write(0x12, rem);
                 }
             }
         }

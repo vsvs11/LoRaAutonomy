@@ -1,0 +1,5149 @@
+
+// ====== FILE: ./.pio/build/esp32-c6-devkitc-1/bootloader/CMakeFiles/3.30.2/CompilerIdC/CMakeCCompilerId.c ======
+#ifdef __cplusplus
+# error "A C++ compiler has been selected for C."
+#endif
+
+#if defined(__18CXX)
+# define ID_VOID_MAIN
+#endif
+#if defined(__CLASSIC_C__)
+/* cv-qualifiers did not exist in K&R C */
+# define const
+# define volatile
+#endif
+
+#if !defined(__has_include)
+/* If the compiler does not have __has_include, pretend the answer is
+   always no.  */
+#  define __has_include(x) 0
+#endif
+
+
+/* Version number components: V=Version, R=Revision, P=Patch
+   Version date components:   YYYY=Year, MM=Month,   DD=Day  */
+
+#if defined(__INTEL_COMPILER) || defined(__ICC)
+# define COMPILER_ID "Intel"
+# if defined(_MSC_VER)
+#  define SIMULATE_ID "MSVC"
+# endif
+# if defined(__GNUC__)
+#  define SIMULATE_ID "GNU"
+# endif
+  /* __INTEL_COMPILER = VRP prior to 2021, and then VVVV for 2021 and later,
+     except that a few beta releases use the old format with V=2021.  */
+# if __INTEL_COMPILER < 2021 || __INTEL_COMPILER == 202110 || __INTEL_COMPILER == 202111
+#  define COMPILER_VERSION_MAJOR DEC(__INTEL_COMPILER/100)
+#  define COMPILER_VERSION_MINOR DEC(__INTEL_COMPILER/10 % 10)
+#  if defined(__INTEL_COMPILER_UPDATE)
+#   define COMPILER_VERSION_PATCH DEC(__INTEL_COMPILER_UPDATE)
+#  else
+#   define COMPILER_VERSION_PATCH DEC(__INTEL_COMPILER   % 10)
+#  endif
+# else
+#  define COMPILER_VERSION_MAJOR DEC(__INTEL_COMPILER)
+#  define COMPILER_VERSION_MINOR DEC(__INTEL_COMPILER_UPDATE)
+   /* The third version component from --version is an update index,
+      but no macro is provided for it.  */
+#  define COMPILER_VERSION_PATCH DEC(0)
+# endif
+# if defined(__INTEL_COMPILER_BUILD_DATE)
+   /* __INTEL_COMPILER_BUILD_DATE = YYYYMMDD */
+#  define COMPILER_VERSION_TWEAK DEC(__INTEL_COMPILER_BUILD_DATE)
+# endif
+# if defined(_MSC_VER)
+   /* _MSC_VER = VVRR */
+#  define SIMULATE_VERSION_MAJOR DEC(_MSC_VER / 100)
+#  define SIMULATE_VERSION_MINOR DEC(_MSC_VER % 100)
+# endif
+# if defined(__GNUC__)
+#  define SIMULATE_VERSION_MAJOR DEC(__GNUC__)
+# elif defined(__GNUG__)
+#  define SIMULATE_VERSION_MAJOR DEC(__GNUG__)
+# endif
+# if defined(__GNUC_MINOR__)
+#  define SIMULATE_VERSION_MINOR DEC(__GNUC_MINOR__)
+# endif
+# if defined(__GNUC_PATCHLEVEL__)
+#  define SIMULATE_VERSION_PATCH DEC(__GNUC_PATCHLEVEL__)
+# endif
+
+#elif (defined(__clang__) && defined(__INTEL_CLANG_COMPILER)) || defined(__INTEL_LLVM_COMPILER)
+# define COMPILER_ID "IntelLLVM"
+#if defined(_MSC_VER)
+# define SIMULATE_ID "MSVC"
+#endif
+#if defined(__GNUC__)
+# define SIMULATE_ID "GNU"
+#endif
+/* __INTEL_LLVM_COMPILER = VVVVRP prior to 2021.2.0, VVVVRRPP for 2021.2.0 and
+ * later.  Look for 6 digit vs. 8 digit version number to decide encoding.
+ * VVVV is no smaller than the current year when a version is released.
+ */
+#if __INTEL_LLVM_COMPILER < 1000000L
+# define COMPILER_VERSION_MAJOR DEC(__INTEL_LLVM_COMPILER/100)
+# define COMPILER_VERSION_MINOR DEC(__INTEL_LLVM_COMPILER/10 % 10)
+# define COMPILER_VERSION_PATCH DEC(__INTEL_LLVM_COMPILER    % 10)
+#else
+# define COMPILER_VERSION_MAJOR DEC(__INTEL_LLVM_COMPILER/10000)
+# define COMPILER_VERSION_MINOR DEC(__INTEL_LLVM_COMPILER/100 % 100)
+# define COMPILER_VERSION_PATCH DEC(__INTEL_LLVM_COMPILER     % 100)
+#endif
+#if defined(_MSC_VER)
+  /* _MSC_VER = VVRR */
+# define SIMULATE_VERSION_MAJOR DEC(_MSC_VER / 100)
+# define SIMULATE_VERSION_MINOR DEC(_MSC_VER % 100)
+#endif
+#if defined(__GNUC__)
+# define SIMULATE_VERSION_MAJOR DEC(__GNUC__)
+#elif defined(__GNUG__)
+# define SIMULATE_VERSION_MAJOR DEC(__GNUG__)
+#endif
+#if defined(__GNUC_MINOR__)
+# define SIMULATE_VERSION_MINOR DEC(__GNUC_MINOR__)
+#endif
+#if defined(__GNUC_PATCHLEVEL__)
+# define SIMULATE_VERSION_PATCH DEC(__GNUC_PATCHLEVEL__)
+#endif
+
+#elif defined(__PATHCC__)
+# define COMPILER_ID "PathScale"
+# define COMPILER_VERSION_MAJOR DEC(__PATHCC__)
+# define COMPILER_VERSION_MINOR DEC(__PATHCC_MINOR__)
+# if defined(__PATHCC_PATCHLEVEL__)
+#  define COMPILER_VERSION_PATCH DEC(__PATHCC_PATCHLEVEL__)
+# endif
+
+#elif defined(__BORLANDC__) && defined(__CODEGEARC_VERSION__)
+# define COMPILER_ID "Embarcadero"
+# define COMPILER_VERSION_MAJOR HEX(__CODEGEARC_VERSION__>>24 & 0x00FF)
+# define COMPILER_VERSION_MINOR HEX(__CODEGEARC_VERSION__>>16 & 0x00FF)
+# define COMPILER_VERSION_PATCH DEC(__CODEGEARC_VERSION__     & 0xFFFF)
+
+#elif defined(__BORLANDC__)
+# define COMPILER_ID "Borland"
+  /* __BORLANDC__ = 0xVRR */
+# define COMPILER_VERSION_MAJOR HEX(__BORLANDC__>>8)
+# define COMPILER_VERSION_MINOR HEX(__BORLANDC__ & 0xFF)
+
+#elif defined(__WATCOMC__) && __WATCOMC__ < 1200
+# define COMPILER_ID "Watcom"
+   /* __WATCOMC__ = VVRR */
+# define COMPILER_VERSION_MAJOR DEC(__WATCOMC__ / 100)
+# define COMPILER_VERSION_MINOR DEC((__WATCOMC__ / 10) % 10)
+# if (__WATCOMC__ % 10) > 0
+#  define COMPILER_VERSION_PATCH DEC(__WATCOMC__ % 10)
+# endif
+
+#elif defined(__WATCOMC__)
+# define COMPILER_ID "OpenWatcom"
+   /* __WATCOMC__ = VVRP + 1100 */
+# define COMPILER_VERSION_MAJOR DEC((__WATCOMC__ - 1100) / 100)
+# define COMPILER_VERSION_MINOR DEC((__WATCOMC__ / 10) % 10)
+# if (__WATCOMC__ % 10) > 0
+#  define COMPILER_VERSION_PATCH DEC(__WATCOMC__ % 10)
+# endif
+
+#elif defined(__SUNPRO_C)
+# define COMPILER_ID "SunPro"
+# if __SUNPRO_C >= 0x5100
+   /* __SUNPRO_C = 0xVRRP */
+#  define COMPILER_VERSION_MAJOR HEX(__SUNPRO_C>>12)
+#  define COMPILER_VERSION_MINOR HEX(__SUNPRO_C>>4 & 0xFF)
+#  define COMPILER_VERSION_PATCH HEX(__SUNPRO_C    & 0xF)
+# else
+   /* __SUNPRO_CC = 0xVRP */
+#  define COMPILER_VERSION_MAJOR HEX(__SUNPRO_C>>8)
+#  define COMPILER_VERSION_MINOR HEX(__SUNPRO_C>>4 & 0xF)
+#  define COMPILER_VERSION_PATCH HEX(__SUNPRO_C    & 0xF)
+# endif
+
+#elif defined(__HP_cc)
+# define COMPILER_ID "HP"
+  /* __HP_cc = VVRRPP */
+# define COMPILER_VERSION_MAJOR DEC(__HP_cc/10000)
+# define COMPILER_VERSION_MINOR DEC(__HP_cc/100 % 100)
+# define COMPILER_VERSION_PATCH DEC(__HP_cc     % 100)
+
+#elif defined(__DECC)
+# define COMPILER_ID "Compaq"
+  /* __DECC_VER = VVRRTPPPP */
+# define COMPILER_VERSION_MAJOR DEC(__DECC_VER/10000000)
+# define COMPILER_VERSION_MINOR DEC(__DECC_VER/100000  % 100)
+# define COMPILER_VERSION_PATCH DEC(__DECC_VER         % 10000)
+
+#elif defined(__IBMC__) && defined(__COMPILER_VER__)
+# define COMPILER_ID "zOS"
+  /* __IBMC__ = VRP */
+# define COMPILER_VERSION_MAJOR DEC(__IBMC__/100)
+# define COMPILER_VERSION_MINOR DEC(__IBMC__/10 % 10)
+# define COMPILER_VERSION_PATCH DEC(__IBMC__    % 10)
+
+#elif defined(__open_xl__) && defined(__clang__)
+# define COMPILER_ID "IBMClang"
+# define COMPILER_VERSION_MAJOR DEC(__open_xl_version__)
+# define COMPILER_VERSION_MINOR DEC(__open_xl_release__)
+# define COMPILER_VERSION_PATCH DEC(__open_xl_modification__)
+# define COMPILER_VERSION_TWEAK DEC(__open_xl_ptf_fix_level__)
+
+
+#elif defined(__ibmxl__) && defined(__clang__)
+# define COMPILER_ID "XLClang"
+# define COMPILER_VERSION_MAJOR DEC(__ibmxl_version__)
+# define COMPILER_VERSION_MINOR DEC(__ibmxl_release__)
+# define COMPILER_VERSION_PATCH DEC(__ibmxl_modification__)
+# define COMPILER_VERSION_TWEAK DEC(__ibmxl_ptf_fix_level__)
+
+
+#elif defined(__IBMC__) && !defined(__COMPILER_VER__) && __IBMC__ >= 800
+# define COMPILER_ID "XL"
+  /* __IBMC__ = VRP */
+# define COMPILER_VERSION_MAJOR DEC(__IBMC__/100)
+# define COMPILER_VERSION_MINOR DEC(__IBMC__/10 % 10)
+# define COMPILER_VERSION_PATCH DEC(__IBMC__    % 10)
+
+#elif defined(__IBMC__) && !defined(__COMPILER_VER__) && __IBMC__ < 800
+# define COMPILER_ID "VisualAge"
+  /* __IBMC__ = VRP */
+# define COMPILER_VERSION_MAJOR DEC(__IBMC__/100)
+# define COMPILER_VERSION_MINOR DEC(__IBMC__/10 % 10)
+# define COMPILER_VERSION_PATCH DEC(__IBMC__    % 10)
+
+#elif defined(__NVCOMPILER)
+# define COMPILER_ID "NVHPC"
+# define COMPILER_VERSION_MAJOR DEC(__NVCOMPILER_MAJOR__)
+# define COMPILER_VERSION_MINOR DEC(__NVCOMPILER_MINOR__)
+# if defined(__NVCOMPILER_PATCHLEVEL__)
+#  define COMPILER_VERSION_PATCH DEC(__NVCOMPILER_PATCHLEVEL__)
+# endif
+
+#elif defined(__PGI)
+# define COMPILER_ID "PGI"
+# define COMPILER_VERSION_MAJOR DEC(__PGIC__)
+# define COMPILER_VERSION_MINOR DEC(__PGIC_MINOR__)
+# if defined(__PGIC_PATCHLEVEL__)
+#  define COMPILER_VERSION_PATCH DEC(__PGIC_PATCHLEVEL__)
+# endif
+
+#elif defined(__clang__) && defined(__cray__)
+# define COMPILER_ID "CrayClang"
+# define COMPILER_VERSION_MAJOR DEC(__cray_major__)
+# define COMPILER_VERSION_MINOR DEC(__cray_minor__)
+# define COMPILER_VERSION_PATCH DEC(__cray_patchlevel__)
+# define COMPILER_VERSION_INTERNAL_STR __clang_version__
+
+
+#elif defined(_CRAYC)
+# define COMPILER_ID "Cray"
+# define COMPILER_VERSION_MAJOR DEC(_RELEASE_MAJOR)
+# define COMPILER_VERSION_MINOR DEC(_RELEASE_MINOR)
+
+#elif defined(__TI_COMPILER_VERSION__)
+# define COMPILER_ID "TI"
+  /* __TI_COMPILER_VERSION__ = VVVRRRPPP */
+# define COMPILER_VERSION_MAJOR DEC(__TI_COMPILER_VERSION__/1000000)
+# define COMPILER_VERSION_MINOR DEC(__TI_COMPILER_VERSION__/1000   % 1000)
+# define COMPILER_VERSION_PATCH DEC(__TI_COMPILER_VERSION__        % 1000)
+
+#elif defined(__CLANG_FUJITSU)
+# define COMPILER_ID "FujitsuClang"
+# define COMPILER_VERSION_MAJOR DEC(__FCC_major__)
+# define COMPILER_VERSION_MINOR DEC(__FCC_minor__)
+# define COMPILER_VERSION_PATCH DEC(__FCC_patchlevel__)
+# define COMPILER_VERSION_INTERNAL_STR __clang_version__
+
+
+#elif defined(__FUJITSU)
+# define COMPILER_ID "Fujitsu"
+# if defined(__FCC_version__)
+#   define COMPILER_VERSION __FCC_version__
+# elif defined(__FCC_major__)
+#   define COMPILER_VERSION_MAJOR DEC(__FCC_major__)
+#   define COMPILER_VERSION_MINOR DEC(__FCC_minor__)
+#   define COMPILER_VERSION_PATCH DEC(__FCC_patchlevel__)
+# endif
+# if defined(__fcc_version)
+#   define COMPILER_VERSION_INTERNAL DEC(__fcc_version)
+# elif defined(__FCC_VERSION)
+#   define COMPILER_VERSION_INTERNAL DEC(__FCC_VERSION)
+# endif
+
+
+#elif defined(__ghs__)
+# define COMPILER_ID "GHS"
+/* __GHS_VERSION_NUMBER = VVVVRP */
+# ifdef __GHS_VERSION_NUMBER
+# define COMPILER_VERSION_MAJOR DEC(__GHS_VERSION_NUMBER / 100)
+# define COMPILER_VERSION_MINOR DEC(__GHS_VERSION_NUMBER / 10 % 10)
+# define COMPILER_VERSION_PATCH DEC(__GHS_VERSION_NUMBER      % 10)
+# endif
+
+#elif defined(__TASKING__)
+# define COMPILER_ID "Tasking"
+  # define COMPILER_VERSION_MAJOR DEC(__VERSION__/1000)
+  # define COMPILER_VERSION_MINOR DEC(__VERSION__ % 100)
+# define COMPILER_VERSION_INTERNAL DEC(__VERSION__)
+
+#elif defined(__ORANGEC__)
+# define COMPILER_ID "OrangeC"
+# define COMPILER_VERSION_MAJOR DEC(__ORANGEC_MAJOR__)
+# define COMPILER_VERSION_MINOR DEC(__ORANGEC_MINOR__)
+# define COMPILER_VERSION_PATCH DEC(__ORANGEC_PATCHLEVEL__)
+
+#elif defined(__TINYC__)
+# define COMPILER_ID "TinyCC"
+
+#elif defined(__BCC__)
+# define COMPILER_ID "Bruce"
+
+#elif defined(__SCO_VERSION__)
+# define COMPILER_ID "SCO"
+
+#elif defined(__ARMCC_VERSION) && !defined(__clang__)
+# define COMPILER_ID "ARMCC"
+#if __ARMCC_VERSION >= 1000000
+  /* __ARMCC_VERSION = VRRPPPP */
+  # define COMPILER_VERSION_MAJOR DEC(__ARMCC_VERSION/1000000)
+  # define COMPILER_VERSION_MINOR DEC(__ARMCC_VERSION/10000 % 100)
+  # define COMPILER_VERSION_PATCH DEC(__ARMCC_VERSION     % 10000)
+#else
+  /* __ARMCC_VERSION = VRPPPP */
+  # define COMPILER_VERSION_MAJOR DEC(__ARMCC_VERSION/100000)
+  # define COMPILER_VERSION_MINOR DEC(__ARMCC_VERSION/10000 % 10)
+  # define COMPILER_VERSION_PATCH DEC(__ARMCC_VERSION    % 10000)
+#endif
+
+
+#elif defined(__clang__) && defined(__apple_build_version__)
+# define COMPILER_ID "AppleClang"
+# if defined(_MSC_VER)
+#  define SIMULATE_ID "MSVC"
+# endif
+# define COMPILER_VERSION_MAJOR DEC(__clang_major__)
+# define COMPILER_VERSION_MINOR DEC(__clang_minor__)
+# define COMPILER_VERSION_PATCH DEC(__clang_patchlevel__)
+# if defined(_MSC_VER)
+   /* _MSC_VER = VVRR */
+#  define SIMULATE_VERSION_MAJOR DEC(_MSC_VER / 100)
+#  define SIMULATE_VERSION_MINOR DEC(_MSC_VER % 100)
+# endif
+# define COMPILER_VERSION_TWEAK DEC(__apple_build_version__)
+
+#elif defined(__clang__) && defined(__ARMCOMPILER_VERSION)
+# define COMPILER_ID "ARMClang"
+  # define COMPILER_VERSION_MAJOR DEC(__ARMCOMPILER_VERSION/1000000)
+  # define COMPILER_VERSION_MINOR DEC(__ARMCOMPILER_VERSION/10000 % 100)
+  # define COMPILER_VERSION_PATCH DEC(__ARMCOMPILER_VERSION/100   % 100)
+# define COMPILER_VERSION_INTERNAL DEC(__ARMCOMPILER_VERSION)
+
+#elif defined(__clang__) && defined(__ti__)
+# define COMPILER_ID "TIClang"
+  # define COMPILER_VERSION_MAJOR DEC(__ti_major__)
+  # define COMPILER_VERSION_MINOR DEC(__ti_minor__)
+  # define COMPILER_VERSION_PATCH DEC(__ti_patchlevel__)
+# define COMPILER_VERSION_INTERNAL DEC(__ti_version__)
+
+#elif defined(__clang__)
+# define COMPILER_ID "Clang"
+# if defined(_MSC_VER)
+#  define SIMULATE_ID "MSVC"
+# endif
+# define COMPILER_VERSION_MAJOR DEC(__clang_major__)
+# define COMPILER_VERSION_MINOR DEC(__clang_minor__)
+# define COMPILER_VERSION_PATCH DEC(__clang_patchlevel__)
+# if defined(_MSC_VER)
+   /* _MSC_VER = VVRR */
+#  define SIMULATE_VERSION_MAJOR DEC(_MSC_VER / 100)
+#  define SIMULATE_VERSION_MINOR DEC(_MSC_VER % 100)
+# endif
+
+#elif defined(__LCC__) && (defined(__GNUC__) || defined(__GNUG__) || defined(__MCST__))
+# define COMPILER_ID "LCC"
+# define COMPILER_VERSION_MAJOR DEC(__LCC__ / 100)
+# define COMPILER_VERSION_MINOR DEC(__LCC__ % 100)
+# if defined(__LCC_MINOR__)
+#  define COMPILER_VERSION_PATCH DEC(__LCC_MINOR__)
+# endif
+# if defined(__GNUC__) && defined(__GNUC_MINOR__)
+#  define SIMULATE_ID "GNU"
+#  define SIMULATE_VERSION_MAJOR DEC(__GNUC__)
+#  define SIMULATE_VERSION_MINOR DEC(__GNUC_MINOR__)
+#  if defined(__GNUC_PATCHLEVEL__)
+#   define SIMULATE_VERSION_PATCH DEC(__GNUC_PATCHLEVEL__)
+#  endif
+# endif
+
+#elif defined(__GNUC__)
+# define COMPILER_ID "GNU"
+# define COMPILER_VERSION_MAJOR DEC(__GNUC__)
+# if defined(__GNUC_MINOR__)
+#  define COMPILER_VERSION_MINOR DEC(__GNUC_MINOR__)
+# endif
+# if defined(__GNUC_PATCHLEVEL__)
+#  define COMPILER_VERSION_PATCH DEC(__GNUC_PATCHLEVEL__)
+# endif
+
+#elif defined(_MSC_VER)
+# define COMPILER_ID "MSVC"
+  /* _MSC_VER = VVRR */
+# define COMPILER_VERSION_MAJOR DEC(_MSC_VER / 100)
+# define COMPILER_VERSION_MINOR DEC(_MSC_VER % 100)
+# if defined(_MSC_FULL_VER)
+#  if _MSC_VER >= 1400
+    /* _MSC_FULL_VER = VVRRPPPPP */
+#   define COMPILER_VERSION_PATCH DEC(_MSC_FULL_VER % 100000)
+#  else
+    /* _MSC_FULL_VER = VVRRPPPP */
+#   define COMPILER_VERSION_PATCH DEC(_MSC_FULL_VER % 10000)
+#  endif
+# endif
+# if defined(_MSC_BUILD)
+#  define COMPILER_VERSION_TWEAK DEC(_MSC_BUILD)
+# endif
+
+#elif defined(_ADI_COMPILER)
+# define COMPILER_ID "ADSP"
+#if defined(__VERSIONNUM__)
+  /* __VERSIONNUM__ = 0xVVRRPPTT */
+#  define COMPILER_VERSION_MAJOR DEC(__VERSIONNUM__ >> 24 & 0xFF)
+#  define COMPILER_VERSION_MINOR DEC(__VERSIONNUM__ >> 16 & 0xFF)
+#  define COMPILER_VERSION_PATCH DEC(__VERSIONNUM__ >> 8 & 0xFF)
+#  define COMPILER_VERSION_TWEAK DEC(__VERSIONNUM__ & 0xFF)
+#endif
+
+#elif defined(__IAR_SYSTEMS_ICC__) || defined(__IAR_SYSTEMS_ICC)
+# define COMPILER_ID "IAR"
+# if defined(__VER__) && defined(__ICCARM__)
+#  define COMPILER_VERSION_MAJOR DEC((__VER__) / 1000000)
+#  define COMPILER_VERSION_MINOR DEC(((__VER__) / 1000) % 1000)
+#  define COMPILER_VERSION_PATCH DEC((__VER__) % 1000)
+#  define COMPILER_VERSION_INTERNAL DEC(__IAR_SYSTEMS_ICC__)
+# elif defined(__VER__) && (defined(__ICCAVR__) || defined(__ICCRX__) || defined(__ICCRH850__) || defined(__ICCRL78__) || defined(__ICC430__) || defined(__ICCRISCV__) || defined(__ICCV850__) || defined(__ICC8051__) || defined(__ICCSTM8__))
+#  define COMPILER_VERSION_MAJOR DEC((__VER__) / 100)
+#  define COMPILER_VERSION_MINOR DEC((__VER__) - (((__VER__) / 100)*100))
+#  define COMPILER_VERSION_PATCH DEC(__SUBVERSION__)
+#  define COMPILER_VERSION_INTERNAL DEC(__IAR_SYSTEMS_ICC__)
+# endif
+
+#elif defined(__SDCC_VERSION_MAJOR) || defined(SDCC)
+# define COMPILER_ID "SDCC"
+# if defined(__SDCC_VERSION_MAJOR)
+#  define COMPILER_VERSION_MAJOR DEC(__SDCC_VERSION_MAJOR)
+#  define COMPILER_VERSION_MINOR DEC(__SDCC_VERSION_MINOR)
+#  define COMPILER_VERSION_PATCH DEC(__SDCC_VERSION_PATCH)
+# else
+  /* SDCC = VRP */
+#  define COMPILER_VERSION_MAJOR DEC(SDCC/100)
+#  define COMPILER_VERSION_MINOR DEC(SDCC/10 % 10)
+#  define COMPILER_VERSION_PATCH DEC(SDCC    % 10)
+# endif
+
+
+/* These compilers are either not known or too old to define an
+  identification macro.  Try to identify the platform and guess that
+  it is the native compiler.  */
+#elif defined(__hpux) || defined(__hpua)
+# define COMPILER_ID "HP"
+
+#else /* unknown compiler */
+# define COMPILER_ID ""
+#endif
+
+/* Construct the string literal in pieces to prevent the source from
+   getting matched.  Store it in a pointer rather than an array
+   because some compilers will just produce instructions to fill the
+   array rather than assigning a pointer to a static array.  */
+char const* info_compiler = "INFO" ":" "compiler[" COMPILER_ID "]";
+#ifdef SIMULATE_ID
+char const* info_simulate = "INFO" ":" "simulate[" SIMULATE_ID "]";
+#endif
+
+#ifdef __QNXNTO__
+char const* qnxnto = "INFO" ":" "qnxnto[]";
+#endif
+
+#if defined(__CRAYXT_COMPUTE_LINUX_TARGET)
+char const *info_cray = "INFO" ":" "compiler_wrapper[CrayPrgEnv]";
+#endif
+
+#define STRINGIFY_HELPER(X) #X
+#define STRINGIFY(X) STRINGIFY_HELPER(X)
+
+/* Identify known platforms by name.  */
+#if defined(__linux) || defined(__linux__) || defined(linux)
+# define PLATFORM_ID "Linux"
+
+#elif defined(__MSYS__)
+# define PLATFORM_ID "MSYS"
+
+#elif defined(__CYGWIN__)
+# define PLATFORM_ID "Cygwin"
+
+#elif defined(__MINGW32__)
+# define PLATFORM_ID "MinGW"
+
+#elif defined(__APPLE__)
+# define PLATFORM_ID "Darwin"
+
+#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+# define PLATFORM_ID "Windows"
+
+#elif defined(__FreeBSD__) || defined(__FreeBSD)
+# define PLATFORM_ID "FreeBSD"
+
+#elif defined(__NetBSD__) || defined(__NetBSD)
+# define PLATFORM_ID "NetBSD"
+
+#elif defined(__OpenBSD__) || defined(__OPENBSD)
+# define PLATFORM_ID "OpenBSD"
+
+#elif defined(__sun) || defined(sun)
+# define PLATFORM_ID "SunOS"
+
+#elif defined(_AIX) || defined(__AIX) || defined(__AIX__) || defined(__aix) || defined(__aix__)
+# define PLATFORM_ID "AIX"
+
+#elif defined(__hpux) || defined(__hpux__)
+# define PLATFORM_ID "HP-UX"
+
+#elif defined(__HAIKU__)
+# define PLATFORM_ID "Haiku"
+
+#elif defined(__BeOS) || defined(__BEOS__) || defined(_BEOS)
+# define PLATFORM_ID "BeOS"
+
+#elif defined(__QNX__) || defined(__QNXNTO__)
+# define PLATFORM_ID "QNX"
+
+#elif defined(__tru64) || defined(_tru64) || defined(__TRU64__)
+# define PLATFORM_ID "Tru64"
+
+#elif defined(__riscos) || defined(__riscos__)
+# define PLATFORM_ID "RISCos"
+
+#elif defined(__sinix) || defined(__sinix__) || defined(__SINIX__)
+# define PLATFORM_ID "SINIX"
+
+#elif defined(__UNIX_SV__)
+# define PLATFORM_ID "UNIX_SV"
+
+#elif defined(__bsdos__)
+# define PLATFORM_ID "BSDOS"
+
+#elif defined(_MPRAS) || defined(MPRAS)
+# define PLATFORM_ID "MP-RAS"
+
+#elif defined(__osf) || defined(__osf__)
+# define PLATFORM_ID "OSF1"
+
+#elif defined(_SCO_SV) || defined(SCO_SV) || defined(sco_sv)
+# define PLATFORM_ID "SCO_SV"
+
+#elif defined(__ultrix) || defined(__ultrix__) || defined(_ULTRIX)
+# define PLATFORM_ID "ULTRIX"
+
+#elif defined(__XENIX__) || defined(_XENIX) || defined(XENIX)
+# define PLATFORM_ID "Xenix"
+
+#elif defined(__WATCOMC__)
+# if defined(__LINUX__)
+#  define PLATFORM_ID "Linux"
+
+# elif defined(__DOS__)
+#  define PLATFORM_ID "DOS"
+
+# elif defined(__OS2__)
+#  define PLATFORM_ID "OS2"
+
+# elif defined(__WINDOWS__)
+#  define PLATFORM_ID "Windows3x"
+
+# elif defined(__VXWORKS__)
+#  define PLATFORM_ID "VxWorks"
+
+# else /* unknown platform */
+#  define PLATFORM_ID
+# endif
+
+#elif defined(__INTEGRITY)
+# if defined(INT_178B)
+#  define PLATFORM_ID "Integrity178"
+
+# else /* regular Integrity */
+#  define PLATFORM_ID "Integrity"
+# endif
+
+# elif defined(_ADI_COMPILER)
+#  define PLATFORM_ID "ADSP"
+
+#else /* unknown platform */
+# define PLATFORM_ID
+
+#endif
+
+/* For windows compilers MSVC and Intel we can determine
+   the architecture of the compiler being used.  This is because
+   the compilers do not have flags that can change the architecture,
+   but rather depend on which compiler is being used
+*/
+#if defined(_WIN32) && defined(_MSC_VER)
+# if defined(_M_IA64)
+#  define ARCHITECTURE_ID "IA64"
+
+# elif defined(_M_ARM64EC)
+#  define ARCHITECTURE_ID "ARM64EC"
+
+# elif defined(_M_X64) || defined(_M_AMD64)
+#  define ARCHITECTURE_ID "x64"
+
+# elif defined(_M_IX86)
+#  define ARCHITECTURE_ID "X86"
+
+# elif defined(_M_ARM64)
+#  define ARCHITECTURE_ID "ARM64"
+
+# elif defined(_M_ARM)
+#  if _M_ARM == 4
+#   define ARCHITECTURE_ID "ARMV4I"
+#  elif _M_ARM == 5
+#   define ARCHITECTURE_ID "ARMV5I"
+#  else
+#   define ARCHITECTURE_ID "ARMV" STRINGIFY(_M_ARM)
+#  endif
+
+# elif defined(_M_MIPS)
+#  define ARCHITECTURE_ID "MIPS"
+
+# elif defined(_M_SH)
+#  define ARCHITECTURE_ID "SHx"
+
+# else /* unknown architecture */
+#  define ARCHITECTURE_ID ""
+# endif
+
+#elif defined(__WATCOMC__)
+# if defined(_M_I86)
+#  define ARCHITECTURE_ID "I86"
+
+# elif defined(_M_IX86)
+#  define ARCHITECTURE_ID "X86"
+
+# else /* unknown architecture */
+#  define ARCHITECTURE_ID ""
+# endif
+
+#elif defined(__IAR_SYSTEMS_ICC__) || defined(__IAR_SYSTEMS_ICC)
+# if defined(__ICCARM__)
+#  define ARCHITECTURE_ID "ARM"
+
+# elif defined(__ICCRX__)
+#  define ARCHITECTURE_ID "RX"
+
+# elif defined(__ICCRH850__)
+#  define ARCHITECTURE_ID "RH850"
+
+# elif defined(__ICCRL78__)
+#  define ARCHITECTURE_ID "RL78"
+
+# elif defined(__ICCRISCV__)
+#  define ARCHITECTURE_ID "RISCV"
+
+# elif defined(__ICCAVR__)
+#  define ARCHITECTURE_ID "AVR"
+
+# elif defined(__ICC430__)
+#  define ARCHITECTURE_ID "MSP430"
+
+# elif defined(__ICCV850__)
+#  define ARCHITECTURE_ID "V850"
+
+# elif defined(__ICC8051__)
+#  define ARCHITECTURE_ID "8051"
+
+# elif defined(__ICCSTM8__)
+#  define ARCHITECTURE_ID "STM8"
+
+# else /* unknown architecture */
+#  define ARCHITECTURE_ID ""
+# endif
+
+#elif defined(__ghs__)
+# if defined(__PPC64__)
+#  define ARCHITECTURE_ID "PPC64"
+
+# elif defined(__ppc__)
+#  define ARCHITECTURE_ID "PPC"
+
+# elif defined(__ARM__)
+#  define ARCHITECTURE_ID "ARM"
+
+# elif defined(__x86_64__)
+#  define ARCHITECTURE_ID "x64"
+
+# elif defined(__i386__)
+#  define ARCHITECTURE_ID "X86"
+
+# else /* unknown architecture */
+#  define ARCHITECTURE_ID ""
+# endif
+
+#elif defined(__clang__) && defined(__ti__)
+# if defined(__ARM_ARCH)
+#  define ARCHITECTURE_ID "Arm"
+
+# else /* unknown architecture */
+#  define ARCHITECTURE_ID ""
+# endif
+
+#elif defined(__TI_COMPILER_VERSION__)
+# if defined(__TI_ARM__)
+#  define ARCHITECTURE_ID "ARM"
+
+# elif defined(__MSP430__)
+#  define ARCHITECTURE_ID "MSP430"
+
+# elif defined(__TMS320C28XX__)
+#  define ARCHITECTURE_ID "TMS320C28x"
+
+# elif defined(__TMS320C6X__) || defined(_TMS320C6X)
+#  define ARCHITECTURE_ID "TMS320C6x"
+
+# else /* unknown architecture */
+#  define ARCHITECTURE_ID ""
+# endif
+
+# elif defined(__ADSPSHARC__)
+#  define ARCHITECTURE_ID "SHARC"
+
+# elif defined(__ADSPBLACKFIN__)
+#  define ARCHITECTURE_ID "Blackfin"
+
+#elif defined(__TASKING__)
+
+# if defined(__CTC__) || defined(__CPTC__)
+#  define ARCHITECTURE_ID "TriCore"
+
+# elif defined(__CMCS__)
+#  define ARCHITECTURE_ID "MCS"
+
+# elif defined(__CARM__)
+#  define ARCHITECTURE_ID "ARM"
+
+# elif defined(__CARC__)
+#  define ARCHITECTURE_ID "ARC"
+
+# elif defined(__C51__)
+#  define ARCHITECTURE_ID "8051"
+
+# elif defined(__CPCP__)
+#  define ARCHITECTURE_ID "PCP"
+
+# else
+#  define ARCHITECTURE_ID ""
+# endif
+
+#else
+#  define ARCHITECTURE_ID
+#endif
+
+/* Convert integer to decimal digit literals.  */
+#define DEC(n)                   \
+  ('0' + (((n) / 10000000)%10)), \
+  ('0' + (((n) / 1000000)%10)),  \
+  ('0' + (((n) / 100000)%10)),   \
+  ('0' + (((n) / 10000)%10)),    \
+  ('0' + (((n) / 1000)%10)),     \
+  ('0' + (((n) / 100)%10)),      \
+  ('0' + (((n) / 10)%10)),       \
+  ('0' +  ((n) % 10))
+
+/* Convert integer to hex digit literals.  */
+#define HEX(n)             \
+  ('0' + ((n)>>28 & 0xF)), \
+  ('0' + ((n)>>24 & 0xF)), \
+  ('0' + ((n)>>20 & 0xF)), \
+  ('0' + ((n)>>16 & 0xF)), \
+  ('0' + ((n)>>12 & 0xF)), \
+  ('0' + ((n)>>8  & 0xF)), \
+  ('0' + ((n)>>4  & 0xF)), \
+  ('0' + ((n)     & 0xF))
+
+/* Construct a string literal encoding the version number. */
+#ifdef COMPILER_VERSION
+char const* info_version = "INFO" ":" "compiler_version[" COMPILER_VERSION "]";
+
+/* Construct a string literal encoding the version number components. */
+#elif defined(COMPILER_VERSION_MAJOR)
+char const info_version[] = {
+  'I', 'N', 'F', 'O', ':',
+  'c','o','m','p','i','l','e','r','_','v','e','r','s','i','o','n','[',
+  COMPILER_VERSION_MAJOR,
+# ifdef COMPILER_VERSION_MINOR
+  '.', COMPILER_VERSION_MINOR,
+#  ifdef COMPILER_VERSION_PATCH
+   '.', COMPILER_VERSION_PATCH,
+#   ifdef COMPILER_VERSION_TWEAK
+    '.', COMPILER_VERSION_TWEAK,
+#   endif
+#  endif
+# endif
+  ']','\0'};
+#endif
+
+/* Construct a string literal encoding the internal version number. */
+#ifdef COMPILER_VERSION_INTERNAL
+char const info_version_internal[] = {
+  'I', 'N', 'F', 'O', ':',
+  'c','o','m','p','i','l','e','r','_','v','e','r','s','i','o','n','_',
+  'i','n','t','e','r','n','a','l','[',
+  COMPILER_VERSION_INTERNAL,']','\0'};
+#elif defined(COMPILER_VERSION_INTERNAL_STR)
+char const* info_version_internal = "INFO" ":" "compiler_version_internal[" COMPILER_VERSION_INTERNAL_STR "]";
+#endif
+
+/* Construct a string literal encoding the version number components. */
+#ifdef SIMULATE_VERSION_MAJOR
+char const info_simulate_version[] = {
+  'I', 'N', 'F', 'O', ':',
+  's','i','m','u','l','a','t','e','_','v','e','r','s','i','o','n','[',
+  SIMULATE_VERSION_MAJOR,
+# ifdef SIMULATE_VERSION_MINOR
+  '.', SIMULATE_VERSION_MINOR,
+#  ifdef SIMULATE_VERSION_PATCH
+   '.', SIMULATE_VERSION_PATCH,
+#   ifdef SIMULATE_VERSION_TWEAK
+    '.', SIMULATE_VERSION_TWEAK,
+#   endif
+#  endif
+# endif
+  ']','\0'};
+#endif
+
+/* Construct the string literal in pieces to prevent the source from
+   getting matched.  Store it in a pointer rather than an array
+   because some compilers will just produce instructions to fill the
+   array rather than assigning a pointer to a static array.  */
+char const* info_platform = "INFO" ":" "platform[" PLATFORM_ID "]";
+char const* info_arch = "INFO" ":" "arch[" ARCHITECTURE_ID "]";
+
+
+
+#define C_STD_99 199901L
+#define C_STD_11 201112L
+#define C_STD_17 201710L
+#define C_STD_23 202311L
+
+#ifdef __STDC_VERSION__
+#  define C_STD __STDC_VERSION__
+#endif
+
+#if !defined(__STDC__) && !defined(__clang__)
+# if defined(_MSC_VER) || defined(__ibmxl__) || defined(__IBMC__)
+#  define C_VERSION "90"
+# else
+#  define C_VERSION
+# endif
+#elif C_STD > C_STD_17
+# define C_VERSION "23"
+#elif C_STD > C_STD_11
+# define C_VERSION "17"
+#elif C_STD > C_STD_99
+# define C_VERSION "11"
+#elif C_STD >= C_STD_99
+# define C_VERSION "99"
+#else
+# define C_VERSION "90"
+#endif
+const char* info_language_standard_default =
+  "INFO" ":" "standard_default[" C_VERSION "]";
+
+const char* info_language_extensions_default = "INFO" ":" "extensions_default["
+#if (defined(__clang__) || defined(__GNUC__) || defined(__xlC__) ||           \
+     defined(__TI_COMPILER_VERSION__)) &&                                     \
+  !defined(__STRICT_ANSI__)
+  "ON"
+#else
+  "OFF"
+#endif
+"]";
+
+/*--------------------------------------------------------------------------*/
+
+#ifdef ID_VOID_MAIN
+void main() {}
+#else
+# if defined(__CLASSIC_C__)
+int main(argc, argv) int argc; char *argv[];
+# else
+int main(int argc, char* argv[])
+# endif
+{
+  int require = 0;
+  require += info_compiler[argc];
+  require += info_platform[argc];
+  require += info_arch[argc];
+#ifdef COMPILER_VERSION_MAJOR
+  require += info_version[argc];
+#endif
+#ifdef COMPILER_VERSION_INTERNAL
+  require += info_version_internal[argc];
+#endif
+#ifdef SIMULATE_ID
+  require += info_simulate[argc];
+#endif
+#ifdef SIMULATE_VERSION_MAJOR
+  require += info_simulate_version[argc];
+#endif
+#if defined(__CRAYXT_COMPUTE_LINUX_TARGET)
+  require += info_cray[argc];
+#endif
+  require += info_language_standard_default[argc];
+  require += info_language_extensions_default[argc];
+  (void)argv;
+  return require;
+}
+#endif
+
+// ====== FILE: ./.pio/build/esp32-c6-devkitc-1/bootloader/config/sdkconfig.h ======
+/*
+ * Automatically generated file. DO NOT EDIT.
+ * Espressif IoT Development Framework (ESP-IDF) 6.0.1 Configuration Header
+ */
+#pragma once
+#define CONFIG_SOC_ADC_SUPPORTED 1
+#define CONFIG_SOC_DEDICATED_GPIO_SUPPORTED 1
+#define CONFIG_SOC_UART_SUPPORTED 1
+#define CONFIG_SOC_UHCI_SUPPORTED 1
+#define CONFIG_SOC_GDMA_SUPPORTED 1
+#define CONFIG_SOC_AHB_GDMA_SUPPORTED 1
+#define CONFIG_SOC_GPTIMER_SUPPORTED 1
+#define CONFIG_SOC_PCNT_SUPPORTED 1
+#define CONFIG_SOC_MCPWM_SUPPORTED 1
+#define CONFIG_SOC_TWAI_SUPPORTED 1
+#define CONFIG_SOC_ETM_SUPPORTED 1
+#define CONFIG_SOC_PARLIO_SUPPORTED 1
+#define CONFIG_SOC_BT_SUPPORTED 1
+#define CONFIG_SOC_IEEE802154_SUPPORTED 1
+#define CONFIG_SOC_ASYNC_MEMCPY_SUPPORTED 1
+#define CONFIG_SOC_USB_SERIAL_JTAG_SUPPORTED 1
+#define CONFIG_SOC_TEMP_SENSOR_SUPPORTED 1
+#define CONFIG_SOC_PHY_SUPPORTED 1
+#define CONFIG_SOC_WIFI_SUPPORTED 1
+#define CONFIG_SOC_SUPPORTS_SECURE_DL_MODE 1
+#define CONFIG_SOC_ULP_SUPPORTED 1
+#define CONFIG_SOC_LP_CORE_SUPPORTED 1
+#define CONFIG_SOC_EFUSE_KEY_PURPOSE_FIELD 1
+#define CONFIG_SOC_EFUSE_SUPPORTED 1
+#define CONFIG_SOC_RTC_FAST_MEM_SUPPORTED 1
+#define CONFIG_SOC_RTC_MEM_SUPPORTED 1
+#define CONFIG_SOC_I2S_SUPPORTED 1
+#define CONFIG_SOC_RMT_SUPPORTED 1
+#define CONFIG_SOC_SDM_SUPPORTED 1
+#define CONFIG_SOC_GPSPI_SUPPORTED 1
+#define CONFIG_SOC_LEDC_SUPPORTED 1
+#define CONFIG_SOC_I2C_SUPPORTED 1
+#define CONFIG_SOC_SYSTIMER_SUPPORTED 1
+#define CONFIG_SOC_SUPPORT_COEXISTENCE 1
+#define CONFIG_SOC_AES_SUPPORTED 1
+#define CONFIG_SOC_MPI_SUPPORTED 1
+#define CONFIG_SOC_SHA_SUPPORTED 1
+#define CONFIG_SOC_HMAC_SUPPORTED 1
+#define CONFIG_SOC_DIG_SIGN_SUPPORTED 1
+#define CONFIG_SOC_ECC_SUPPORTED 1
+#define CONFIG_SOC_FLASH_ENC_SUPPORTED 1
+#define CONFIG_SOC_SECURE_BOOT_SUPPORTED 1
+#define CONFIG_SOC_SDIO_SLAVE_SUPPORTED 1
+#define CONFIG_SOC_BOD_SUPPORTED 1
+#define CONFIG_SOC_APM_SUPPORTED 1
+#define CONFIG_SOC_PMU_SUPPORTED 1
+#define CONFIG_SOC_PMU_PVT_SUPPORTED 1
+#define CONFIG_SOC_PAU_SUPPORTED 1
+#define CONFIG_SOC_RTC_TIMER_V2_SUPPORTED 1
+#define CONFIG_SOC_LP_AON_SUPPORTED 1
+#define CONFIG_SOC_LP_PERIPHERALS_SUPPORTED 1
+#define CONFIG_SOC_LP_I2C_SUPPORTED 1
+#define CONFIG_SOC_ULP_LP_UART_SUPPORTED 1
+#define CONFIG_SOC_CLK_TREE_SUPPORTED 1
+#define CONFIG_SOC_ASSIST_DEBUG_SUPPORTED 1
+#define CONFIG_SOC_WDT_SUPPORTED 1
+#define CONFIG_SOC_SPI_FLASH_SUPPORTED 1
+#define CONFIG_SOC_RNG_SUPPORTED 1
+#define CONFIG_SOC_LIGHT_SLEEP_SUPPORTED 1
+#define CONFIG_SOC_DEEP_SLEEP_SUPPORTED 1
+#define CONFIG_SOC_MODEM_CLOCK_SUPPORTED 1
+#define CONFIG_SOC_PM_SUPPORTED 1
+#define CONFIG_SOC_XTAL_SUPPORT_40M 1
+#define CONFIG_SOC_XTAL_CLOCK_PATH_DEPENDS_ON_TOP_DOMAIN 1
+#define CONFIG_SOC_AES_SUPPORT_DMA 1
+#define CONFIG_SOC_AES_GDMA 1
+#define CONFIG_SOC_AES_SUPPORT_AES_128 1
+#define CONFIG_SOC_AES_SUPPORT_AES_256 1
+#define CONFIG_SOC_ADC_DIG_CTRL_SUPPORTED 1
+#define CONFIG_SOC_ADC_DIG_IIR_FILTER_SUPPORTED 1
+#define CONFIG_SOC_ADC_MONITOR_SUPPORTED 1
+#define CONFIG_SOC_ADC_DMA_SUPPORTED 1
+#define CONFIG_SOC_ADC_PERIPH_NUM 1
+#define CONFIG_SOC_ADC_MAX_CHANNEL_NUM 7
+#define CONFIG_SOC_ADC_ATTEN_NUM 4
+#define CONFIG_SOC_ADC_DIGI_CONTROLLER_NUM 1
+#define CONFIG_SOC_ADC_PATT_LEN_MAX 8
+#define CONFIG_SOC_ADC_DIGI_MAX_BITWIDTH 12
+#define CONFIG_SOC_ADC_DIGI_MIN_BITWIDTH 12
+#define CONFIG_SOC_ADC_DIGI_IIR_FILTER_NUM 2
+#define CONFIG_SOC_ADC_DIGI_MONITOR_NUM 2
+#define CONFIG_SOC_ADC_DIGI_RESULT_BYTES 4
+#define CONFIG_SOC_ADC_DIGI_DATA_BYTES_PER_CONV 4
+#define CONFIG_SOC_ADC_SAMPLE_FREQ_THRES_HIGH 83333
+#define CONFIG_SOC_ADC_SAMPLE_FREQ_THRES_LOW 611
+#define CONFIG_SOC_ADC_RTC_MIN_BITWIDTH 12
+#define CONFIG_SOC_ADC_RTC_MAX_BITWIDTH 12
+#define CONFIG_SOC_ADC_CALIBRATION_V1_SUPPORTED 1
+#define CONFIG_SOC_ADC_SELF_HW_CALI_SUPPORTED 1
+#define CONFIG_SOC_ADC_CALIB_CHAN_COMPENS_SUPPORTED 1
+#define CONFIG_SOC_ADC_TEMPERATURE_SHARE_INTR 1
+#define CONFIG_SOC_ADC_SHARED_POWER 1
+#define CONFIG_SOC_BROWNOUT_RESET_SUPPORTED 1
+#define CONFIG_SOC_SHARED_IDCACHE_SUPPORTED 1
+#define CONFIG_SOC_CACHE_FREEZE_SUPPORTED 1
+#define CONFIG_SOC_CPU_CORES_NUM 1
+#define CONFIG_SOC_CPU_INTR_NUM 32
+#define CONFIG_SOC_CPU_HAS_FLEXIBLE_INTC 1
+#define CONFIG_SOC_INT_PLIC_SUPPORTED 1
+#define CONFIG_SOC_CPU_HAS_CSR_PC 1
+#define CONFIG_SOC_CPU_BREAKPOINTS_NUM 4
+#define CONFIG_SOC_CPU_WATCHPOINTS_NUM 4
+#define CONFIG_SOC_CPU_WATCHPOINT_MAX_REGION_SIZE 0x80000000
+#define CONFIG_SOC_CPU_HAS_PMA 1
+#define CONFIG_SOC_CPU_IDRAM_SPLIT_USING_PMP 1
+#define CONFIG_SOC_CPU_PMP_REGION_GRANULARITY 4
+#define CONFIG_SOC_CPU_MISALIGNED_ACCESS_ON_PMP_MISMATCH_ISSUE 1
+#define CONFIG_SOC_DS_SIGNATURE_MAX_BIT_LEN 3072
+#define CONFIG_SOC_DS_KEY_PARAM_MD_IV_LENGTH 16
+#define CONFIG_SOC_DS_KEY_CHECK_MAX_WAIT_US 1100
+#define CONFIG_SOC_AHB_GDMA_VERSION 1
+#define CONFIG_SOC_GDMA_SUPPORT_ETM 1
+#define CONFIG_SOC_GDMA_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_GPIO_PORT 1
+#define CONFIG_SOC_GPIO_PIN_COUNT 31
+#define CONFIG_SOC_GPIO_SUPPORT_PIN_GLITCH_FILTER 1
+#define CONFIG_SOC_GPIO_FLEX_GLITCH_FILTER_NUM 8
+#define CONFIG_SOC_GPIO_SUPPORT_ETM 1
+#define CONFIG_SOC_GPIO_SUPPORT_HP_PERIPH_PD_SLEEP_WAKEUP 1
+#define CONFIG_SOC_LP_IO_CLOCK_IS_INDEPENDENT 1
+#define CONFIG_SOC_GPIO_IN_RANGE_MAX 30
+#define CONFIG_SOC_GPIO_OUT_RANGE_MAX 30
+#define CONFIG_SOC_GPIO_HP_PERIPH_PD_SLEEP_WAKEABLE_MASK 0
+#define CONFIG_SOC_GPIO_HP_PERIPH_PD_SLEEP_WAKEABLE_PIN_CNT 8
+#define CONFIG_SOC_GPIO_VALID_DIGITAL_IO_PAD_MASK 0x000000007FFFFF00
+#define CONFIG_SOC_GPIO_SUPPORT_FORCE_HOLD 1
+#define CONFIG_SOC_GPIO_SUPPORT_HOLD_SINGLE_IO_IN_DSLP 1
+#define CONFIG_SOC_GPIO_CLOCKOUT_BY_GPIO_MATRIX 1
+#define CONFIG_SOC_CLOCKOUT_HAS_SOURCE_GATE 1
+#define CONFIG_SOC_GPIO_CLOCKOUT_CHANNEL_NUM 3
+#define CONFIG_SOC_RTCIO_PIN_COUNT 8
+#define CONFIG_SOC_RTCIO_INPUT_OUTPUT_SUPPORTED 1
+#define CONFIG_SOC_RTCIO_HOLD_SUPPORTED 1
+#define CONFIG_SOC_RTCIO_WAKE_SUPPORTED 1
+#define CONFIG_SOC_SDM_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_ETM_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_I2C_NUM 2
+#define CONFIG_SOC_HP_I2C_NUM 1
+#define CONFIG_SOC_LP_I2C_NUM 1
+#define CONFIG_SOC_I2C_SUPPORT_XTAL 1
+#define CONFIG_SOC_I2C_SUPPORT_RTC 1
+#define CONFIG_SOC_I2C_SUPPORT_10BIT_ADDR 1
+#define CONFIG_SOC_I2C_SUPPORT_SLAVE 1
+#define CONFIG_SOC_I2C_SLAVE_SUPPORT_BROADCAST 1
+#define CONFIG_SOC_I2C_SLAVE_CAN_GET_STRETCH_CAUSE 1
+#define CONFIG_SOC_I2C_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_I2S_HW_VERSION_2 1
+#define CONFIG_SOC_I2S_SUPPORTS_ETM 1
+#define CONFIG_SOC_I2S_SUPPORTS_PCM 1
+#define CONFIG_SOC_I2S_SUPPORTS_PDM 1
+#define CONFIG_SOC_I2S_SUPPORTS_PDM_TX 1
+#define CONFIG_SOC_I2S_SUPPORTS_PCM2PDM 1
+#define CONFIG_SOC_I2S_SUPPORTS_PDM_RX 1
+#define CONFIG_SOC_I2S_PDM_MAX_TX_LINES 2
+#define CONFIG_SOC_I2S_PDM_MAX_RX_LINES 1
+#define CONFIG_SOC_I2S_SUPPORTS_TDM 1
+#define CONFIG_SOC_LEDC_SUPPORT_PLL_DIV_CLOCK 1
+#define CONFIG_SOC_LEDC_SUPPORT_XTAL_CLOCK 1
+#define CONFIG_SOC_LEDC_TIMER_NUM 4
+#define CONFIG_SOC_LEDC_CHANNEL_NUM 6
+#define CONFIG_SOC_LEDC_TIMER_BIT_WIDTH 20
+#define CONFIG_SOC_LEDC_SUPPORT_FADE_STOP 1
+#define CONFIG_SOC_LEDC_GAMMA_CURVE_FADE_SUPPORTED 1
+#define CONFIG_SOC_LEDC_GAMMA_CURVE_FADE_RANGE_MAX 16
+#define CONFIG_SOC_LEDC_FADE_PARAMS_BIT_WIDTH 10
+#define CONFIG_SOC_LEDC_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_LEDC_SUPPORT_ETM 1
+#define CONFIG_SOC_MMU_PAGE_SIZE_CONFIGURABLE 1
+#define CONFIG_SOC_MMU_PAGE_SIZE_8KB_SUPPORTED 1
+#define CONFIG_SOC_MMU_PERIPH_NUM 1
+#define CONFIG_SOC_MMU_LINEAR_ADDRESS_REGION_NUM 1
+#define CONFIG_SOC_MMU_DI_VADDR_SHARED 1
+#define CONFIG_SOC_MPU_MIN_REGION_SIZE 0x20000000
+#define CONFIG_SOC_MPU_REGIONS_MAX_NUM 8
+#define CONFIG_SOC_PCNT_SUPPORT_RUNTIME_THRES_UPDATE 1
+#define CONFIG_SOC_RMT_MEM_WORDS_PER_CHANNEL 48
+#define CONFIG_SOC_RMT_SUPPORT_RX_PINGPONG 1
+#define CONFIG_SOC_RMT_SUPPORT_TX_LOOP_COUNT 1
+#define CONFIG_SOC_RMT_SUPPORT_TX_LOOP_AUTO_STOP 1
+#define CONFIG_SOC_RMT_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_MCPWM_SWSYNC_CAN_PROPAGATE 1
+#define CONFIG_SOC_MCPWM_SUPPORT_ETM 1
+#define CONFIG_SOC_MCPWM_CAPTURE_CLK_FROM_GROUP 1
+#define CONFIG_SOC_MCPWM_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_PARLIO_TX_UNIT_MAX_DATA_WIDTH 16
+#define CONFIG_SOC_PARLIO_RX_UNIT_MAX_DATA_WIDTH 16
+#define CONFIG_SOC_PARLIO_TX_RX_SHARE_INTERRUPT 1
+#define CONFIG_SOC_PARLIO_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_MPI_MEM_BLOCKS_NUM 4
+#define CONFIG_SOC_MPI_OPERATIONS_NUM 3
+#define CONFIG_SOC_RSA_MAX_BIT_LEN 3072
+#define CONFIG_SOC_SHA_DMA_MAX_BUFFER_SIZE 3968
+#define CONFIG_SOC_SHA_SUPPORT_DMA 1
+#define CONFIG_SOC_SHA_SUPPORT_RESUME 1
+#define CONFIG_SOC_SHA_GDMA 1
+#define CONFIG_SOC_SHA_SUPPORT_SHA1 1
+#define CONFIG_SOC_SHA_SUPPORT_SHA224 1
+#define CONFIG_SOC_SHA_SUPPORT_SHA256 1
+#define CONFIG_SOC_SPI_PERIPH_NUM 2
+#define CONFIG_SOC_SPI_MAX_CS_NUM 6
+#define CONFIG_SOC_SPI_MAXIMUM_BUFFER_SIZE 64
+#define CONFIG_SOC_SPI_SUPPORT_DDRCLK 1
+#define CONFIG_SOC_SPI_SLAVE_SUPPORT_SEG_TRANS 1
+#define CONFIG_SOC_SPI_SUPPORT_CD_SIG 1
+#define CONFIG_SOC_SPI_SUPPORT_CONTINUOUS_TRANS 1
+#define CONFIG_SOC_SPI_SUPPORT_SLAVE_HD_VER2 1
+#define CONFIG_SOC_SPI_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_SPI_SUPPORT_CLK_XTAL 1
+#define CONFIG_SOC_SPI_SUPPORT_CLK_PLL_F80M 1
+#define CONFIG_SOC_SPI_SUPPORT_CLK_RC_FAST 1
+#define CONFIG_SOC_SPI_SCT_SUPPORTED 1
+#define CONFIG_SOC_SPI_SCT_REG_NUM 14
+#define CONFIG_SOC_SPI_SCT_BUFFER_NUM_MAX 1
+#define CONFIG_SOC_SPI_SCT_CONF_BITLEN_MAX 0x3FFFA
+#define CONFIG_SOC_MEMSPI_IS_INDEPENDENT 1
+#define CONFIG_SOC_SPI_MAX_PRE_DIVIDER 16
+#define CONFIG_SOC_SPI_MEM_SUPPORT_AUTO_WAIT_IDLE 1
+#define CONFIG_SOC_SPI_MEM_SUPPORT_AUTO_SUSPEND 1
+#define CONFIG_SOC_SPI_MEM_SUPPORT_AUTO_RESUME 1
+#define CONFIG_SOC_SPI_MEM_SUPPORT_IDLE_INTR 1
+#define CONFIG_SOC_SPI_MEM_SUPPORT_SW_SUSPEND 1
+#define CONFIG_SOC_SPI_MEM_SUPPORT_CHECK_SUS 1
+#define CONFIG_SOC_SPI_MEM_SUPPORT_WRAP 1
+#define CONFIG_SOC_MEMSPI_ENCRYPTION_ALIGNMENT 16
+#define CONFIG_SOC_SYSTIMER_COUNTER_NUM 2
+#define CONFIG_SOC_SYSTIMER_ALARM_NUM 3
+#define CONFIG_SOC_SYSTIMER_BIT_WIDTH_LO 32
+#define CONFIG_SOC_SYSTIMER_BIT_WIDTH_HI 20
+#define CONFIG_SOC_SYSTIMER_FIXED_DIVIDER 1
+#define CONFIG_SOC_SYSTIMER_SUPPORT_RC_FAST 1
+#define CONFIG_SOC_SYSTIMER_INT_LEVEL 1
+#define CONFIG_SOC_SYSTIMER_ALARM_MISS_COMPENSATE 1
+#define CONFIG_SOC_SYSTIMER_SUPPORT_ETM 1
+#define CONFIG_SOC_LP_TIMER_BIT_WIDTH_LO 32
+#define CONFIG_SOC_LP_TIMER_BIT_WIDTH_HI 16
+#define CONFIG_SOC_TIMER_SUPPORT_ETM 1
+#define CONFIG_SOC_TIMER_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_MWDT_SUPPORT_XTAL 1
+#define CONFIG_SOC_MWDT_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_TWAI_CONTROLLER_NUM 2
+#define CONFIG_SOC_TWAI_MASK_FILTER_NUM 1
+#define CONFIG_SOC_TWAI_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_EFUSE_DIS_DOWNLOAD_ICACHE 1
+#define CONFIG_SOC_EFUSE_DIS_PAD_JTAG 1
+#define CONFIG_SOC_EFUSE_DIS_USB_JTAG 1
+#define CONFIG_SOC_EFUSE_DIS_DIRECT_BOOT 1
+#define CONFIG_SOC_EFUSE_SOFT_DIS_JTAG 1
+#define CONFIG_SOC_EFUSE_DIS_ICACHE 1
+#define CONFIG_SOC_EFUSE_BLOCK9_KEY_PURPOSE_QUIRK 1
+#define CONFIG_SOC_EFUSE_XTS_AES_KEY_128 1
+#define CONFIG_SOC_SECURE_BOOT_V2_RSA 1
+#define CONFIG_SOC_SECURE_BOOT_V2_ECC 1
+#define CONFIG_SOC_EFUSE_SECURE_BOOT_KEY_DIGESTS 3
+#define CONFIG_SOC_EFUSE_REVOKE_BOOT_KEY_DIGESTS 1
+#define CONFIG_SOC_SUPPORT_SECURE_BOOT_REVOKE_KEY 1
+#define CONFIG_SOC_FLASH_ENCRYPTED_XTS_AES_BLOCK_MAX 64
+#define CONFIG_SOC_FLASH_ENCRYPTION_XTS_AES 1
+#define CONFIG_SOC_FLASH_ENCRYPTION_XTS_AES_128 1
+#define CONFIG_SOC_FLASH_ENCRYPTION_PAGE_CONFIGURABLE 1
+#define CONFIG_SOC_APM_CTRL_FILTER_SUPPORTED 1
+#define CONFIG_SOC_APM_LP_APM0_SUPPORTED 1
+#define CONFIG_SOC_APM_SUPPORT_LP_TEE_CTRL 1
+#define CONFIG_SOC_CRYPTO_DPA_PROTECTION_SUPPORTED 1
+#define CONFIG_SOC_UART_NUM 3
+#define CONFIG_SOC_UART_HP_NUM 2
+#define CONFIG_SOC_UART_LP_NUM 1
+#define CONFIG_SOC_UART_FIFO_LEN 128
+#define CONFIG_SOC_LP_UART_FIFO_LEN 16
+#define CONFIG_SOC_UART_BITRATE_MAX 5000000
+#define CONFIG_SOC_UART_SUPPORT_RTC_CLK 1
+#define CONFIG_SOC_UART_SUPPORT_XTAL_CLK 1
+#define CONFIG_SOC_UART_SUPPORT_WAKEUP_INT 1
+#define CONFIG_SOC_UART_HAS_LP_UART 1
+#define CONFIG_SOC_UART_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_UART_WAKEUP_CHARS_SEQ_MAX_LEN 5
+#define CONFIG_SOC_UART_WAKEUP_SUPPORT_ACTIVE_THRESH_MODE 1
+#define CONFIG_SOC_UART_WAKEUP_SUPPORT_FIFO_THRESH_MODE 1
+#define CONFIG_SOC_UART_WAKEUP_SUPPORT_START_BIT_MODE 1
+#define CONFIG_SOC_UART_WAKEUP_SUPPORT_CHAR_SEQ_MODE 1
+#define CONFIG_SOC_UHCI_NUM 1
+#define CONFIG_SOC_COEX_HW_PTI 1
+#define CONFIG_SOC_EXTERNAL_COEX_ADVANCE 1
+#define CONFIG_SOC_PHY_DIG_REGS_MEM_SIZE 21
+#define CONFIG_SOC_WIFI_LIGHT_SLEEP_CLK_WIDTH 12
+#define CONFIG_SOC_RTC_MEM_SUPPORT_SPEED_MODE_SWITCH 1
+#define CONFIG_SOC_PM_SUPPORT_WIFI_WAKEUP 1
+#define CONFIG_SOC_PM_SUPPORT_BEACON_WAKEUP 1
+#define CONFIG_SOC_PM_SUPPORT_BT_WAKEUP 1
+#define CONFIG_SOC_PM_SUPPORT_EXT1_WAKEUP 1
+#define CONFIG_SOC_PM_SUPPORT_EXT1_WAKEUP_MODE_PER_PIN 1
+#define CONFIG_SOC_PM_SUPPORT_CPU_PD 1
+#define CONFIG_SOC_PM_SUPPORT_MODEM_PD 1
+#define CONFIG_SOC_PM_SUPPORT_XTAL32K_PD 1
+#define CONFIG_SOC_PM_SUPPORT_RC32K_PD 1
+#define CONFIG_SOC_PM_SUPPORT_RC_FAST_PD 1
+#define CONFIG_SOC_PM_SUPPORT_VDDSDIO_PD 1
+#define CONFIG_SOC_PM_SUPPORT_TOP_PD 1
+#define CONFIG_SOC_PM_SUPPORT_HP_AON_PD 1
+#define CONFIG_SOC_PM_SUPPORT_MAC_BB_PD 1
+#define CONFIG_SOC_PM_SUPPORT_RTC_PERIPH_PD 1
+#define CONFIG_SOC_PM_SUPPORT_PMU_MODEM_STATE 1
+#define CONFIG_SOC_PM_SUPPORT_PMU_CLK_ICG 1
+#define CONFIG_SOC_PM_SUPPORT_DEEPSLEEP_CHECK_STUB_ONLY 1
+#define CONFIG_SOC_PM_CPU_RETENTION_BY_SW 1
+#define CONFIG_SOC_PM_MODEM_RETENTION_BY_REGDMA 1
+#define CONFIG_SOC_PM_RETENTION_HAS_CLOCK_BUG 1
+#define CONFIG_SOC_PM_MODEM_RF_FLAG_UPDATE_WORKAROUND 1
+#define CONFIG_SOC_PM_PAU_LINK_NUM 4
+#define CONFIG_SOC_PM_PAU_REGDMA_LINK_MULTI_ADDR 1
+#define CONFIG_SOC_PM_PAU_REGDMA_LINK_WIFIMAC 1
+#define CONFIG_SOC_PM_PAU_REGDMA_UPDATE_CACHE_BEFORE_WAIT_COMPARE 1
+#define CONFIG_SOC_PM_PMU_MIN_SLP_SLOW_CLK_CYCLE_FIXED 1
+#define CONFIG_SOC_PM_RETENTION_MODULE_NUM 32
+#define CONFIG_SOC_CLK_RC_FAST_SUPPORT_CALIBRATION 1
+#define CONFIG_SOC_MODEM_CLOCK_IS_INDEPENDENT 1
+#define CONFIG_SOC_CLK_XTAL32K_SUPPORTED 1
+#define CONFIG_SOC_CLK_OSC_SLOW_SUPPORTED 1
+#define CONFIG_SOC_CLK_RC32K_SUPPORTED 1
+#define CONFIG_SOC_CLK_LP_FAST_SUPPORT_XTAL_D2 1
+#define CONFIG_SOC_RCC_IS_INDEPENDENT 1
+#define CONFIG_SOC_TEMPERATURE_SENSOR_SUPPORT_FAST_RC 1
+#define CONFIG_SOC_TEMPERATURE_SENSOR_SUPPORT_XTAL 1
+#define CONFIG_SOC_TEMPERATURE_SENSOR_INTR_SUPPORT 1
+#define CONFIG_SOC_TEMPERATURE_SENSOR_SUPPORT_ETM 1
+#define CONFIG_SOC_TEMPERATURE_SENSOR_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_TEMPERATURE_SENSOR_UNDER_PD_TOP_DOMAIN 1
+#define CONFIG_SOC_RNG_CLOCK_IS_INDEPENDENT 1
+#define CONFIG_SOC_WIFI_HW_TSF 1
+#define CONFIG_SOC_WIFI_FTM_SUPPORT 1
+#define CONFIG_SOC_WIFI_GCMP_SUPPORT 1
+#define CONFIG_SOC_WIFI_WAPI_SUPPORT 1
+#define CONFIG_SOC_WIFI_TXOP_SUPPORT 1
+#define CONFIG_SOC_WIFI_CSI_SUPPORT 1
+#define CONFIG_SOC_WIFI_MESH_SUPPORT 1
+#define CONFIG_SOC_WIFI_HE_SUPPORT 1
+#define CONFIG_SOC_WIFI_MAC_VERSION_NUM 2
+#define CONFIG_SOC_BLE_SUPPORTED 1
+#define CONFIG_SOC_BLE_MESH_SUPPORTED 1
+#define CONFIG_SOC_ESP_NIMBLE_CONTROLLER 1
+#define CONFIG_SOC_BLE_50_SUPPORTED 1
+#define CONFIG_SOC_BLE_DEVICE_PRIVACY_SUPPORTED 1
+#define CONFIG_SOC_BLE_POWER_CONTROL_SUPPORTED 1
+#define CONFIG_SOC_BLE_PERIODIC_ADV_ENH_SUPPORTED 1
+#define CONFIG_SOC_BLUFI_SUPPORTED 1
+#define CONFIG_SOC_BLE_MULTI_CONN_OPTIMIZATION 1
+#define CONFIG_SOC_BLE_SUBRATE_SUPPORTED 1
+#define CONFIG_SOC_BLE_PERIODIC_ADV_WITH_RESPONSE 1
+#define CONFIG_SOC_BLE_USE_WIFI_PWR_CLK_WORKAROUND 1
+#define CONFIG_SOC_PHY_COMBO_MODULE 1
+#define CONFIG_SOC_CAPS_NO_RESET_BY_ANA_BOD 1
+#define CONFIG_SOC_LP_CORE_SINGLE_INTERRUPT_VECTOR 1
+#define CONFIG_SOC_LP_CORE_SUPPORT_ETM 1
+#define CONFIG_SOC_DEBUG_HAVE_OCD_STUB_BINS 1
+#define CONFIG_IDF_CMAKE 1
+#define CONFIG_IDF_TOOLCHAIN "gcc"
+#define CONFIG_IDF_TOOLCHAIN_GCC 1
+#define CONFIG_IDF_TARGET_ARCH_RISCV 1
+#define CONFIG_IDF_TARGET_ARCH "riscv"
+#define CONFIG_IDF_TARGET "esp32c6"
+#define CONFIG_IDF_INIT_VERSION "6.0.1"
+#define CONFIG_IDF_TARGET_ESP32C6 1
+#define CONFIG_IDF_FIRMWARE_CHIP_ID 0x000D
+#define CONFIG_APP_BUILD_TYPE_APP_2NDBOOT 1
+#define CONFIG_APP_BUILD_GENERATE_BINARIES 1
+#define CONFIG_APP_BUILD_BOOTLOADER 1
+#define CONFIG_APP_BUILD_USE_FLASH_SECTIONS 1
+#define CONFIG_BOOTLOADER_COMPILE_TIME_DATE 1
+#define CONFIG_BOOTLOADER_PROJECT_VER 1
+#define CONFIG_BOOTLOADER_OFFSET_IN_FLASH 0x0
+#define CONFIG_BOOTLOADER_COMPILER_OPTIMIZATION_SIZE 1
+#define CONFIG_BOOTLOADER_LOG_VERSION_1 1
+#define CONFIG_BOOTLOADER_LOG_VERSION 1
+#define CONFIG_BOOTLOADER_LOG_LEVEL_INFO 1
+#define CONFIG_BOOTLOADER_LOG_LEVEL 3
+#define CONFIG_BOOTLOADER_LOG_TIMESTAMP_SOURCE_CPU_TICKS 1
+#define CONFIG_BOOTLOADER_LOG_MODE_TEXT_EN 1
+#define CONFIG_BOOTLOADER_LOG_MODE_TEXT 1
+#define CONFIG_BOOTLOADER_CPU_CLK_FREQ_MHZ 80
+#define CONFIG_BOOTLOADER_FLASH_XMC_SUPPORT 1
+#define CONFIG_BOOTLOADER_REGION_PROTECTION_ENABLE 1
+#define CONFIG_BOOTLOADER_WDT_ENABLE 1
+#define CONFIG_BOOTLOADER_WDT_TIME_MS 9000
+#define CONFIG_BOOTLOADER_RESERVE_RTC_SIZE 0x0
+#define CONFIG_SECURE_BOOT_V2_RSA_SUPPORTED 1
+#define CONFIG_SECURE_BOOT_V2_ECC_SUPPORTED 1
+#define CONFIG_SECURE_BOOT_V2_PREFERRED 1
+#define CONFIG_SECURE_ROM_DL_MODE_ENABLED 1
+#define CONFIG_APP_COMPILE_TIME_DATE 1
+#define CONFIG_APP_RETRIEVE_LEN_ELF_SHA 9
+#define CONFIG_ESP_ROM_HAS_CRC_LE 1
+#define CONFIG_ESP_ROM_HAS_CRC_BE 1
+#define CONFIG_ESP_ROM_HAS_JPEG_DECODE 1
+#define CONFIG_ESP_ROM_UART_CLK_IS_XTAL 1
+#define CONFIG_ESP_ROM_USB_SERIAL_DEVICE_NUM 3
+#define CONFIG_ESP_ROM_HAS_RETARGETABLE_LOCKING 1
+#define CONFIG_ESP_ROM_GET_CLK_FREQ 1
+#define CONFIG_ESP_ROM_HAS_RVFPLIB 1
+#define CONFIG_ESP_ROM_HAS_HAL_WDT 1
+#define CONFIG_ESP_ROM_HAS_HAL_SYSTIMER 1
+#define CONFIG_ESP_ROM_SYSTIMER_INIT_PATCH 1
+#define CONFIG_ESP_ROM_HAS_HEAP_TLSF 1
+#define CONFIG_ESP_ROM_TLSF_CHECK_PATCH 1
+#define CONFIG_ESP_ROM_MULTI_HEAP_WALK_PATCH 1
+#define CONFIG_ESP_ROM_HAS_LAYOUT_TABLE 1
+#define CONFIG_ESP_ROM_HAS_SPI_FLASH 1
+#define CONFIG_ESP_ROM_HAS_SPI_FLASH_MMAP 1
+#define CONFIG_ESP_ROM_HAS_REGI2C_BUG 1
+#define CONFIG_ESP_ROM_HAS_NEWLIB 1
+#define CONFIG_ESP_ROM_HAS_NEWLIB_NORMAL_FORMAT 1
+#define CONFIG_ESP_ROM_REV0_HAS_NO_ECDSA_INTERFACE 1
+#define CONFIG_ESP_ROM_WDT_INIT_PATCH 1
+#define CONFIG_ESP_ROM_NEEDS_SET_CACHE_MMU_SIZE 1
+#define CONFIG_ESP_ROM_RAM_APP_NEEDS_MMU_INIT 1
+#define CONFIG_ESP_ROM_HAS_SW_FLOAT 1
+#define CONFIG_ESP_ROM_USB_OTG_NUM -1
+#define CONFIG_ESP_ROM_HAS_VERSION 1
+#define CONFIG_ESP_ROM_SUPPORT_DEEP_SLEEP_WAKEUP_STUB 1
+#define CONFIG_ESP_ROM_HAS_OUTPUT_PUTC_FUNC 1
+#define CONFIG_ESP_ROM_NO_USB_SERIAL_OUTPUT_API 1
+#define CONFIG_ESP_ROM_HAS_SUBOPTIMAL_NEWLIB_ON_MISALIGNED_MEMORY 1
+#define CONFIG_ESP_ROM_SUPPORT_SECURE_BOOT_FAST_WAKEUP 1
+#define CONFIG_BOOT_ROM_LOG_ALWAYS_ON 1
+#define CONFIG_SECURE_TEE_LOG_LEVEL 0
+#define CONFIG_ESPTOOLPY_FLASHMODE_DIO 1
+#define CONFIG_ESPTOOLPY_FLASH_SAMPLE_MODE_STR 1
+#define CONFIG_ESPTOOLPY_FLASHMODE "dio"
+#define CONFIG_ESPTOOLPY_FLASHFREQ_80M 1
+#define CONFIG_ESPTOOLPY_FLASHFREQ "80m"
+#define CONFIG_ESPTOOLPY_FLASHSIZE_2MB 1
+#define CONFIG_ESPTOOLPY_FLASHSIZE "2MB"
+#define CONFIG_ESPTOOLPY_BEFORE_RESET 1
+#define CONFIG_ESPTOOLPY_BEFORE "default-reset"
+#define CONFIG_ESPTOOLPY_AFTER_RESET 1
+#define CONFIG_ESPTOOLPY_AFTER "hard-reset"
+#define CONFIG_ESPTOOLPY_MONITOR_BAUD 115200
+#define CONFIG_PARTITION_TABLE_SINGLE_APP 1
+#define CONFIG_PARTITION_TABLE_CUSTOM_FILENAME "partitions.csv"
+#define CONFIG_PARTITION_TABLE_FILENAME "partitions_singleapp.csv"
+#define CONFIG_PARTITION_TABLE_OFFSET 0x8000
+#define CONFIG_PARTITION_TABLE_MD5 1
+#define CONFIG_COMPILER_OPTIMIZATION_DEBUG 1
+#define CONFIG_COMPILER_OPTIMIZATION_ASSERTIONS_ENABLE 1
+#define CONFIG_COMPILER_FLOAT_LIB_FROM_RVFPLIB 1
+#define CONFIG_COMPILER_OPTIMIZATION_ASSERTION_LEVEL 2
+#define CONFIG_COMPILER_HIDE_PATHS_MACROS 1
+#define CONFIG_COMPILER_STACK_CHECK_MODE_NONE 1
+#define CONFIG_COMPILER_RT_LIB_GCCLIB 1
+#define CONFIG_COMPILER_RT_LIB_NAME "gcc"
+#define CONFIG_COMPILER_ORPHAN_SECTIONS_ERROR 1
+#define CONFIG_COMPILER_CXX_GLIBCXX_CONSTEXPR_NO_CHANGE 1
+#define CONFIG_EFUSE_MAX_BLK_LEN 256
+#define CONFIG_ESP_ERR_TO_NAME_LOOKUP 1
+#define CONFIG_ESP_HW_SUPPORT_FUNC_IN_IRAM 1
+#define CONFIG_ESP32C6_REV_MIN_0 1
+#define CONFIG_ESP32C6_REV_MIN_FULL 0
+#define CONFIG_ESP_REV_MIN_FULL 0
+#define CONFIG_ESP32C6_REV_MAX_FULL 99
+#define CONFIG_ESP_REV_MAX_FULL 99
+#define CONFIG_ESP_EFUSE_BLOCK_REV_MIN_FULL 0
+#define CONFIG_ESP_EFUSE_BLOCK_REV_MAX_FULL 99
+#define CONFIG_ESP_MAC_ADDR_UNIVERSE_WIFI_STA 1
+#define CONFIG_ESP_MAC_ADDR_UNIVERSE_WIFI_AP 1
+#define CONFIG_ESP_MAC_ADDR_UNIVERSE_BT 1
+#define CONFIG_ESP_MAC_ADDR_UNIVERSE_ETH 1
+#define CONFIG_ESP_MAC_ADDR_UNIVERSE_IEEE802154 1
+#define CONFIG_ESP_MAC_UNIVERSAL_MAC_ADDRESSES_FOUR 1
+#define CONFIG_ESP_MAC_UNIVERSAL_MAC_ADDRESSES 4
+#define CONFIG_ESP32C6_UNIVERSAL_MAC_ADDRESSES_FOUR 1
+#define CONFIG_ESP32C6_UNIVERSAL_MAC_ADDRESSES 4
+#define CONFIG_ESP_SLEEP_FLASH_LEAKAGE_WORKAROUND 1
+#define CONFIG_ESP_SLEEP_GPIO_RESET_WORKAROUND 1
+#define CONFIG_ESP_SLEEP_WAIT_FLASH_READY_EXTRA_DELAY 0
+#define CONFIG_ESP_SLEEP_GPIO_ENABLE_INTERNAL_RESISTORS 1
+#define CONFIG_RTC_CLK_SRC_INT_RC 1
+#define CONFIG_RTC_CLK_CAL_CYCLES 1024
+#define CONFIG_RTC_CLK_FUNC_IN_IRAM 1
+#define CONFIG_RTC_TIME_FUNC_IN_IRAM 1
+#define CONFIG_ESP_PERIPH_CTRL_FUNC_IN_IRAM 1
+#define CONFIG_ESP_REGI2C_CTRL_FUNC_IN_IRAM 1
+#define CONFIG_XTAL_FREQ_40 1
+#define CONFIG_XTAL_FREQ 40
+#define CONFIG_ESP_BROWNOUT_DET 1
+#define CONFIG_ESP_BROWNOUT_DET_LVL_SEL_7 1
+#define CONFIG_ESP_BROWNOUT_DET_LVL 7
+#define CONFIG_ESP_BROWNOUT_USE_INTR 1
+#define CONFIG_ESP_INTR_IN_IRAM 1
+#define CONFIG_LIBC_PICOLIBC 1
+#define CONFIG_LIBC_PICOLIBC_NEWLIB_COMPATIBILITY 1
+#define CONFIG_LIBC_MISC_IN_IRAM 1
+#define CONFIG_LIBC_LOCKS_PLACE_IN_IRAM 1
+#define CONFIG_LIBC_TIME_SYSCALL_USE_RTC_HRT 1
+#define CONFIG_LIBC_OPTIMIZED_MISALIGNED_ACCESS 1
+#define CONFIG_LIBC_ASSERT_BUFFER_SIZE 200
+#define CONFIG_ESP_ROM_PRINT_IN_IRAM 1
+#define CONFIG_ESP_CRYPTO_DPA_PROTECTION_AT_STARTUP 1
+#define CONFIG_ESP_CRYPTO_DPA_PROTECTION_LEVEL_LOW 1
+#define CONFIG_ESP_CRYPTO_DPA_PROTECTION_LEVEL 1
+#define CONFIG_ESP_CONSOLE_UART_DEFAULT 1
+#define CONFIG_ESP_CONSOLE_SECONDARY_USB_SERIAL_JTAG 1
+#define CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG_ENABLED 1
+#define CONFIG_ESP_CONSOLE_UART 1
+#define CONFIG_ESP_CONSOLE_UART_NUM 0
+#define CONFIG_ESP_CONSOLE_ROM_SERIAL_PORT_NUM 0
+#define CONFIG_ESP_CONSOLE_UART_BAUDRATE 115200
+#define CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_160 1
+#define CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ 160
+#define CONFIG_ESP_SYSTEM_IN_IRAM 1
+#define CONFIG_ESP_SYSTEM_PANIC_PRINT_REBOOT 1
+#define CONFIG_ESP_SYSTEM_PANIC_REBOOT_DELAY_SECONDS 0
+#define CONFIG_ESP_SYSTEM_SINGLE_CORE_MODE 1
+#define CONFIG_ESP_SYSTEM_RTC_FAST_MEM_AS_HEAP_DEPCHECK 1
+#define CONFIG_ESP_SYSTEM_ALLOW_RTC_FAST_MEM_AS_HEAP 1
+#define CONFIG_ESP_SYSTEM_NO_BACKTRACE 1
+#define CONFIG_ESP_SYSTEM_MEMPROT 1
+#define CONFIG_ESP_SYSTEM_MEMPROT_PMP 1
+#define CONFIG_ESP_SYSTEM_EVENT_QUEUE_SIZE 32
+#define CONFIG_ESP_SYSTEM_EVENT_TASK_STACK_SIZE 2304
+#define CONFIG_ESP_MAIN_TASK_STACK_SIZE 3584
+#define CONFIG_ESP_MAIN_TASK_AFFINITY_CPU0 1
+#define CONFIG_ESP_MAIN_TASK_AFFINITY 0x0
+#define CONFIG_ESP_MINIMAL_SHARED_STACK_SIZE 2048
+#define CONFIG_ESP_INT_WDT 1
+#define CONFIG_ESP_INT_WDT_TIMEOUT_MS 300
+#define CONFIG_ESP_TASK_WDT_EN 1
+#define CONFIG_ESP_TASK_WDT_INIT 1
+#define CONFIG_ESP_TASK_WDT_TIMEOUT_S 5
+#define CONFIG_ESP_TASK_WDT_CHECK_IDLE_TASK_CPU0 1
+#define CONFIG_ESP_DEBUG_OCDAWARE 1
+#define CONFIG_ESP_SYSTEM_CHECK_INT_LEVEL_4 1
+#define CONFIG_ESP_SYSTEM_HW_STACK_GUARD 1
+#define CONFIG_ESP_SYSTEM_BBPLL_RECALIB 1
+#define CONFIG_ESP_SYSTEM_HW_PC_RECORD 1
+#define CONFIG_ESP_IPC_TASK_STACK_SIZE 1024
+#define CONFIG_FREERTOS_UNICORE 1
+#define CONFIG_FREERTOS_HZ 100
+#define CONFIG_FREERTOS_OPTIMIZED_SCHEDULER 1
+#define CONFIG_FREERTOS_CHECK_STACKOVERFLOW_CANARY 1
+#define CONFIG_FREERTOS_THREAD_LOCAL_STORAGE_POINTERS 1
+#define CONFIG_FREERTOS_IDLE_TASK_STACKSIZE 1536
+#define CONFIG_FREERTOS_MAX_TASK_NAME_LEN 16
+#define CONFIG_FREERTOS_USE_TIMERS 1
+#define CONFIG_FREERTOS_TIMER_SERVICE_TASK_NAME "Tmr Svc"
+#define CONFIG_FREERTOS_TIMER_TASK_NO_AFFINITY 1
+#define CONFIG_FREERTOS_TIMER_SERVICE_TASK_CORE_AFFINITY 0x7FFFFFFF
+#define CONFIG_FREERTOS_TIMER_TASK_PRIORITY 1
+#define CONFIG_FREERTOS_TIMER_TASK_STACK_DEPTH 2048
+#define CONFIG_FREERTOS_TIMER_QUEUE_LENGTH 10
+#define CONFIG_FREERTOS_QUEUE_REGISTRY_SIZE 0
+#define CONFIG_FREERTOS_TASK_NOTIFICATION_ARRAY_ENTRIES 1
+#define CONFIG_FREERTOS_TASK_FUNCTION_WRAPPER 1
+#define CONFIG_FREERTOS_TLSP_DELETION_CALLBACKS 1
+#define CONFIG_FREERTOS_CHECK_MUTEX_GIVEN_BY_OWNER 1
+#define CONFIG_FREERTOS_ISR_STACKSIZE 1536
+#define CONFIG_FREERTOS_INTERRUPT_BACKTRACE 1
+#define CONFIG_FREERTOS_TICK_SUPPORT_SYSTIMER 1
+#define CONFIG_FREERTOS_CORETIMER_SYSTIMER_LVL1 1
+#define CONFIG_FREERTOS_SYSTICK_USES_SYSTIMER 1
+#define CONFIG_FREERTOS_PORT 1
+#define CONFIG_FREERTOS_NO_AFFINITY 0x7FFFFFFF
+#define CONFIG_FREERTOS_SUPPORT_STATIC_ALLOCATION 1
+#define CONFIG_FREERTOS_DEBUG_OCDAWARE 1
+#define CONFIG_FREERTOS_NUMBER_OF_CORES 1
+#define CONFIG_HAL_ASSERTION_EQUALS_SYSTEM 1
+#define CONFIG_HAL_DEFAULT_ASSERTION_LEVEL 2
+#define CONFIG_HAL_SYSTIMER_USE_ROM_IMPL 1
+#define CONFIG_HAL_WDT_USE_ROM_IMPL 1
+#define CONFIG_HAL_GPIO_USE_ROM_IMPL 1
+#define CONFIG_LOG_VERSION_1 1
+#define CONFIG_LOG_VERSION 1
+#define CONFIG_LOG_DEFAULT_LEVEL_INFO 1
+#define CONFIG_LOG_DEFAULT_LEVEL 3
+#define CONFIG_LOG_MAXIMUM_EQUALS_DEFAULT 1
+#define CONFIG_LOG_MAXIMUM_LEVEL 3
+#define CONFIG_LOG_DYNAMIC_LEVEL_CONTROL 1
+#define CONFIG_LOG_TAG_LEVEL_IMPL_CACHE_AND_LINKED_LIST 1
+#define CONFIG_LOG_TAG_LEVEL_CACHE_BINARY_MIN_HEAP 1
+#define CONFIG_LOG_TAG_LEVEL_IMPL_CACHE_SIZE 31
+#define CONFIG_LOG_TIMESTAMP_SOURCE_RTOS 1
+#define CONFIG_LOG_MODE_TEXT_EN 1
+#define CONFIG_LOG_MODE_TEXT 1
+#define CONFIG_LOG_IN_IRAM 1
+#define CONFIG_MMU_PAGE_SIZE_32KB 1
+#define CONFIG_MMU_PAGE_MODE "32KB"
+#define CONFIG_MMU_PAGE_SIZE 0x8000
+#define CONFIG_SPI_FLASH_BROWNOUT_RESET_XMC 1
+#define CONFIG_SPI_FLASH_BROWNOUT_RESET 1
+#define CONFIG_SPI_FLASH_SUSPEND_TSUS_VAL_US 50
+#define CONFIG_SPI_FLASH_PLACE_FUNCTIONS_IN_IRAM 1
+#define CONFIG_SPI_FLASH_DANGEROUS_WRITE_ABORTS 1
+#define CONFIG_SPI_FLASH_YIELD_DURING_ERASE 1
+#define CONFIG_SPI_FLASH_ERASE_YIELD_DURATION_MS 20
+#define CONFIG_SPI_FLASH_ERASE_YIELD_TICKS 1
+#define CONFIG_SPI_FLASH_WRITE_CHUNK_SIZE 8192
+#define CONFIG_SPI_FLASH_VENDOR_XMC_SUPPORT_ENABLED 1
+#define CONFIG_SPI_FLASH_VENDOR_GD_SUPPORT_ENABLED 1
+#define CONFIG_SPI_FLASH_SUPPORT_GD_CHIP 1
+#define CONFIG_SPI_FLASH_ENABLE_ENCRYPTED_READ_WRITE 1
+
+/* List of deprecated options */
+#define CONFIG_BROWNOUT_DET CONFIG_ESP_BROWNOUT_DET
+#define CONFIG_BROWNOUT_DET_LVL CONFIG_ESP_BROWNOUT_DET_LVL
+#define CONFIG_BROWNOUT_DET_LVL_SEL_7 CONFIG_ESP_BROWNOUT_DET_LVL_SEL_7
+#define CONFIG_COMPILER_OPTIMIZATION_DEFAULT CONFIG_COMPILER_OPTIMIZATION_DEBUG
+#define CONFIG_COMPILER_OPTIMIZATION_LEVEL_DEBUG CONFIG_COMPILER_OPTIMIZATION_DEBUG
+#define CONFIG_CONSOLE_UART CONFIG_ESP_CONSOLE_UART
+#define CONFIG_CONSOLE_UART_BAUDRATE CONFIG_ESP_CONSOLE_UART_BAUDRATE
+#define CONFIG_CONSOLE_UART_DEFAULT CONFIG_ESP_CONSOLE_UART_DEFAULT
+#define CONFIG_CONSOLE_UART_NUM CONFIG_ESP_CONSOLE_UART_NUM
+#define CONFIG_ESP_SYSTEM_BROWNOUT_INTR CONFIG_ESP_BROWNOUT_USE_INTR
+#define CONFIG_ESP_SYSTEM_MEMPROT_FEATURE CONFIG_ESP_SYSTEM_MEMPROT
+#define CONFIG_ESP_SYSTEM_MEMPROT_FEATURE_VIA_TEE CONFIG_ESP_SYSTEM_MEMPROT
+#define CONFIG_ESP_SYSTEM_PMP_IDRAM_SPLIT CONFIG_ESP_SYSTEM_MEMPROT
+#define CONFIG_ESP_TASK_WDT CONFIG_ESP_TASK_WDT_INIT
+#define CONFIG_FLASHMODE_DIO CONFIG_ESPTOOLPY_FLASHMODE_DIO
+#define CONFIG_INT_WDT CONFIG_ESP_INT_WDT
+#define CONFIG_INT_WDT_TIMEOUT_MS CONFIG_ESP_INT_WDT_TIMEOUT_MS
+#define CONFIG_IPC_TASK_STACK_SIZE CONFIG_ESP_IPC_TASK_STACK_SIZE
+#define CONFIG_LOG_BOOTLOADER_LEVEL CONFIG_BOOTLOADER_LOG_LEVEL
+#define CONFIG_LOG_BOOTLOADER_LEVEL_INFO CONFIG_BOOTLOADER_LOG_LEVEL_INFO
+#define CONFIG_MAIN_TASK_STACK_SIZE CONFIG_ESP_MAIN_TASK_STACK_SIZE
+#define CONFIG_MONITOR_BAUD CONFIG_ESPTOOLPY_MONITOR_BAUD
+#define CONFIG_NEWLIB_TIME_SYSCALL_USE_RTC_HRT CONFIG_LIBC_TIME_SYSCALL_USE_RTC_HRT
+#define CONFIG_OPTIMIZATION_ASSERTIONS_ENABLED CONFIG_COMPILER_OPTIMIZATION_ASSERTIONS_ENABLE
+#define CONFIG_OPTIMIZATION_ASSERTION_LEVEL CONFIG_COMPILER_OPTIMIZATION_ASSERTION_LEVEL
+#define CONFIG_OPTIMIZATION_LEVEL_DEBUG CONFIG_COMPILER_OPTIMIZATION_DEBUG
+#define CONFIG_PERIPH_CTRL_FUNC_IN_IRAM CONFIG_ESP_PERIPH_CTRL_FUNC_IN_IRAM
+#define CONFIG_SPI_FLASH_WRITING_DANGEROUS_REGIONS_ABORTS CONFIG_SPI_FLASH_DANGEROUS_WRITE_ABORTS
+#define CONFIG_STACK_CHECK_NONE CONFIG_COMPILER_STACK_CHECK_MODE_NONE
+#define CONFIG_SYSTEM_EVENT_QUEUE_SIZE CONFIG_ESP_SYSTEM_EVENT_QUEUE_SIZE
+#define CONFIG_SYSTEM_EVENT_TASK_STACK_SIZE CONFIG_ESP_SYSTEM_EVENT_TASK_STACK_SIZE
+#define CONFIG_TASK_WDT CONFIG_ESP_TASK_WDT_INIT
+#define CONFIG_TASK_WDT_CHECK_IDLE_TASK_CPU0 CONFIG_ESP_TASK_WDT_CHECK_IDLE_TASK_CPU0
+#define CONFIG_TASK_WDT_TIMEOUT_S CONFIG_ESP_TASK_WDT_TIMEOUT_S
+#define CONFIG_TIMER_QUEUE_LENGTH CONFIG_FREERTOS_TIMER_QUEUE_LENGTH
+#define CONFIG_TIMER_TASK_PRIORITY CONFIG_FREERTOS_TIMER_TASK_PRIORITY
+#define CONFIG_TIMER_TASK_STACK_DEPTH CONFIG_FREERTOS_TIMER_TASK_STACK_DEPTH
+
+// ====== FILE: ./.pio/build/esp32-c6-devkitc-1/CMakeFiles/3.30.2/CompilerIdC/CMakeCCompilerId.c ======
+#ifdef __cplusplus
+# error "A C++ compiler has been selected for C."
+#endif
+
+#if defined(__18CXX)
+# define ID_VOID_MAIN
+#endif
+#if defined(__CLASSIC_C__)
+/* cv-qualifiers did not exist in K&R C */
+# define const
+# define volatile
+#endif
+
+#if !defined(__has_include)
+/* If the compiler does not have __has_include, pretend the answer is
+   always no.  */
+#  define __has_include(x) 0
+#endif
+
+
+/* Version number components: V=Version, R=Revision, P=Patch
+   Version date components:   YYYY=Year, MM=Month,   DD=Day  */
+
+#if defined(__INTEL_COMPILER) || defined(__ICC)
+# define COMPILER_ID "Intel"
+# if defined(_MSC_VER)
+#  define SIMULATE_ID "MSVC"
+# endif
+# if defined(__GNUC__)
+#  define SIMULATE_ID "GNU"
+# endif
+  /* __INTEL_COMPILER = VRP prior to 2021, and then VVVV for 2021 and later,
+     except that a few beta releases use the old format with V=2021.  */
+# if __INTEL_COMPILER < 2021 || __INTEL_COMPILER == 202110 || __INTEL_COMPILER == 202111
+#  define COMPILER_VERSION_MAJOR DEC(__INTEL_COMPILER/100)
+#  define COMPILER_VERSION_MINOR DEC(__INTEL_COMPILER/10 % 10)
+#  if defined(__INTEL_COMPILER_UPDATE)
+#   define COMPILER_VERSION_PATCH DEC(__INTEL_COMPILER_UPDATE)
+#  else
+#   define COMPILER_VERSION_PATCH DEC(__INTEL_COMPILER   % 10)
+#  endif
+# else
+#  define COMPILER_VERSION_MAJOR DEC(__INTEL_COMPILER)
+#  define COMPILER_VERSION_MINOR DEC(__INTEL_COMPILER_UPDATE)
+   /* The third version component from --version is an update index,
+      but no macro is provided for it.  */
+#  define COMPILER_VERSION_PATCH DEC(0)
+# endif
+# if defined(__INTEL_COMPILER_BUILD_DATE)
+   /* __INTEL_COMPILER_BUILD_DATE = YYYYMMDD */
+#  define COMPILER_VERSION_TWEAK DEC(__INTEL_COMPILER_BUILD_DATE)
+# endif
+# if defined(_MSC_VER)
+   /* _MSC_VER = VVRR */
+#  define SIMULATE_VERSION_MAJOR DEC(_MSC_VER / 100)
+#  define SIMULATE_VERSION_MINOR DEC(_MSC_VER % 100)
+# endif
+# if defined(__GNUC__)
+#  define SIMULATE_VERSION_MAJOR DEC(__GNUC__)
+# elif defined(__GNUG__)
+#  define SIMULATE_VERSION_MAJOR DEC(__GNUG__)
+# endif
+# if defined(__GNUC_MINOR__)
+#  define SIMULATE_VERSION_MINOR DEC(__GNUC_MINOR__)
+# endif
+# if defined(__GNUC_PATCHLEVEL__)
+#  define SIMULATE_VERSION_PATCH DEC(__GNUC_PATCHLEVEL__)
+# endif
+
+#elif (defined(__clang__) && defined(__INTEL_CLANG_COMPILER)) || defined(__INTEL_LLVM_COMPILER)
+# define COMPILER_ID "IntelLLVM"
+#if defined(_MSC_VER)
+# define SIMULATE_ID "MSVC"
+#endif
+#if defined(__GNUC__)
+# define SIMULATE_ID "GNU"
+#endif
+/* __INTEL_LLVM_COMPILER = VVVVRP prior to 2021.2.0, VVVVRRPP for 2021.2.0 and
+ * later.  Look for 6 digit vs. 8 digit version number to decide encoding.
+ * VVVV is no smaller than the current year when a version is released.
+ */
+#if __INTEL_LLVM_COMPILER < 1000000L
+# define COMPILER_VERSION_MAJOR DEC(__INTEL_LLVM_COMPILER/100)
+# define COMPILER_VERSION_MINOR DEC(__INTEL_LLVM_COMPILER/10 % 10)
+# define COMPILER_VERSION_PATCH DEC(__INTEL_LLVM_COMPILER    % 10)
+#else
+# define COMPILER_VERSION_MAJOR DEC(__INTEL_LLVM_COMPILER/10000)
+# define COMPILER_VERSION_MINOR DEC(__INTEL_LLVM_COMPILER/100 % 100)
+# define COMPILER_VERSION_PATCH DEC(__INTEL_LLVM_COMPILER     % 100)
+#endif
+#if defined(_MSC_VER)
+  /* _MSC_VER = VVRR */
+# define SIMULATE_VERSION_MAJOR DEC(_MSC_VER / 100)
+# define SIMULATE_VERSION_MINOR DEC(_MSC_VER % 100)
+#endif
+#if defined(__GNUC__)
+# define SIMULATE_VERSION_MAJOR DEC(__GNUC__)
+#elif defined(__GNUG__)
+# define SIMULATE_VERSION_MAJOR DEC(__GNUG__)
+#endif
+#if defined(__GNUC_MINOR__)
+# define SIMULATE_VERSION_MINOR DEC(__GNUC_MINOR__)
+#endif
+#if defined(__GNUC_PATCHLEVEL__)
+# define SIMULATE_VERSION_PATCH DEC(__GNUC_PATCHLEVEL__)
+#endif
+
+#elif defined(__PATHCC__)
+# define COMPILER_ID "PathScale"
+# define COMPILER_VERSION_MAJOR DEC(__PATHCC__)
+# define COMPILER_VERSION_MINOR DEC(__PATHCC_MINOR__)
+# if defined(__PATHCC_PATCHLEVEL__)
+#  define COMPILER_VERSION_PATCH DEC(__PATHCC_PATCHLEVEL__)
+# endif
+
+#elif defined(__BORLANDC__) && defined(__CODEGEARC_VERSION__)
+# define COMPILER_ID "Embarcadero"
+# define COMPILER_VERSION_MAJOR HEX(__CODEGEARC_VERSION__>>24 & 0x00FF)
+# define COMPILER_VERSION_MINOR HEX(__CODEGEARC_VERSION__>>16 & 0x00FF)
+# define COMPILER_VERSION_PATCH DEC(__CODEGEARC_VERSION__     & 0xFFFF)
+
+#elif defined(__BORLANDC__)
+# define COMPILER_ID "Borland"
+  /* __BORLANDC__ = 0xVRR */
+# define COMPILER_VERSION_MAJOR HEX(__BORLANDC__>>8)
+# define COMPILER_VERSION_MINOR HEX(__BORLANDC__ & 0xFF)
+
+#elif defined(__WATCOMC__) && __WATCOMC__ < 1200
+# define COMPILER_ID "Watcom"
+   /* __WATCOMC__ = VVRR */
+# define COMPILER_VERSION_MAJOR DEC(__WATCOMC__ / 100)
+# define COMPILER_VERSION_MINOR DEC((__WATCOMC__ / 10) % 10)
+# if (__WATCOMC__ % 10) > 0
+#  define COMPILER_VERSION_PATCH DEC(__WATCOMC__ % 10)
+# endif
+
+#elif defined(__WATCOMC__)
+# define COMPILER_ID "OpenWatcom"
+   /* __WATCOMC__ = VVRP + 1100 */
+# define COMPILER_VERSION_MAJOR DEC((__WATCOMC__ - 1100) / 100)
+# define COMPILER_VERSION_MINOR DEC((__WATCOMC__ / 10) % 10)
+# if (__WATCOMC__ % 10) > 0
+#  define COMPILER_VERSION_PATCH DEC(__WATCOMC__ % 10)
+# endif
+
+#elif defined(__SUNPRO_C)
+# define COMPILER_ID "SunPro"
+# if __SUNPRO_C >= 0x5100
+   /* __SUNPRO_C = 0xVRRP */
+#  define COMPILER_VERSION_MAJOR HEX(__SUNPRO_C>>12)
+#  define COMPILER_VERSION_MINOR HEX(__SUNPRO_C>>4 & 0xFF)
+#  define COMPILER_VERSION_PATCH HEX(__SUNPRO_C    & 0xF)
+# else
+   /* __SUNPRO_CC = 0xVRP */
+#  define COMPILER_VERSION_MAJOR HEX(__SUNPRO_C>>8)
+#  define COMPILER_VERSION_MINOR HEX(__SUNPRO_C>>4 & 0xF)
+#  define COMPILER_VERSION_PATCH HEX(__SUNPRO_C    & 0xF)
+# endif
+
+#elif defined(__HP_cc)
+# define COMPILER_ID "HP"
+  /* __HP_cc = VVRRPP */
+# define COMPILER_VERSION_MAJOR DEC(__HP_cc/10000)
+# define COMPILER_VERSION_MINOR DEC(__HP_cc/100 % 100)
+# define COMPILER_VERSION_PATCH DEC(__HP_cc     % 100)
+
+#elif defined(__DECC)
+# define COMPILER_ID "Compaq"
+  /* __DECC_VER = VVRRTPPPP */
+# define COMPILER_VERSION_MAJOR DEC(__DECC_VER/10000000)
+# define COMPILER_VERSION_MINOR DEC(__DECC_VER/100000  % 100)
+# define COMPILER_VERSION_PATCH DEC(__DECC_VER         % 10000)
+
+#elif defined(__IBMC__) && defined(__COMPILER_VER__)
+# define COMPILER_ID "zOS"
+  /* __IBMC__ = VRP */
+# define COMPILER_VERSION_MAJOR DEC(__IBMC__/100)
+# define COMPILER_VERSION_MINOR DEC(__IBMC__/10 % 10)
+# define COMPILER_VERSION_PATCH DEC(__IBMC__    % 10)
+
+#elif defined(__open_xl__) && defined(__clang__)
+# define COMPILER_ID "IBMClang"
+# define COMPILER_VERSION_MAJOR DEC(__open_xl_version__)
+# define COMPILER_VERSION_MINOR DEC(__open_xl_release__)
+# define COMPILER_VERSION_PATCH DEC(__open_xl_modification__)
+# define COMPILER_VERSION_TWEAK DEC(__open_xl_ptf_fix_level__)
+
+
+#elif defined(__ibmxl__) && defined(__clang__)
+# define COMPILER_ID "XLClang"
+# define COMPILER_VERSION_MAJOR DEC(__ibmxl_version__)
+# define COMPILER_VERSION_MINOR DEC(__ibmxl_release__)
+# define COMPILER_VERSION_PATCH DEC(__ibmxl_modification__)
+# define COMPILER_VERSION_TWEAK DEC(__ibmxl_ptf_fix_level__)
+
+
+#elif defined(__IBMC__) && !defined(__COMPILER_VER__) && __IBMC__ >= 800
+# define COMPILER_ID "XL"
+  /* __IBMC__ = VRP */
+# define COMPILER_VERSION_MAJOR DEC(__IBMC__/100)
+# define COMPILER_VERSION_MINOR DEC(__IBMC__/10 % 10)
+# define COMPILER_VERSION_PATCH DEC(__IBMC__    % 10)
+
+#elif defined(__IBMC__) && !defined(__COMPILER_VER__) && __IBMC__ < 800
+# define COMPILER_ID "VisualAge"
+  /* __IBMC__ = VRP */
+# define COMPILER_VERSION_MAJOR DEC(__IBMC__/100)
+# define COMPILER_VERSION_MINOR DEC(__IBMC__/10 % 10)
+# define COMPILER_VERSION_PATCH DEC(__IBMC__    % 10)
+
+#elif defined(__NVCOMPILER)
+# define COMPILER_ID "NVHPC"
+# define COMPILER_VERSION_MAJOR DEC(__NVCOMPILER_MAJOR__)
+# define COMPILER_VERSION_MINOR DEC(__NVCOMPILER_MINOR__)
+# if defined(__NVCOMPILER_PATCHLEVEL__)
+#  define COMPILER_VERSION_PATCH DEC(__NVCOMPILER_PATCHLEVEL__)
+# endif
+
+#elif defined(__PGI)
+# define COMPILER_ID "PGI"
+# define COMPILER_VERSION_MAJOR DEC(__PGIC__)
+# define COMPILER_VERSION_MINOR DEC(__PGIC_MINOR__)
+# if defined(__PGIC_PATCHLEVEL__)
+#  define COMPILER_VERSION_PATCH DEC(__PGIC_PATCHLEVEL__)
+# endif
+
+#elif defined(__clang__) && defined(__cray__)
+# define COMPILER_ID "CrayClang"
+# define COMPILER_VERSION_MAJOR DEC(__cray_major__)
+# define COMPILER_VERSION_MINOR DEC(__cray_minor__)
+# define COMPILER_VERSION_PATCH DEC(__cray_patchlevel__)
+# define COMPILER_VERSION_INTERNAL_STR __clang_version__
+
+
+#elif defined(_CRAYC)
+# define COMPILER_ID "Cray"
+# define COMPILER_VERSION_MAJOR DEC(_RELEASE_MAJOR)
+# define COMPILER_VERSION_MINOR DEC(_RELEASE_MINOR)
+
+#elif defined(__TI_COMPILER_VERSION__)
+# define COMPILER_ID "TI"
+  /* __TI_COMPILER_VERSION__ = VVVRRRPPP */
+# define COMPILER_VERSION_MAJOR DEC(__TI_COMPILER_VERSION__/1000000)
+# define COMPILER_VERSION_MINOR DEC(__TI_COMPILER_VERSION__/1000   % 1000)
+# define COMPILER_VERSION_PATCH DEC(__TI_COMPILER_VERSION__        % 1000)
+
+#elif defined(__CLANG_FUJITSU)
+# define COMPILER_ID "FujitsuClang"
+# define COMPILER_VERSION_MAJOR DEC(__FCC_major__)
+# define COMPILER_VERSION_MINOR DEC(__FCC_minor__)
+# define COMPILER_VERSION_PATCH DEC(__FCC_patchlevel__)
+# define COMPILER_VERSION_INTERNAL_STR __clang_version__
+
+
+#elif defined(__FUJITSU)
+# define COMPILER_ID "Fujitsu"
+# if defined(__FCC_version__)
+#   define COMPILER_VERSION __FCC_version__
+# elif defined(__FCC_major__)
+#   define COMPILER_VERSION_MAJOR DEC(__FCC_major__)
+#   define COMPILER_VERSION_MINOR DEC(__FCC_minor__)
+#   define COMPILER_VERSION_PATCH DEC(__FCC_patchlevel__)
+# endif
+# if defined(__fcc_version)
+#   define COMPILER_VERSION_INTERNAL DEC(__fcc_version)
+# elif defined(__FCC_VERSION)
+#   define COMPILER_VERSION_INTERNAL DEC(__FCC_VERSION)
+# endif
+
+
+#elif defined(__ghs__)
+# define COMPILER_ID "GHS"
+/* __GHS_VERSION_NUMBER = VVVVRP */
+# ifdef __GHS_VERSION_NUMBER
+# define COMPILER_VERSION_MAJOR DEC(__GHS_VERSION_NUMBER / 100)
+# define COMPILER_VERSION_MINOR DEC(__GHS_VERSION_NUMBER / 10 % 10)
+# define COMPILER_VERSION_PATCH DEC(__GHS_VERSION_NUMBER      % 10)
+# endif
+
+#elif defined(__TASKING__)
+# define COMPILER_ID "Tasking"
+  # define COMPILER_VERSION_MAJOR DEC(__VERSION__/1000)
+  # define COMPILER_VERSION_MINOR DEC(__VERSION__ % 100)
+# define COMPILER_VERSION_INTERNAL DEC(__VERSION__)
+
+#elif defined(__ORANGEC__)
+# define COMPILER_ID "OrangeC"
+# define COMPILER_VERSION_MAJOR DEC(__ORANGEC_MAJOR__)
+# define COMPILER_VERSION_MINOR DEC(__ORANGEC_MINOR__)
+# define COMPILER_VERSION_PATCH DEC(__ORANGEC_PATCHLEVEL__)
+
+#elif defined(__TINYC__)
+# define COMPILER_ID "TinyCC"
+
+#elif defined(__BCC__)
+# define COMPILER_ID "Bruce"
+
+#elif defined(__SCO_VERSION__)
+# define COMPILER_ID "SCO"
+
+#elif defined(__ARMCC_VERSION) && !defined(__clang__)
+# define COMPILER_ID "ARMCC"
+#if __ARMCC_VERSION >= 1000000
+  /* __ARMCC_VERSION = VRRPPPP */
+  # define COMPILER_VERSION_MAJOR DEC(__ARMCC_VERSION/1000000)
+  # define COMPILER_VERSION_MINOR DEC(__ARMCC_VERSION/10000 % 100)
+  # define COMPILER_VERSION_PATCH DEC(__ARMCC_VERSION     % 10000)
+#else
+  /* __ARMCC_VERSION = VRPPPP */
+  # define COMPILER_VERSION_MAJOR DEC(__ARMCC_VERSION/100000)
+  # define COMPILER_VERSION_MINOR DEC(__ARMCC_VERSION/10000 % 10)
+  # define COMPILER_VERSION_PATCH DEC(__ARMCC_VERSION    % 10000)
+#endif
+
+
+#elif defined(__clang__) && defined(__apple_build_version__)
+# define COMPILER_ID "AppleClang"
+# if defined(_MSC_VER)
+#  define SIMULATE_ID "MSVC"
+# endif
+# define COMPILER_VERSION_MAJOR DEC(__clang_major__)
+# define COMPILER_VERSION_MINOR DEC(__clang_minor__)
+# define COMPILER_VERSION_PATCH DEC(__clang_patchlevel__)
+# if defined(_MSC_VER)
+   /* _MSC_VER = VVRR */
+#  define SIMULATE_VERSION_MAJOR DEC(_MSC_VER / 100)
+#  define SIMULATE_VERSION_MINOR DEC(_MSC_VER % 100)
+# endif
+# define COMPILER_VERSION_TWEAK DEC(__apple_build_version__)
+
+#elif defined(__clang__) && defined(__ARMCOMPILER_VERSION)
+# define COMPILER_ID "ARMClang"
+  # define COMPILER_VERSION_MAJOR DEC(__ARMCOMPILER_VERSION/1000000)
+  # define COMPILER_VERSION_MINOR DEC(__ARMCOMPILER_VERSION/10000 % 100)
+  # define COMPILER_VERSION_PATCH DEC(__ARMCOMPILER_VERSION/100   % 100)
+# define COMPILER_VERSION_INTERNAL DEC(__ARMCOMPILER_VERSION)
+
+#elif defined(__clang__) && defined(__ti__)
+# define COMPILER_ID "TIClang"
+  # define COMPILER_VERSION_MAJOR DEC(__ti_major__)
+  # define COMPILER_VERSION_MINOR DEC(__ti_minor__)
+  # define COMPILER_VERSION_PATCH DEC(__ti_patchlevel__)
+# define COMPILER_VERSION_INTERNAL DEC(__ti_version__)
+
+#elif defined(__clang__)
+# define COMPILER_ID "Clang"
+# if defined(_MSC_VER)
+#  define SIMULATE_ID "MSVC"
+# endif
+# define COMPILER_VERSION_MAJOR DEC(__clang_major__)
+# define COMPILER_VERSION_MINOR DEC(__clang_minor__)
+# define COMPILER_VERSION_PATCH DEC(__clang_patchlevel__)
+# if defined(_MSC_VER)
+   /* _MSC_VER = VVRR */
+#  define SIMULATE_VERSION_MAJOR DEC(_MSC_VER / 100)
+#  define SIMULATE_VERSION_MINOR DEC(_MSC_VER % 100)
+# endif
+
+#elif defined(__LCC__) && (defined(__GNUC__) || defined(__GNUG__) || defined(__MCST__))
+# define COMPILER_ID "LCC"
+# define COMPILER_VERSION_MAJOR DEC(__LCC__ / 100)
+# define COMPILER_VERSION_MINOR DEC(__LCC__ % 100)
+# if defined(__LCC_MINOR__)
+#  define COMPILER_VERSION_PATCH DEC(__LCC_MINOR__)
+# endif
+# if defined(__GNUC__) && defined(__GNUC_MINOR__)
+#  define SIMULATE_ID "GNU"
+#  define SIMULATE_VERSION_MAJOR DEC(__GNUC__)
+#  define SIMULATE_VERSION_MINOR DEC(__GNUC_MINOR__)
+#  if defined(__GNUC_PATCHLEVEL__)
+#   define SIMULATE_VERSION_PATCH DEC(__GNUC_PATCHLEVEL__)
+#  endif
+# endif
+
+#elif defined(__GNUC__)
+# define COMPILER_ID "GNU"
+# define COMPILER_VERSION_MAJOR DEC(__GNUC__)
+# if defined(__GNUC_MINOR__)
+#  define COMPILER_VERSION_MINOR DEC(__GNUC_MINOR__)
+# endif
+# if defined(__GNUC_PATCHLEVEL__)
+#  define COMPILER_VERSION_PATCH DEC(__GNUC_PATCHLEVEL__)
+# endif
+
+#elif defined(_MSC_VER)
+# define COMPILER_ID "MSVC"
+  /* _MSC_VER = VVRR */
+# define COMPILER_VERSION_MAJOR DEC(_MSC_VER / 100)
+# define COMPILER_VERSION_MINOR DEC(_MSC_VER % 100)
+# if defined(_MSC_FULL_VER)
+#  if _MSC_VER >= 1400
+    /* _MSC_FULL_VER = VVRRPPPPP */
+#   define COMPILER_VERSION_PATCH DEC(_MSC_FULL_VER % 100000)
+#  else
+    /* _MSC_FULL_VER = VVRRPPPP */
+#   define COMPILER_VERSION_PATCH DEC(_MSC_FULL_VER % 10000)
+#  endif
+# endif
+# if defined(_MSC_BUILD)
+#  define COMPILER_VERSION_TWEAK DEC(_MSC_BUILD)
+# endif
+
+#elif defined(_ADI_COMPILER)
+# define COMPILER_ID "ADSP"
+#if defined(__VERSIONNUM__)
+  /* __VERSIONNUM__ = 0xVVRRPPTT */
+#  define COMPILER_VERSION_MAJOR DEC(__VERSIONNUM__ >> 24 & 0xFF)
+#  define COMPILER_VERSION_MINOR DEC(__VERSIONNUM__ >> 16 & 0xFF)
+#  define COMPILER_VERSION_PATCH DEC(__VERSIONNUM__ >> 8 & 0xFF)
+#  define COMPILER_VERSION_TWEAK DEC(__VERSIONNUM__ & 0xFF)
+#endif
+
+#elif defined(__IAR_SYSTEMS_ICC__) || defined(__IAR_SYSTEMS_ICC)
+# define COMPILER_ID "IAR"
+# if defined(__VER__) && defined(__ICCARM__)
+#  define COMPILER_VERSION_MAJOR DEC((__VER__) / 1000000)
+#  define COMPILER_VERSION_MINOR DEC(((__VER__) / 1000) % 1000)
+#  define COMPILER_VERSION_PATCH DEC((__VER__) % 1000)
+#  define COMPILER_VERSION_INTERNAL DEC(__IAR_SYSTEMS_ICC__)
+# elif defined(__VER__) && (defined(__ICCAVR__) || defined(__ICCRX__) || defined(__ICCRH850__) || defined(__ICCRL78__) || defined(__ICC430__) || defined(__ICCRISCV__) || defined(__ICCV850__) || defined(__ICC8051__) || defined(__ICCSTM8__))
+#  define COMPILER_VERSION_MAJOR DEC((__VER__) / 100)
+#  define COMPILER_VERSION_MINOR DEC((__VER__) - (((__VER__) / 100)*100))
+#  define COMPILER_VERSION_PATCH DEC(__SUBVERSION__)
+#  define COMPILER_VERSION_INTERNAL DEC(__IAR_SYSTEMS_ICC__)
+# endif
+
+#elif defined(__SDCC_VERSION_MAJOR) || defined(SDCC)
+# define COMPILER_ID "SDCC"
+# if defined(__SDCC_VERSION_MAJOR)
+#  define COMPILER_VERSION_MAJOR DEC(__SDCC_VERSION_MAJOR)
+#  define COMPILER_VERSION_MINOR DEC(__SDCC_VERSION_MINOR)
+#  define COMPILER_VERSION_PATCH DEC(__SDCC_VERSION_PATCH)
+# else
+  /* SDCC = VRP */
+#  define COMPILER_VERSION_MAJOR DEC(SDCC/100)
+#  define COMPILER_VERSION_MINOR DEC(SDCC/10 % 10)
+#  define COMPILER_VERSION_PATCH DEC(SDCC    % 10)
+# endif
+
+
+/* These compilers are either not known or too old to define an
+  identification macro.  Try to identify the platform and guess that
+  it is the native compiler.  */
+#elif defined(__hpux) || defined(__hpua)
+# define COMPILER_ID "HP"
+
+#else /* unknown compiler */
+# define COMPILER_ID ""
+#endif
+
+/* Construct the string literal in pieces to prevent the source from
+   getting matched.  Store it in a pointer rather than an array
+   because some compilers will just produce instructions to fill the
+   array rather than assigning a pointer to a static array.  */
+char const* info_compiler = "INFO" ":" "compiler[" COMPILER_ID "]";
+#ifdef SIMULATE_ID
+char const* info_simulate = "INFO" ":" "simulate[" SIMULATE_ID "]";
+#endif
+
+#ifdef __QNXNTO__
+char const* qnxnto = "INFO" ":" "qnxnto[]";
+#endif
+
+#if defined(__CRAYXT_COMPUTE_LINUX_TARGET)
+char const *info_cray = "INFO" ":" "compiler_wrapper[CrayPrgEnv]";
+#endif
+
+#define STRINGIFY_HELPER(X) #X
+#define STRINGIFY(X) STRINGIFY_HELPER(X)
+
+/* Identify known platforms by name.  */
+#if defined(__linux) || defined(__linux__) || defined(linux)
+# define PLATFORM_ID "Linux"
+
+#elif defined(__MSYS__)
+# define PLATFORM_ID "MSYS"
+
+#elif defined(__CYGWIN__)
+# define PLATFORM_ID "Cygwin"
+
+#elif defined(__MINGW32__)
+# define PLATFORM_ID "MinGW"
+
+#elif defined(__APPLE__)
+# define PLATFORM_ID "Darwin"
+
+#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+# define PLATFORM_ID "Windows"
+
+#elif defined(__FreeBSD__) || defined(__FreeBSD)
+# define PLATFORM_ID "FreeBSD"
+
+#elif defined(__NetBSD__) || defined(__NetBSD)
+# define PLATFORM_ID "NetBSD"
+
+#elif defined(__OpenBSD__) || defined(__OPENBSD)
+# define PLATFORM_ID "OpenBSD"
+
+#elif defined(__sun) || defined(sun)
+# define PLATFORM_ID "SunOS"
+
+#elif defined(_AIX) || defined(__AIX) || defined(__AIX__) || defined(__aix) || defined(__aix__)
+# define PLATFORM_ID "AIX"
+
+#elif defined(__hpux) || defined(__hpux__)
+# define PLATFORM_ID "HP-UX"
+
+#elif defined(__HAIKU__)
+# define PLATFORM_ID "Haiku"
+
+#elif defined(__BeOS) || defined(__BEOS__) || defined(_BEOS)
+# define PLATFORM_ID "BeOS"
+
+#elif defined(__QNX__) || defined(__QNXNTO__)
+# define PLATFORM_ID "QNX"
+
+#elif defined(__tru64) || defined(_tru64) || defined(__TRU64__)
+# define PLATFORM_ID "Tru64"
+
+#elif defined(__riscos) || defined(__riscos__)
+# define PLATFORM_ID "RISCos"
+
+#elif defined(__sinix) || defined(__sinix__) || defined(__SINIX__)
+# define PLATFORM_ID "SINIX"
+
+#elif defined(__UNIX_SV__)
+# define PLATFORM_ID "UNIX_SV"
+
+#elif defined(__bsdos__)
+# define PLATFORM_ID "BSDOS"
+
+#elif defined(_MPRAS) || defined(MPRAS)
+# define PLATFORM_ID "MP-RAS"
+
+#elif defined(__osf) || defined(__osf__)
+# define PLATFORM_ID "OSF1"
+
+#elif defined(_SCO_SV) || defined(SCO_SV) || defined(sco_sv)
+# define PLATFORM_ID "SCO_SV"
+
+#elif defined(__ultrix) || defined(__ultrix__) || defined(_ULTRIX)
+# define PLATFORM_ID "ULTRIX"
+
+#elif defined(__XENIX__) || defined(_XENIX) || defined(XENIX)
+# define PLATFORM_ID "Xenix"
+
+#elif defined(__WATCOMC__)
+# if defined(__LINUX__)
+#  define PLATFORM_ID "Linux"
+
+# elif defined(__DOS__)
+#  define PLATFORM_ID "DOS"
+
+# elif defined(__OS2__)
+#  define PLATFORM_ID "OS2"
+
+# elif defined(__WINDOWS__)
+#  define PLATFORM_ID "Windows3x"
+
+# elif defined(__VXWORKS__)
+#  define PLATFORM_ID "VxWorks"
+
+# else /* unknown platform */
+#  define PLATFORM_ID
+# endif
+
+#elif defined(__INTEGRITY)
+# if defined(INT_178B)
+#  define PLATFORM_ID "Integrity178"
+
+# else /* regular Integrity */
+#  define PLATFORM_ID "Integrity"
+# endif
+
+# elif defined(_ADI_COMPILER)
+#  define PLATFORM_ID "ADSP"
+
+#else /* unknown platform */
+# define PLATFORM_ID
+
+#endif
+
+/* For windows compilers MSVC and Intel we can determine
+   the architecture of the compiler being used.  This is because
+   the compilers do not have flags that can change the architecture,
+   but rather depend on which compiler is being used
+*/
+#if defined(_WIN32) && defined(_MSC_VER)
+# if defined(_M_IA64)
+#  define ARCHITECTURE_ID "IA64"
+
+# elif defined(_M_ARM64EC)
+#  define ARCHITECTURE_ID "ARM64EC"
+
+# elif defined(_M_X64) || defined(_M_AMD64)
+#  define ARCHITECTURE_ID "x64"
+
+# elif defined(_M_IX86)
+#  define ARCHITECTURE_ID "X86"
+
+# elif defined(_M_ARM64)
+#  define ARCHITECTURE_ID "ARM64"
+
+# elif defined(_M_ARM)
+#  if _M_ARM == 4
+#   define ARCHITECTURE_ID "ARMV4I"
+#  elif _M_ARM == 5
+#   define ARCHITECTURE_ID "ARMV5I"
+#  else
+#   define ARCHITECTURE_ID "ARMV" STRINGIFY(_M_ARM)
+#  endif
+
+# elif defined(_M_MIPS)
+#  define ARCHITECTURE_ID "MIPS"
+
+# elif defined(_M_SH)
+#  define ARCHITECTURE_ID "SHx"
+
+# else /* unknown architecture */
+#  define ARCHITECTURE_ID ""
+# endif
+
+#elif defined(__WATCOMC__)
+# if defined(_M_I86)
+#  define ARCHITECTURE_ID "I86"
+
+# elif defined(_M_IX86)
+#  define ARCHITECTURE_ID "X86"
+
+# else /* unknown architecture */
+#  define ARCHITECTURE_ID ""
+# endif
+
+#elif defined(__IAR_SYSTEMS_ICC__) || defined(__IAR_SYSTEMS_ICC)
+# if defined(__ICCARM__)
+#  define ARCHITECTURE_ID "ARM"
+
+# elif defined(__ICCRX__)
+#  define ARCHITECTURE_ID "RX"
+
+# elif defined(__ICCRH850__)
+#  define ARCHITECTURE_ID "RH850"
+
+# elif defined(__ICCRL78__)
+#  define ARCHITECTURE_ID "RL78"
+
+# elif defined(__ICCRISCV__)
+#  define ARCHITECTURE_ID "RISCV"
+
+# elif defined(__ICCAVR__)
+#  define ARCHITECTURE_ID "AVR"
+
+# elif defined(__ICC430__)
+#  define ARCHITECTURE_ID "MSP430"
+
+# elif defined(__ICCV850__)
+#  define ARCHITECTURE_ID "V850"
+
+# elif defined(__ICC8051__)
+#  define ARCHITECTURE_ID "8051"
+
+# elif defined(__ICCSTM8__)
+#  define ARCHITECTURE_ID "STM8"
+
+# else /* unknown architecture */
+#  define ARCHITECTURE_ID ""
+# endif
+
+#elif defined(__ghs__)
+# if defined(__PPC64__)
+#  define ARCHITECTURE_ID "PPC64"
+
+# elif defined(__ppc__)
+#  define ARCHITECTURE_ID "PPC"
+
+# elif defined(__ARM__)
+#  define ARCHITECTURE_ID "ARM"
+
+# elif defined(__x86_64__)
+#  define ARCHITECTURE_ID "x64"
+
+# elif defined(__i386__)
+#  define ARCHITECTURE_ID "X86"
+
+# else /* unknown architecture */
+#  define ARCHITECTURE_ID ""
+# endif
+
+#elif defined(__clang__) && defined(__ti__)
+# if defined(__ARM_ARCH)
+#  define ARCHITECTURE_ID "Arm"
+
+# else /* unknown architecture */
+#  define ARCHITECTURE_ID ""
+# endif
+
+#elif defined(__TI_COMPILER_VERSION__)
+# if defined(__TI_ARM__)
+#  define ARCHITECTURE_ID "ARM"
+
+# elif defined(__MSP430__)
+#  define ARCHITECTURE_ID "MSP430"
+
+# elif defined(__TMS320C28XX__)
+#  define ARCHITECTURE_ID "TMS320C28x"
+
+# elif defined(__TMS320C6X__) || defined(_TMS320C6X)
+#  define ARCHITECTURE_ID "TMS320C6x"
+
+# else /* unknown architecture */
+#  define ARCHITECTURE_ID ""
+# endif
+
+# elif defined(__ADSPSHARC__)
+#  define ARCHITECTURE_ID "SHARC"
+
+# elif defined(__ADSPBLACKFIN__)
+#  define ARCHITECTURE_ID "Blackfin"
+
+#elif defined(__TASKING__)
+
+# if defined(__CTC__) || defined(__CPTC__)
+#  define ARCHITECTURE_ID "TriCore"
+
+# elif defined(__CMCS__)
+#  define ARCHITECTURE_ID "MCS"
+
+# elif defined(__CARM__)
+#  define ARCHITECTURE_ID "ARM"
+
+# elif defined(__CARC__)
+#  define ARCHITECTURE_ID "ARC"
+
+# elif defined(__C51__)
+#  define ARCHITECTURE_ID "8051"
+
+# elif defined(__CPCP__)
+#  define ARCHITECTURE_ID "PCP"
+
+# else
+#  define ARCHITECTURE_ID ""
+# endif
+
+#else
+#  define ARCHITECTURE_ID
+#endif
+
+/* Convert integer to decimal digit literals.  */
+#define DEC(n)                   \
+  ('0' + (((n) / 10000000)%10)), \
+  ('0' + (((n) / 1000000)%10)),  \
+  ('0' + (((n) / 100000)%10)),   \
+  ('0' + (((n) / 10000)%10)),    \
+  ('0' + (((n) / 1000)%10)),     \
+  ('0' + (((n) / 100)%10)),      \
+  ('0' + (((n) / 10)%10)),       \
+  ('0' +  ((n) % 10))
+
+/* Convert integer to hex digit literals.  */
+#define HEX(n)             \
+  ('0' + ((n)>>28 & 0xF)), \
+  ('0' + ((n)>>24 & 0xF)), \
+  ('0' + ((n)>>20 & 0xF)), \
+  ('0' + ((n)>>16 & 0xF)), \
+  ('0' + ((n)>>12 & 0xF)), \
+  ('0' + ((n)>>8  & 0xF)), \
+  ('0' + ((n)>>4  & 0xF)), \
+  ('0' + ((n)     & 0xF))
+
+/* Construct a string literal encoding the version number. */
+#ifdef COMPILER_VERSION
+char const* info_version = "INFO" ":" "compiler_version[" COMPILER_VERSION "]";
+
+/* Construct a string literal encoding the version number components. */
+#elif defined(COMPILER_VERSION_MAJOR)
+char const info_version[] = {
+  'I', 'N', 'F', 'O', ':',
+  'c','o','m','p','i','l','e','r','_','v','e','r','s','i','o','n','[',
+  COMPILER_VERSION_MAJOR,
+# ifdef COMPILER_VERSION_MINOR
+  '.', COMPILER_VERSION_MINOR,
+#  ifdef COMPILER_VERSION_PATCH
+   '.', COMPILER_VERSION_PATCH,
+#   ifdef COMPILER_VERSION_TWEAK
+    '.', COMPILER_VERSION_TWEAK,
+#   endif
+#  endif
+# endif
+  ']','\0'};
+#endif
+
+/* Construct a string literal encoding the internal version number. */
+#ifdef COMPILER_VERSION_INTERNAL
+char const info_version_internal[] = {
+  'I', 'N', 'F', 'O', ':',
+  'c','o','m','p','i','l','e','r','_','v','e','r','s','i','o','n','_',
+  'i','n','t','e','r','n','a','l','[',
+  COMPILER_VERSION_INTERNAL,']','\0'};
+#elif defined(COMPILER_VERSION_INTERNAL_STR)
+char const* info_version_internal = "INFO" ":" "compiler_version_internal[" COMPILER_VERSION_INTERNAL_STR "]";
+#endif
+
+/* Construct a string literal encoding the version number components. */
+#ifdef SIMULATE_VERSION_MAJOR
+char const info_simulate_version[] = {
+  'I', 'N', 'F', 'O', ':',
+  's','i','m','u','l','a','t','e','_','v','e','r','s','i','o','n','[',
+  SIMULATE_VERSION_MAJOR,
+# ifdef SIMULATE_VERSION_MINOR
+  '.', SIMULATE_VERSION_MINOR,
+#  ifdef SIMULATE_VERSION_PATCH
+   '.', SIMULATE_VERSION_PATCH,
+#   ifdef SIMULATE_VERSION_TWEAK
+    '.', SIMULATE_VERSION_TWEAK,
+#   endif
+#  endif
+# endif
+  ']','\0'};
+#endif
+
+/* Construct the string literal in pieces to prevent the source from
+   getting matched.  Store it in a pointer rather than an array
+   because some compilers will just produce instructions to fill the
+   array rather than assigning a pointer to a static array.  */
+char const* info_platform = "INFO" ":" "platform[" PLATFORM_ID "]";
+char const* info_arch = "INFO" ":" "arch[" ARCHITECTURE_ID "]";
+
+
+
+#define C_STD_99 199901L
+#define C_STD_11 201112L
+#define C_STD_17 201710L
+#define C_STD_23 202311L
+
+#ifdef __STDC_VERSION__
+#  define C_STD __STDC_VERSION__
+#endif
+
+#if !defined(__STDC__) && !defined(__clang__)
+# if defined(_MSC_VER) || defined(__ibmxl__) || defined(__IBMC__)
+#  define C_VERSION "90"
+# else
+#  define C_VERSION
+# endif
+#elif C_STD > C_STD_17
+# define C_VERSION "23"
+#elif C_STD > C_STD_11
+# define C_VERSION "17"
+#elif C_STD > C_STD_99
+# define C_VERSION "11"
+#elif C_STD >= C_STD_99
+# define C_VERSION "99"
+#else
+# define C_VERSION "90"
+#endif
+const char* info_language_standard_default =
+  "INFO" ":" "standard_default[" C_VERSION "]";
+
+const char* info_language_extensions_default = "INFO" ":" "extensions_default["
+#if (defined(__clang__) || defined(__GNUC__) || defined(__xlC__) ||           \
+     defined(__TI_COMPILER_VERSION__)) &&                                     \
+  !defined(__STRICT_ANSI__)
+  "ON"
+#else
+  "OFF"
+#endif
+"]";
+
+/*--------------------------------------------------------------------------*/
+
+#ifdef ID_VOID_MAIN
+void main() {}
+#else
+# if defined(__CLASSIC_C__)
+int main(argc, argv) int argc; char *argv[];
+# else
+int main(int argc, char* argv[])
+# endif
+{
+  int require = 0;
+  require += info_compiler[argc];
+  require += info_platform[argc];
+  require += info_arch[argc];
+#ifdef COMPILER_VERSION_MAJOR
+  require += info_version[argc];
+#endif
+#ifdef COMPILER_VERSION_INTERNAL
+  require += info_version_internal[argc];
+#endif
+#ifdef SIMULATE_ID
+  require += info_simulate[argc];
+#endif
+#ifdef SIMULATE_VERSION_MAJOR
+  require += info_simulate_version[argc];
+#endif
+#if defined(__CRAYXT_COMPUTE_LINUX_TARGET)
+  require += info_cray[argc];
+#endif
+  require += info_language_standard_default[argc];
+  require += info_language_extensions_default[argc];
+  (void)argv;
+  return require;
+}
+#endif
+
+// ====== FILE: ./.pio/build/esp32-c6-devkitc-1/config/sdkconfig.h ======
+/*
+ * Automatically generated file. DO NOT EDIT.
+ * Espressif IoT Development Framework (ESP-IDF) 6.0.1 Configuration Header
+ */
+#pragma once
+#define CONFIG_SOC_ADC_SUPPORTED 1
+#define CONFIG_SOC_DEDICATED_GPIO_SUPPORTED 1
+#define CONFIG_SOC_UART_SUPPORTED 1
+#define CONFIG_SOC_UHCI_SUPPORTED 1
+#define CONFIG_SOC_GDMA_SUPPORTED 1
+#define CONFIG_SOC_AHB_GDMA_SUPPORTED 1
+#define CONFIG_SOC_GPTIMER_SUPPORTED 1
+#define CONFIG_SOC_PCNT_SUPPORTED 1
+#define CONFIG_SOC_MCPWM_SUPPORTED 1
+#define CONFIG_SOC_TWAI_SUPPORTED 1
+#define CONFIG_SOC_ETM_SUPPORTED 1
+#define CONFIG_SOC_PARLIO_SUPPORTED 1
+#define CONFIG_SOC_BT_SUPPORTED 1
+#define CONFIG_SOC_IEEE802154_SUPPORTED 1
+#define CONFIG_SOC_ASYNC_MEMCPY_SUPPORTED 1
+#define CONFIG_SOC_USB_SERIAL_JTAG_SUPPORTED 1
+#define CONFIG_SOC_TEMP_SENSOR_SUPPORTED 1
+#define CONFIG_SOC_PHY_SUPPORTED 1
+#define CONFIG_SOC_WIFI_SUPPORTED 1
+#define CONFIG_SOC_SUPPORTS_SECURE_DL_MODE 1
+#define CONFIG_SOC_ULP_SUPPORTED 1
+#define CONFIG_SOC_LP_CORE_SUPPORTED 1
+#define CONFIG_SOC_EFUSE_KEY_PURPOSE_FIELD 1
+#define CONFIG_SOC_EFUSE_SUPPORTED 1
+#define CONFIG_SOC_RTC_FAST_MEM_SUPPORTED 1
+#define CONFIG_SOC_RTC_MEM_SUPPORTED 1
+#define CONFIG_SOC_I2S_SUPPORTED 1
+#define CONFIG_SOC_RMT_SUPPORTED 1
+#define CONFIG_SOC_SDM_SUPPORTED 1
+#define CONFIG_SOC_GPSPI_SUPPORTED 1
+#define CONFIG_SOC_LEDC_SUPPORTED 1
+#define CONFIG_SOC_I2C_SUPPORTED 1
+#define CONFIG_SOC_SYSTIMER_SUPPORTED 1
+#define CONFIG_SOC_SUPPORT_COEXISTENCE 1
+#define CONFIG_SOC_AES_SUPPORTED 1
+#define CONFIG_SOC_MPI_SUPPORTED 1
+#define CONFIG_SOC_SHA_SUPPORTED 1
+#define CONFIG_SOC_HMAC_SUPPORTED 1
+#define CONFIG_SOC_DIG_SIGN_SUPPORTED 1
+#define CONFIG_SOC_ECC_SUPPORTED 1
+#define CONFIG_SOC_FLASH_ENC_SUPPORTED 1
+#define CONFIG_SOC_SECURE_BOOT_SUPPORTED 1
+#define CONFIG_SOC_SDIO_SLAVE_SUPPORTED 1
+#define CONFIG_SOC_BOD_SUPPORTED 1
+#define CONFIG_SOC_APM_SUPPORTED 1
+#define CONFIG_SOC_PMU_SUPPORTED 1
+#define CONFIG_SOC_PMU_PVT_SUPPORTED 1
+#define CONFIG_SOC_PAU_SUPPORTED 1
+#define CONFIG_SOC_RTC_TIMER_V2_SUPPORTED 1
+#define CONFIG_SOC_LP_AON_SUPPORTED 1
+#define CONFIG_SOC_LP_PERIPHERALS_SUPPORTED 1
+#define CONFIG_SOC_LP_I2C_SUPPORTED 1
+#define CONFIG_SOC_ULP_LP_UART_SUPPORTED 1
+#define CONFIG_SOC_CLK_TREE_SUPPORTED 1
+#define CONFIG_SOC_ASSIST_DEBUG_SUPPORTED 1
+#define CONFIG_SOC_WDT_SUPPORTED 1
+#define CONFIG_SOC_SPI_FLASH_SUPPORTED 1
+#define CONFIG_SOC_RNG_SUPPORTED 1
+#define CONFIG_SOC_LIGHT_SLEEP_SUPPORTED 1
+#define CONFIG_SOC_DEEP_SLEEP_SUPPORTED 1
+#define CONFIG_SOC_MODEM_CLOCK_SUPPORTED 1
+#define CONFIG_SOC_PM_SUPPORTED 1
+#define CONFIG_SOC_XTAL_SUPPORT_40M 1
+#define CONFIG_SOC_XTAL_CLOCK_PATH_DEPENDS_ON_TOP_DOMAIN 1
+#define CONFIG_SOC_AES_SUPPORT_DMA 1
+#define CONFIG_SOC_AES_GDMA 1
+#define CONFIG_SOC_AES_SUPPORT_AES_128 1
+#define CONFIG_SOC_AES_SUPPORT_AES_256 1
+#define CONFIG_SOC_ADC_DIG_CTRL_SUPPORTED 1
+#define CONFIG_SOC_ADC_DIG_IIR_FILTER_SUPPORTED 1
+#define CONFIG_SOC_ADC_MONITOR_SUPPORTED 1
+#define CONFIG_SOC_ADC_DMA_SUPPORTED 1
+#define CONFIG_SOC_ADC_PERIPH_NUM 1
+#define CONFIG_SOC_ADC_MAX_CHANNEL_NUM 7
+#define CONFIG_SOC_ADC_ATTEN_NUM 4
+#define CONFIG_SOC_ADC_DIGI_CONTROLLER_NUM 1
+#define CONFIG_SOC_ADC_PATT_LEN_MAX 8
+#define CONFIG_SOC_ADC_DIGI_MAX_BITWIDTH 12
+#define CONFIG_SOC_ADC_DIGI_MIN_BITWIDTH 12
+#define CONFIG_SOC_ADC_DIGI_IIR_FILTER_NUM 2
+#define CONFIG_SOC_ADC_DIGI_MONITOR_NUM 2
+#define CONFIG_SOC_ADC_DIGI_RESULT_BYTES 4
+#define CONFIG_SOC_ADC_DIGI_DATA_BYTES_PER_CONV 4
+#define CONFIG_SOC_ADC_SAMPLE_FREQ_THRES_HIGH 83333
+#define CONFIG_SOC_ADC_SAMPLE_FREQ_THRES_LOW 611
+#define CONFIG_SOC_ADC_RTC_MIN_BITWIDTH 12
+#define CONFIG_SOC_ADC_RTC_MAX_BITWIDTH 12
+#define CONFIG_SOC_ADC_CALIBRATION_V1_SUPPORTED 1
+#define CONFIG_SOC_ADC_SELF_HW_CALI_SUPPORTED 1
+#define CONFIG_SOC_ADC_CALIB_CHAN_COMPENS_SUPPORTED 1
+#define CONFIG_SOC_ADC_TEMPERATURE_SHARE_INTR 1
+#define CONFIG_SOC_ADC_SHARED_POWER 1
+#define CONFIG_SOC_BROWNOUT_RESET_SUPPORTED 1
+#define CONFIG_SOC_SHARED_IDCACHE_SUPPORTED 1
+#define CONFIG_SOC_CACHE_FREEZE_SUPPORTED 1
+#define CONFIG_SOC_CPU_CORES_NUM 1
+#define CONFIG_SOC_CPU_INTR_NUM 32
+#define CONFIG_SOC_CPU_HAS_FLEXIBLE_INTC 1
+#define CONFIG_SOC_INT_PLIC_SUPPORTED 1
+#define CONFIG_SOC_CPU_HAS_CSR_PC 1
+#define CONFIG_SOC_CPU_BREAKPOINTS_NUM 4
+#define CONFIG_SOC_CPU_WATCHPOINTS_NUM 4
+#define CONFIG_SOC_CPU_WATCHPOINT_MAX_REGION_SIZE 0x80000000
+#define CONFIG_SOC_CPU_HAS_PMA 1
+#define CONFIG_SOC_CPU_IDRAM_SPLIT_USING_PMP 1
+#define CONFIG_SOC_CPU_PMP_REGION_GRANULARITY 4
+#define CONFIG_SOC_CPU_MISALIGNED_ACCESS_ON_PMP_MISMATCH_ISSUE 1
+#define CONFIG_SOC_DS_SIGNATURE_MAX_BIT_LEN 3072
+#define CONFIG_SOC_DS_KEY_PARAM_MD_IV_LENGTH 16
+#define CONFIG_SOC_DS_KEY_CHECK_MAX_WAIT_US 1100
+#define CONFIG_SOC_AHB_GDMA_VERSION 1
+#define CONFIG_SOC_GDMA_SUPPORT_ETM 1
+#define CONFIG_SOC_GDMA_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_GPIO_PORT 1
+#define CONFIG_SOC_GPIO_PIN_COUNT 31
+#define CONFIG_SOC_GPIO_SUPPORT_PIN_GLITCH_FILTER 1
+#define CONFIG_SOC_GPIO_FLEX_GLITCH_FILTER_NUM 8
+#define CONFIG_SOC_GPIO_SUPPORT_ETM 1
+#define CONFIG_SOC_GPIO_SUPPORT_HP_PERIPH_PD_SLEEP_WAKEUP 1
+#define CONFIG_SOC_LP_IO_CLOCK_IS_INDEPENDENT 1
+#define CONFIG_SOC_GPIO_IN_RANGE_MAX 30
+#define CONFIG_SOC_GPIO_OUT_RANGE_MAX 30
+#define CONFIG_SOC_GPIO_HP_PERIPH_PD_SLEEP_WAKEABLE_MASK 0
+#define CONFIG_SOC_GPIO_HP_PERIPH_PD_SLEEP_WAKEABLE_PIN_CNT 8
+#define CONFIG_SOC_GPIO_VALID_DIGITAL_IO_PAD_MASK 0x000000007FFFFF00
+#define CONFIG_SOC_GPIO_SUPPORT_FORCE_HOLD 1
+#define CONFIG_SOC_GPIO_SUPPORT_HOLD_SINGLE_IO_IN_DSLP 1
+#define CONFIG_SOC_GPIO_CLOCKOUT_BY_GPIO_MATRIX 1
+#define CONFIG_SOC_CLOCKOUT_HAS_SOURCE_GATE 1
+#define CONFIG_SOC_GPIO_CLOCKOUT_CHANNEL_NUM 3
+#define CONFIG_SOC_RTCIO_PIN_COUNT 8
+#define CONFIG_SOC_RTCIO_INPUT_OUTPUT_SUPPORTED 1
+#define CONFIG_SOC_RTCIO_HOLD_SUPPORTED 1
+#define CONFIG_SOC_RTCIO_WAKE_SUPPORTED 1
+#define CONFIG_SOC_SDM_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_ETM_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_I2C_NUM 2
+#define CONFIG_SOC_HP_I2C_NUM 1
+#define CONFIG_SOC_LP_I2C_NUM 1
+#define CONFIG_SOC_I2C_SUPPORT_XTAL 1
+#define CONFIG_SOC_I2C_SUPPORT_RTC 1
+#define CONFIG_SOC_I2C_SUPPORT_10BIT_ADDR 1
+#define CONFIG_SOC_I2C_SUPPORT_SLAVE 1
+#define CONFIG_SOC_I2C_SLAVE_SUPPORT_BROADCAST 1
+#define CONFIG_SOC_I2C_SLAVE_CAN_GET_STRETCH_CAUSE 1
+#define CONFIG_SOC_I2C_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_I2S_HW_VERSION_2 1
+#define CONFIG_SOC_I2S_SUPPORTS_ETM 1
+#define CONFIG_SOC_I2S_SUPPORTS_PCM 1
+#define CONFIG_SOC_I2S_SUPPORTS_PDM 1
+#define CONFIG_SOC_I2S_SUPPORTS_PDM_TX 1
+#define CONFIG_SOC_I2S_SUPPORTS_PCM2PDM 1
+#define CONFIG_SOC_I2S_SUPPORTS_PDM_RX 1
+#define CONFIG_SOC_I2S_PDM_MAX_TX_LINES 2
+#define CONFIG_SOC_I2S_PDM_MAX_RX_LINES 1
+#define CONFIG_SOC_I2S_SUPPORTS_TDM 1
+#define CONFIG_SOC_LEDC_SUPPORT_PLL_DIV_CLOCK 1
+#define CONFIG_SOC_LEDC_SUPPORT_XTAL_CLOCK 1
+#define CONFIG_SOC_LEDC_TIMER_NUM 4
+#define CONFIG_SOC_LEDC_CHANNEL_NUM 6
+#define CONFIG_SOC_LEDC_TIMER_BIT_WIDTH 20
+#define CONFIG_SOC_LEDC_SUPPORT_FADE_STOP 1
+#define CONFIG_SOC_LEDC_GAMMA_CURVE_FADE_SUPPORTED 1
+#define CONFIG_SOC_LEDC_GAMMA_CURVE_FADE_RANGE_MAX 16
+#define CONFIG_SOC_LEDC_FADE_PARAMS_BIT_WIDTH 10
+#define CONFIG_SOC_LEDC_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_LEDC_SUPPORT_ETM 1
+#define CONFIG_SOC_MMU_PAGE_SIZE_CONFIGURABLE 1
+#define CONFIG_SOC_MMU_PAGE_SIZE_8KB_SUPPORTED 1
+#define CONFIG_SOC_MMU_PERIPH_NUM 1
+#define CONFIG_SOC_MMU_LINEAR_ADDRESS_REGION_NUM 1
+#define CONFIG_SOC_MMU_DI_VADDR_SHARED 1
+#define CONFIG_SOC_MPU_MIN_REGION_SIZE 0x20000000
+#define CONFIG_SOC_MPU_REGIONS_MAX_NUM 8
+#define CONFIG_SOC_PCNT_SUPPORT_RUNTIME_THRES_UPDATE 1
+#define CONFIG_SOC_RMT_MEM_WORDS_PER_CHANNEL 48
+#define CONFIG_SOC_RMT_SUPPORT_RX_PINGPONG 1
+#define CONFIG_SOC_RMT_SUPPORT_TX_LOOP_COUNT 1
+#define CONFIG_SOC_RMT_SUPPORT_TX_LOOP_AUTO_STOP 1
+#define CONFIG_SOC_RMT_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_MCPWM_SWSYNC_CAN_PROPAGATE 1
+#define CONFIG_SOC_MCPWM_SUPPORT_ETM 1
+#define CONFIG_SOC_MCPWM_CAPTURE_CLK_FROM_GROUP 1
+#define CONFIG_SOC_MCPWM_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_PARLIO_TX_UNIT_MAX_DATA_WIDTH 16
+#define CONFIG_SOC_PARLIO_RX_UNIT_MAX_DATA_WIDTH 16
+#define CONFIG_SOC_PARLIO_TX_RX_SHARE_INTERRUPT 1
+#define CONFIG_SOC_PARLIO_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_MPI_MEM_BLOCKS_NUM 4
+#define CONFIG_SOC_MPI_OPERATIONS_NUM 3
+#define CONFIG_SOC_RSA_MAX_BIT_LEN 3072
+#define CONFIG_SOC_SHA_DMA_MAX_BUFFER_SIZE 3968
+#define CONFIG_SOC_SHA_SUPPORT_DMA 1
+#define CONFIG_SOC_SHA_SUPPORT_RESUME 1
+#define CONFIG_SOC_SHA_GDMA 1
+#define CONFIG_SOC_SHA_SUPPORT_SHA1 1
+#define CONFIG_SOC_SHA_SUPPORT_SHA224 1
+#define CONFIG_SOC_SHA_SUPPORT_SHA256 1
+#define CONFIG_SOC_SPI_PERIPH_NUM 2
+#define CONFIG_SOC_SPI_MAX_CS_NUM 6
+#define CONFIG_SOC_SPI_MAXIMUM_BUFFER_SIZE 64
+#define CONFIG_SOC_SPI_SUPPORT_DDRCLK 1
+#define CONFIG_SOC_SPI_SLAVE_SUPPORT_SEG_TRANS 1
+#define CONFIG_SOC_SPI_SUPPORT_CD_SIG 1
+#define CONFIG_SOC_SPI_SUPPORT_CONTINUOUS_TRANS 1
+#define CONFIG_SOC_SPI_SUPPORT_SLAVE_HD_VER2 1
+#define CONFIG_SOC_SPI_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_SPI_SUPPORT_CLK_XTAL 1
+#define CONFIG_SOC_SPI_SUPPORT_CLK_PLL_F80M 1
+#define CONFIG_SOC_SPI_SUPPORT_CLK_RC_FAST 1
+#define CONFIG_SOC_SPI_SCT_SUPPORTED 1
+#define CONFIG_SOC_SPI_SCT_REG_NUM 14
+#define CONFIG_SOC_SPI_SCT_BUFFER_NUM_MAX 1
+#define CONFIG_SOC_SPI_SCT_CONF_BITLEN_MAX 0x3FFFA
+#define CONFIG_SOC_MEMSPI_IS_INDEPENDENT 1
+#define CONFIG_SOC_SPI_MAX_PRE_DIVIDER 16
+#define CONFIG_SOC_SPI_MEM_SUPPORT_AUTO_WAIT_IDLE 1
+#define CONFIG_SOC_SPI_MEM_SUPPORT_AUTO_SUSPEND 1
+#define CONFIG_SOC_SPI_MEM_SUPPORT_AUTO_RESUME 1
+#define CONFIG_SOC_SPI_MEM_SUPPORT_IDLE_INTR 1
+#define CONFIG_SOC_SPI_MEM_SUPPORT_SW_SUSPEND 1
+#define CONFIG_SOC_SPI_MEM_SUPPORT_CHECK_SUS 1
+#define CONFIG_SOC_SPI_MEM_SUPPORT_WRAP 1
+#define CONFIG_SOC_MEMSPI_ENCRYPTION_ALIGNMENT 16
+#define CONFIG_SOC_SYSTIMER_COUNTER_NUM 2
+#define CONFIG_SOC_SYSTIMER_ALARM_NUM 3
+#define CONFIG_SOC_SYSTIMER_BIT_WIDTH_LO 32
+#define CONFIG_SOC_SYSTIMER_BIT_WIDTH_HI 20
+#define CONFIG_SOC_SYSTIMER_FIXED_DIVIDER 1
+#define CONFIG_SOC_SYSTIMER_SUPPORT_RC_FAST 1
+#define CONFIG_SOC_SYSTIMER_INT_LEVEL 1
+#define CONFIG_SOC_SYSTIMER_ALARM_MISS_COMPENSATE 1
+#define CONFIG_SOC_SYSTIMER_SUPPORT_ETM 1
+#define CONFIG_SOC_LP_TIMER_BIT_WIDTH_LO 32
+#define CONFIG_SOC_LP_TIMER_BIT_WIDTH_HI 16
+#define CONFIG_SOC_TIMER_SUPPORT_ETM 1
+#define CONFIG_SOC_TIMER_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_MWDT_SUPPORT_XTAL 1
+#define CONFIG_SOC_MWDT_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_TWAI_CONTROLLER_NUM 2
+#define CONFIG_SOC_TWAI_MASK_FILTER_NUM 1
+#define CONFIG_SOC_TWAI_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_EFUSE_DIS_DOWNLOAD_ICACHE 1
+#define CONFIG_SOC_EFUSE_DIS_PAD_JTAG 1
+#define CONFIG_SOC_EFUSE_DIS_USB_JTAG 1
+#define CONFIG_SOC_EFUSE_DIS_DIRECT_BOOT 1
+#define CONFIG_SOC_EFUSE_SOFT_DIS_JTAG 1
+#define CONFIG_SOC_EFUSE_DIS_ICACHE 1
+#define CONFIG_SOC_EFUSE_BLOCK9_KEY_PURPOSE_QUIRK 1
+#define CONFIG_SOC_EFUSE_XTS_AES_KEY_128 1
+#define CONFIG_SOC_SECURE_BOOT_V2_RSA 1
+#define CONFIG_SOC_SECURE_BOOT_V2_ECC 1
+#define CONFIG_SOC_EFUSE_SECURE_BOOT_KEY_DIGESTS 3
+#define CONFIG_SOC_EFUSE_REVOKE_BOOT_KEY_DIGESTS 1
+#define CONFIG_SOC_SUPPORT_SECURE_BOOT_REVOKE_KEY 1
+#define CONFIG_SOC_FLASH_ENCRYPTED_XTS_AES_BLOCK_MAX 64
+#define CONFIG_SOC_FLASH_ENCRYPTION_XTS_AES 1
+#define CONFIG_SOC_FLASH_ENCRYPTION_XTS_AES_128 1
+#define CONFIG_SOC_FLASH_ENCRYPTION_PAGE_CONFIGURABLE 1
+#define CONFIG_SOC_APM_CTRL_FILTER_SUPPORTED 1
+#define CONFIG_SOC_APM_LP_APM0_SUPPORTED 1
+#define CONFIG_SOC_APM_SUPPORT_LP_TEE_CTRL 1
+#define CONFIG_SOC_CRYPTO_DPA_PROTECTION_SUPPORTED 1
+#define CONFIG_SOC_UART_NUM 3
+#define CONFIG_SOC_UART_HP_NUM 2
+#define CONFIG_SOC_UART_LP_NUM 1
+#define CONFIG_SOC_UART_FIFO_LEN 128
+#define CONFIG_SOC_LP_UART_FIFO_LEN 16
+#define CONFIG_SOC_UART_BITRATE_MAX 5000000
+#define CONFIG_SOC_UART_SUPPORT_RTC_CLK 1
+#define CONFIG_SOC_UART_SUPPORT_XTAL_CLK 1
+#define CONFIG_SOC_UART_SUPPORT_WAKEUP_INT 1
+#define CONFIG_SOC_UART_HAS_LP_UART 1
+#define CONFIG_SOC_UART_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_UART_WAKEUP_CHARS_SEQ_MAX_LEN 5
+#define CONFIG_SOC_UART_WAKEUP_SUPPORT_ACTIVE_THRESH_MODE 1
+#define CONFIG_SOC_UART_WAKEUP_SUPPORT_FIFO_THRESH_MODE 1
+#define CONFIG_SOC_UART_WAKEUP_SUPPORT_START_BIT_MODE 1
+#define CONFIG_SOC_UART_WAKEUP_SUPPORT_CHAR_SEQ_MODE 1
+#define CONFIG_SOC_UHCI_NUM 1
+#define CONFIG_SOC_COEX_HW_PTI 1
+#define CONFIG_SOC_EXTERNAL_COEX_ADVANCE 1
+#define CONFIG_SOC_PHY_DIG_REGS_MEM_SIZE 21
+#define CONFIG_SOC_WIFI_LIGHT_SLEEP_CLK_WIDTH 12
+#define CONFIG_SOC_RTC_MEM_SUPPORT_SPEED_MODE_SWITCH 1
+#define CONFIG_SOC_PM_SUPPORT_WIFI_WAKEUP 1
+#define CONFIG_SOC_PM_SUPPORT_BEACON_WAKEUP 1
+#define CONFIG_SOC_PM_SUPPORT_BT_WAKEUP 1
+#define CONFIG_SOC_PM_SUPPORT_EXT1_WAKEUP 1
+#define CONFIG_SOC_PM_SUPPORT_EXT1_WAKEUP_MODE_PER_PIN 1
+#define CONFIG_SOC_PM_SUPPORT_CPU_PD 1
+#define CONFIG_SOC_PM_SUPPORT_MODEM_PD 1
+#define CONFIG_SOC_PM_SUPPORT_XTAL32K_PD 1
+#define CONFIG_SOC_PM_SUPPORT_RC32K_PD 1
+#define CONFIG_SOC_PM_SUPPORT_RC_FAST_PD 1
+#define CONFIG_SOC_PM_SUPPORT_VDDSDIO_PD 1
+#define CONFIG_SOC_PM_SUPPORT_TOP_PD 1
+#define CONFIG_SOC_PM_SUPPORT_HP_AON_PD 1
+#define CONFIG_SOC_PM_SUPPORT_MAC_BB_PD 1
+#define CONFIG_SOC_PM_SUPPORT_RTC_PERIPH_PD 1
+#define CONFIG_SOC_PM_SUPPORT_PMU_MODEM_STATE 1
+#define CONFIG_SOC_PM_SUPPORT_PMU_CLK_ICG 1
+#define CONFIG_SOC_PM_SUPPORT_DEEPSLEEP_CHECK_STUB_ONLY 1
+#define CONFIG_SOC_PM_CPU_RETENTION_BY_SW 1
+#define CONFIG_SOC_PM_MODEM_RETENTION_BY_REGDMA 1
+#define CONFIG_SOC_PM_RETENTION_HAS_CLOCK_BUG 1
+#define CONFIG_SOC_PM_MODEM_RF_FLAG_UPDATE_WORKAROUND 1
+#define CONFIG_SOC_PM_PAU_LINK_NUM 4
+#define CONFIG_SOC_PM_PAU_REGDMA_LINK_MULTI_ADDR 1
+#define CONFIG_SOC_PM_PAU_REGDMA_LINK_WIFIMAC 1
+#define CONFIG_SOC_PM_PAU_REGDMA_UPDATE_CACHE_BEFORE_WAIT_COMPARE 1
+#define CONFIG_SOC_PM_PMU_MIN_SLP_SLOW_CLK_CYCLE_FIXED 1
+#define CONFIG_SOC_PM_RETENTION_MODULE_NUM 32
+#define CONFIG_SOC_CLK_RC_FAST_SUPPORT_CALIBRATION 1
+#define CONFIG_SOC_MODEM_CLOCK_IS_INDEPENDENT 1
+#define CONFIG_SOC_CLK_XTAL32K_SUPPORTED 1
+#define CONFIG_SOC_CLK_OSC_SLOW_SUPPORTED 1
+#define CONFIG_SOC_CLK_RC32K_SUPPORTED 1
+#define CONFIG_SOC_CLK_LP_FAST_SUPPORT_XTAL_D2 1
+#define CONFIG_SOC_RCC_IS_INDEPENDENT 1
+#define CONFIG_SOC_TEMPERATURE_SENSOR_SUPPORT_FAST_RC 1
+#define CONFIG_SOC_TEMPERATURE_SENSOR_SUPPORT_XTAL 1
+#define CONFIG_SOC_TEMPERATURE_SENSOR_INTR_SUPPORT 1
+#define CONFIG_SOC_TEMPERATURE_SENSOR_SUPPORT_ETM 1
+#define CONFIG_SOC_TEMPERATURE_SENSOR_SUPPORT_SLEEP_RETENTION 1
+#define CONFIG_SOC_TEMPERATURE_SENSOR_UNDER_PD_TOP_DOMAIN 1
+#define CONFIG_SOC_RNG_CLOCK_IS_INDEPENDENT 1
+#define CONFIG_SOC_WIFI_HW_TSF 1
+#define CONFIG_SOC_WIFI_FTM_SUPPORT 1
+#define CONFIG_SOC_WIFI_GCMP_SUPPORT 1
+#define CONFIG_SOC_WIFI_WAPI_SUPPORT 1
+#define CONFIG_SOC_WIFI_TXOP_SUPPORT 1
+#define CONFIG_SOC_WIFI_CSI_SUPPORT 1
+#define CONFIG_SOC_WIFI_MESH_SUPPORT 1
+#define CONFIG_SOC_WIFI_HE_SUPPORT 1
+#define CONFIG_SOC_WIFI_MAC_VERSION_NUM 2
+#define CONFIG_SOC_BLE_SUPPORTED 1
+#define CONFIG_SOC_BLE_MESH_SUPPORTED 1
+#define CONFIG_SOC_ESP_NIMBLE_CONTROLLER 1
+#define CONFIG_SOC_BLE_50_SUPPORTED 1
+#define CONFIG_SOC_BLE_DEVICE_PRIVACY_SUPPORTED 1
+#define CONFIG_SOC_BLE_POWER_CONTROL_SUPPORTED 1
+#define CONFIG_SOC_BLE_PERIODIC_ADV_ENH_SUPPORTED 1
+#define CONFIG_SOC_BLUFI_SUPPORTED 1
+#define CONFIG_SOC_BLE_MULTI_CONN_OPTIMIZATION 1
+#define CONFIG_SOC_BLE_SUBRATE_SUPPORTED 1
+#define CONFIG_SOC_BLE_PERIODIC_ADV_WITH_RESPONSE 1
+#define CONFIG_SOC_BLE_USE_WIFI_PWR_CLK_WORKAROUND 1
+#define CONFIG_SOC_PHY_COMBO_MODULE 1
+#define CONFIG_SOC_CAPS_NO_RESET_BY_ANA_BOD 1
+#define CONFIG_SOC_LP_CORE_SINGLE_INTERRUPT_VECTOR 1
+#define CONFIG_SOC_LP_CORE_SUPPORT_ETM 1
+#define CONFIG_SOC_DEBUG_HAVE_OCD_STUB_BINS 1
+#define CONFIG_IDF_CMAKE 1
+#define CONFIG_IDF_TOOLCHAIN "gcc"
+#define CONFIG_IDF_TOOLCHAIN_GCC 1
+#define CONFIG_IDF_TARGET_ARCH_RISCV 1
+#define CONFIG_IDF_TARGET_ARCH "riscv"
+#define CONFIG_IDF_TARGET "esp32c6"
+#define CONFIG_IDF_INIT_VERSION "6.0.1"
+#define CONFIG_IDF_TARGET_ESP32C6 1
+#define CONFIG_IDF_FIRMWARE_CHIP_ID 0x000D
+#define CONFIG_APP_BUILD_TYPE_APP_2NDBOOT 1
+#define CONFIG_APP_BUILD_GENERATE_BINARIES 1
+#define CONFIG_APP_BUILD_BOOTLOADER 1
+#define CONFIG_APP_BUILD_USE_FLASH_SECTIONS 1
+#define CONFIG_BOOTLOADER_COMPILE_TIME_DATE 1
+#define CONFIG_BOOTLOADER_PROJECT_VER 1
+#define CONFIG_BOOTLOADER_OFFSET_IN_FLASH 0x0
+#define CONFIG_BOOTLOADER_COMPILER_OPTIMIZATION_SIZE 1
+#define CONFIG_BOOTLOADER_LOG_VERSION_1 1
+#define CONFIG_BOOTLOADER_LOG_VERSION 1
+#define CONFIG_BOOTLOADER_LOG_LEVEL_INFO 1
+#define CONFIG_BOOTLOADER_LOG_LEVEL 3
+#define CONFIG_BOOTLOADER_LOG_TIMESTAMP_SOURCE_CPU_TICKS 1
+#define CONFIG_BOOTLOADER_LOG_MODE_TEXT_EN 1
+#define CONFIG_BOOTLOADER_LOG_MODE_TEXT 1
+#define CONFIG_BOOTLOADER_CPU_CLK_FREQ_MHZ 80
+#define CONFIG_BOOTLOADER_FLASH_XMC_SUPPORT 1
+#define CONFIG_BOOTLOADER_REGION_PROTECTION_ENABLE 1
+#define CONFIG_BOOTLOADER_WDT_ENABLE 1
+#define CONFIG_BOOTLOADER_WDT_TIME_MS 9000
+#define CONFIG_BOOTLOADER_RESERVE_RTC_SIZE 0x0
+#define CONFIG_SECURE_BOOT_V2_RSA_SUPPORTED 1
+#define CONFIG_SECURE_BOOT_V2_ECC_SUPPORTED 1
+#define CONFIG_SECURE_BOOT_V2_PREFERRED 1
+#define CONFIG_SECURE_ROM_DL_MODE_ENABLED 1
+#define CONFIG_APP_COMPILE_TIME_DATE 1
+#define CONFIG_APP_RETRIEVE_LEN_ELF_SHA 9
+#define CONFIG_ESP_ROM_HAS_CRC_LE 1
+#define CONFIG_ESP_ROM_HAS_CRC_BE 1
+#define CONFIG_ESP_ROM_HAS_JPEG_DECODE 1
+#define CONFIG_ESP_ROM_UART_CLK_IS_XTAL 1
+#define CONFIG_ESP_ROM_USB_SERIAL_DEVICE_NUM 3
+#define CONFIG_ESP_ROM_HAS_RETARGETABLE_LOCKING 1
+#define CONFIG_ESP_ROM_GET_CLK_FREQ 1
+#define CONFIG_ESP_ROM_HAS_RVFPLIB 1
+#define CONFIG_ESP_ROM_HAS_HAL_WDT 1
+#define CONFIG_ESP_ROM_HAS_HAL_SYSTIMER 1
+#define CONFIG_ESP_ROM_SYSTIMER_INIT_PATCH 1
+#define CONFIG_ESP_ROM_HAS_HEAP_TLSF 1
+#define CONFIG_ESP_ROM_TLSF_CHECK_PATCH 1
+#define CONFIG_ESP_ROM_MULTI_HEAP_WALK_PATCH 1
+#define CONFIG_ESP_ROM_HAS_LAYOUT_TABLE 1
+#define CONFIG_ESP_ROM_HAS_SPI_FLASH 1
+#define CONFIG_ESP_ROM_HAS_SPI_FLASH_MMAP 1
+#define CONFIG_ESP_ROM_HAS_REGI2C_BUG 1
+#define CONFIG_ESP_ROM_HAS_NEWLIB 1
+#define CONFIG_ESP_ROM_HAS_NEWLIB_NORMAL_FORMAT 1
+#define CONFIG_ESP_ROM_REV0_HAS_NO_ECDSA_INTERFACE 1
+#define CONFIG_ESP_ROM_WDT_INIT_PATCH 1
+#define CONFIG_ESP_ROM_NEEDS_SET_CACHE_MMU_SIZE 1
+#define CONFIG_ESP_ROM_RAM_APP_NEEDS_MMU_INIT 1
+#define CONFIG_ESP_ROM_HAS_SW_FLOAT 1
+#define CONFIG_ESP_ROM_USB_OTG_NUM -1
+#define CONFIG_ESP_ROM_HAS_VERSION 1
+#define CONFIG_ESP_ROM_SUPPORT_DEEP_SLEEP_WAKEUP_STUB 1
+#define CONFIG_ESP_ROM_HAS_OUTPUT_PUTC_FUNC 1
+#define CONFIG_ESP_ROM_NO_USB_SERIAL_OUTPUT_API 1
+#define CONFIG_ESP_ROM_HAS_SUBOPTIMAL_NEWLIB_ON_MISALIGNED_MEMORY 1
+#define CONFIG_ESP_ROM_SUPPORT_SECURE_BOOT_FAST_WAKEUP 1
+#define CONFIG_BOOT_ROM_LOG_ALWAYS_ON 1
+#define CONFIG_SECURE_TEE_LOG_LEVEL 0
+#define CONFIG_ESPTOOLPY_FLASHMODE_DIO 1
+#define CONFIG_ESPTOOLPY_FLASH_SAMPLE_MODE_STR 1
+#define CONFIG_ESPTOOLPY_FLASHMODE "dio"
+#define CONFIG_ESPTOOLPY_FLASHFREQ_80M 1
+#define CONFIG_ESPTOOLPY_FLASHFREQ "80m"
+#define CONFIG_ESPTOOLPY_FLASHSIZE_2MB 1
+#define CONFIG_ESPTOOLPY_FLASHSIZE "2MB"
+#define CONFIG_ESPTOOLPY_BEFORE_RESET 1
+#define CONFIG_ESPTOOLPY_BEFORE "default-reset"
+#define CONFIG_ESPTOOLPY_AFTER_RESET 1
+#define CONFIG_ESPTOOLPY_AFTER "hard-reset"
+#define CONFIG_ESPTOOLPY_MONITOR_BAUD 115200
+#define CONFIG_PARTITION_TABLE_SINGLE_APP 1
+#define CONFIG_PARTITION_TABLE_CUSTOM_FILENAME "partitions.csv"
+#define CONFIG_PARTITION_TABLE_FILENAME "partitions_singleapp.csv"
+#define CONFIG_PARTITION_TABLE_OFFSET 0x8000
+#define CONFIG_PARTITION_TABLE_MD5 1
+#define CONFIG_COMPILER_OPTIMIZATION_DEBUG 1
+#define CONFIG_COMPILER_OPTIMIZATION_ASSERTIONS_ENABLE 1
+#define CONFIG_COMPILER_FLOAT_LIB_FROM_RVFPLIB 1
+#define CONFIG_COMPILER_OPTIMIZATION_ASSERTION_LEVEL 2
+#define CONFIG_COMPILER_HIDE_PATHS_MACROS 1
+#define CONFIG_COMPILER_STACK_CHECK_MODE_NONE 1
+#define CONFIG_COMPILER_RT_LIB_GCCLIB 1
+#define CONFIG_COMPILER_RT_LIB_NAME "gcc"
+#define CONFIG_COMPILER_ORPHAN_SECTIONS_ERROR 1
+#define CONFIG_COMPILER_CXX_GLIBCXX_CONSTEXPR_NO_CHANGE 1
+#define CONFIG_EFUSE_MAX_BLK_LEN 256
+#define CONFIG_ESP_TLS_USING_MBEDTLS 1
+#define CONFIG_ESP_TLS_USE_DS_PERIPHERAL 1
+#define CONFIG_ESP_TLS_DYN_BUF_STRATEGY_SUPPORTED 1
+#define CONFIG_ESP_COEX_ENABLED 1
+#define CONFIG_ESP_COEX_SW_COEXIST_ENABLE 1
+#define CONFIG_ESP_ERR_TO_NAME_LOOKUP 1
+#define CONFIG_GDMA_CTRL_FUNC_IN_IRAM 1
+#define CONFIG_GDMA_ISR_HANDLER_IN_IRAM 1
+#define CONFIG_GDMA_OBJ_DRAM_SAFE 1
+#define CONFIG_GPTIMER_ISR_HANDLER_IN_IRAM 1
+#define CONFIG_GPTIMER_OBJ_CACHE_SAFE 1
+#define CONFIG_I2C_MASTER_ISR_HANDLER_IN_IRAM 1
+#define CONFIG_MCPWM_ISR_HANDLER_IN_IRAM 1
+#define CONFIG_MCPWM_OBJ_CACHE_SAFE 1
+#define CONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM 1
+#define CONFIG_PARLIO_RX_ISR_HANDLER_IN_IRAM 1
+#define CONFIG_PARLIO_OBJ_CACHE_SAFE 1
+#define CONFIG_RMT_ENCODER_FUNC_IN_IRAM 1
+#define CONFIG_RMT_TX_ISR_HANDLER_IN_IRAM 1
+#define CONFIG_RMT_RX_ISR_HANDLER_IN_IRAM 1
+#define CONFIG_RMT_OBJ_CACHE_SAFE 1
+#define CONFIG_SPI_MASTER_ISR_IN_IRAM 1
+#define CONFIG_SPI_SLAVE_ISR_IN_IRAM 1
+#define CONFIG_USJ_ENABLE_USB_SERIAL_JTAG 1
+#define CONFIG_ETH_ENABLED 1
+#define CONFIG_ETH_USE_SPI_ETHERNET 1
+#define CONFIG_ESP_EVENT_POST_FROM_ISR 1
+#define CONFIG_ESP_EVENT_POST_FROM_IRAM_ISR 1
+#define CONFIG_ESP_GDBSTUB_ENABLED 1
+#define CONFIG_ESP_GDBSTUB_SUPPORT_TASKS 1
+#define CONFIG_ESP_GDBSTUB_MAX_TASKS 32
+#define CONFIG_ESPHID_TASK_SIZE_BT 2048
+#define CONFIG_ESPHID_TASK_SIZE_BLE 4096
+#define CONFIG_ESP_HTTP_CLIENT_ENABLE_HTTPS 1
+#define CONFIG_ESP_HTTP_CLIENT_EVENT_POST_TIMEOUT 2000
+#define CONFIG_HTTPD_MAX_REQ_HDR_LEN 1024
+#define CONFIG_HTTPD_MAX_URI_LEN 512
+#define CONFIG_HTTPD_ERR_RESP_NO_DELAY 1
+#define CONFIG_HTTPD_PURGE_BUF_LEN 32
+#define CONFIG_HTTPD_SERVER_EVENT_POST_TIMEOUT 2000
+#define CONFIG_ESP_HTTPS_OTA_EVENT_POST_TIMEOUT 2000
+#define CONFIG_ESP_HTTPS_SERVER_EVENT_POST_TIMEOUT 2000
+#define CONFIG_ESP_HW_SUPPORT_FUNC_IN_IRAM 1
+#define CONFIG_ESP32C6_REV_MIN_0 1
+#define CONFIG_ESP32C6_REV_MIN_FULL 0
+#define CONFIG_ESP_REV_MIN_FULL 0
+#define CONFIG_ESP32C6_REV_MAX_FULL 99
+#define CONFIG_ESP_REV_MAX_FULL 99
+#define CONFIG_ESP_EFUSE_BLOCK_REV_MIN_FULL 0
+#define CONFIG_ESP_EFUSE_BLOCK_REV_MAX_FULL 99
+#define CONFIG_ESP_MAC_ADDR_UNIVERSE_WIFI_STA 1
+#define CONFIG_ESP_MAC_ADDR_UNIVERSE_WIFI_AP 1
+#define CONFIG_ESP_MAC_ADDR_UNIVERSE_BT 1
+#define CONFIG_ESP_MAC_ADDR_UNIVERSE_ETH 1
+#define CONFIG_ESP_MAC_ADDR_UNIVERSE_IEEE802154 1
+#define CONFIG_ESP_MAC_UNIVERSAL_MAC_ADDRESSES_FOUR 1
+#define CONFIG_ESP_MAC_UNIVERSAL_MAC_ADDRESSES 4
+#define CONFIG_ESP32C6_UNIVERSAL_MAC_ADDRESSES_FOUR 1
+#define CONFIG_ESP32C6_UNIVERSAL_MAC_ADDRESSES 4
+#define CONFIG_ESP_SLEEP_FLASH_LEAKAGE_WORKAROUND 1
+#define CONFIG_ESP_SLEEP_GPIO_RESET_WORKAROUND 1
+#define CONFIG_ESP_SLEEP_WAIT_FLASH_READY_EXTRA_DELAY 0
+#define CONFIG_ESP_SLEEP_GPIO_ENABLE_INTERNAL_RESISTORS 1
+#define CONFIG_RTC_CLK_SRC_INT_RC 1
+#define CONFIG_RTC_CLK_CAL_CYCLES 1024
+#define CONFIG_RTC_CLK_FUNC_IN_IRAM 1
+#define CONFIG_RTC_TIME_FUNC_IN_IRAM 1
+#define CONFIG_ESP_PERIPH_CTRL_FUNC_IN_IRAM 1
+#define CONFIG_ESP_REGI2C_CTRL_FUNC_IN_IRAM 1
+#define CONFIG_XTAL_FREQ_40 1
+#define CONFIG_XTAL_FREQ 40
+#define CONFIG_ESP_BROWNOUT_DET 1
+#define CONFIG_ESP_BROWNOUT_DET_LVL_SEL_7 1
+#define CONFIG_ESP_BROWNOUT_DET_LVL 7
+#define CONFIG_ESP_BROWNOUT_USE_INTR 1
+#define CONFIG_ESP_SPI_BUS_LOCK_ISR_FUNCS_IN_IRAM 1
+#define CONFIG_ESP_INTR_IN_IRAM 1
+#define CONFIG_LIBC_PICOLIBC 1
+#define CONFIG_LIBC_PICOLIBC_NEWLIB_COMPATIBILITY 1
+#define CONFIG_LIBC_MISC_IN_IRAM 1
+#define CONFIG_LIBC_LOCKS_PLACE_IN_IRAM 1
+#define CONFIG_LIBC_STDOUT_LINE_ENDING_CRLF 1
+#define CONFIG_LIBC_STDIN_LINE_ENDING_CR 1
+#define CONFIG_LIBC_TIME_SYSCALL_USE_RTC_HRT 1
+#define CONFIG_LIBC_OPTIMIZED_MISALIGNED_ACCESS 1
+#define CONFIG_LIBC_ASSERT_BUFFER_SIZE 200
+#define CONFIG_ESP_NETIF_LOST_IP_TIMER_ENABLE 1
+#define CONFIG_ESP_NETIF_IP_LOST_TIMER_INTERVAL 120
+#define CONFIG_ESP_NETIF_TCPIP_LWIP 1
+#define CONFIG_ESP_NETIF_USES_TCPIP_WITH_BSD_API 1
+#define CONFIG_ESP_NETIF_REPORT_DATA_TRAFFIC 1
+#define CONFIG_ESP_NETIF_RECEIVE_REPORT_ERRORS 1
+#define CONFIG_ESP_PHY_ENABLED 1
+#define CONFIG_ESP_PHY_CALIBRATION_AND_DATA_STORAGE 1
+#define CONFIG_ESP_PHY_MAX_WIFI_TX_POWER 20
+#define CONFIG_ESP_PHY_MAX_TX_POWER 20
+#define CONFIG_ESP_PHY_RF_CAL_PARTIAL 1
+#define CONFIG_ESP_PHY_CALIBRATION_MODE 0
+#define CONFIG_ESP_PHY_PLL_TRACK_PERIOD_MS 1000
+#define CONFIG_ESP_PHY_IRAM_OPT 1
+#define CONFIG_PM_SLEEP_FUNC_IN_IRAM 1
+#define CONFIG_PM_SLP_IRAM_OPT 1
+#define CONFIG_PM_SLP_DEFAULT_PARAMS_OPT 1
+#define CONFIG_PM_POWER_DOWN_CPU_IN_LIGHT_SLEEP 1
+#define CONFIG_PM_CPU_RETENTION_DYNAMIC 1
+#define CONFIG_PM_ESP_SLEEP_POWER_DOWN_CPU 1
+#define CONFIG_ESP_ROM_PRINT_IN_IRAM 1
+#define CONFIG_ESP_CRYPTO_DPA_PROTECTION_AT_STARTUP 1
+#define CONFIG_ESP_CRYPTO_DPA_PROTECTION_LEVEL_LOW 1
+#define CONFIG_ESP_CRYPTO_DPA_PROTECTION_LEVEL 1
+#define CONFIG_ESP_CONSOLE_UART_DEFAULT 1
+#define CONFIG_ESP_CONSOLE_SECONDARY_USB_SERIAL_JTAG 1
+#define CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG_ENABLED 1
+#define CONFIG_ESP_CONSOLE_UART 1
+#define CONFIG_ESP_CONSOLE_UART_NUM 0
+#define CONFIG_ESP_CONSOLE_ROM_SERIAL_PORT_NUM 0
+#define CONFIG_ESP_CONSOLE_UART_BAUDRATE 115200
+#define CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_160 1
+#define CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ 160
+#define CONFIG_ESP_SYSTEM_IN_IRAM 1
+#define CONFIG_ESP_SYSTEM_PANIC_PRINT_REBOOT 1
+#define CONFIG_ESP_SYSTEM_PANIC_REBOOT_DELAY_SECONDS 0
+#define CONFIG_ESP_SYSTEM_SINGLE_CORE_MODE 1
+#define CONFIG_ESP_SYSTEM_RTC_FAST_MEM_AS_HEAP_DEPCHECK 1
+#define CONFIG_ESP_SYSTEM_ALLOW_RTC_FAST_MEM_AS_HEAP 1
+#define CONFIG_ESP_SYSTEM_NO_BACKTRACE 1
+#define CONFIG_ESP_SYSTEM_MEMPROT 1
+#define CONFIG_ESP_SYSTEM_MEMPROT_PMP 1
+#define CONFIG_ESP_SYSTEM_EVENT_QUEUE_SIZE 32
+#define CONFIG_ESP_SYSTEM_EVENT_TASK_STACK_SIZE 2304
+#define CONFIG_ESP_MAIN_TASK_STACK_SIZE 3584
+#define CONFIG_ESP_MAIN_TASK_AFFINITY_CPU0 1
+#define CONFIG_ESP_MAIN_TASK_AFFINITY 0x0
+#define CONFIG_ESP_MINIMAL_SHARED_STACK_SIZE 2048
+#define CONFIG_ESP_INT_WDT 1
+#define CONFIG_ESP_INT_WDT_TIMEOUT_MS 300
+#define CONFIG_ESP_TASK_WDT_EN 1
+#define CONFIG_ESP_TASK_WDT_INIT 1
+#define CONFIG_ESP_TASK_WDT_TIMEOUT_S 5
+#define CONFIG_ESP_TASK_WDT_CHECK_IDLE_TASK_CPU0 1
+#define CONFIG_ESP_DEBUG_OCDAWARE 1
+#define CONFIG_ESP_SYSTEM_CHECK_INT_LEVEL_4 1
+#define CONFIG_ESP_SYSTEM_HW_STACK_GUARD 1
+#define CONFIG_ESP_SYSTEM_BBPLL_RECALIB 1
+#define CONFIG_ESP_SYSTEM_HW_PC_RECORD 1
+#define CONFIG_ESP_IPC_TASK_STACK_SIZE 1024
+#define CONFIG_ESP_TIMER_IN_IRAM 1
+#define CONFIG_ESP_TIME_FUNCS_USE_RTC_TIMER 1
+#define CONFIG_ESP_TIME_FUNCS_USE_ESP_TIMER 1
+#define CONFIG_ESP_TIMER_TASK_STACK_SIZE 3584
+#define CONFIG_ESP_TIMER_INTERRUPT_LEVEL 1
+#define CONFIG_ESP_TIMER_TASK_AFFINITY 0x0
+#define CONFIG_ESP_TIMER_TASK_AFFINITY_CPU0 1
+#define CONFIG_ESP_TIMER_ISR_AFFINITY_CPU0 1
+#define CONFIG_ESP_TIMER_IMPL_SYSTIMER 1
+#define CONFIG_ESP_TRACE_LIB_NONE 1
+#define CONFIG_ESP_TRACE_LIB_NAME "none"
+#define CONFIG_ESP_TRACE_TRANSPORT_NONE 1
+#define CONFIG_ESP_TRACE_TRANSPORT_NAME "none"
+#define CONFIG_ESP_WIFI_ENABLED 1
+#define CONFIG_ESP_WIFI_STATIC_RX_BUFFER_NUM 10
+#define CONFIG_ESP_WIFI_DYNAMIC_RX_BUFFER_NUM 32
+#define CONFIG_ESP_WIFI_DYNAMIC_TX_BUFFER 1
+#define CONFIG_ESP_WIFI_TX_BUFFER_TYPE 1
+#define CONFIG_ESP_WIFI_DYNAMIC_TX_BUFFER_NUM 32
+#define CONFIG_ESP_WIFI_STATIC_RX_MGMT_BUFFER 1
+#define CONFIG_ESP_WIFI_DYNAMIC_RX_MGMT_BUF 0
+#define CONFIG_ESP_WIFI_RX_MGMT_BUF_NUM_DEF 5
+#define CONFIG_ESP_WIFI_AMPDU_TX_ENABLED 1
+#define CONFIG_ESP_WIFI_TX_BA_WIN 6
+#define CONFIG_ESP_WIFI_AMPDU_RX_ENABLED 1
+#define CONFIG_ESP_WIFI_RX_BA_WIN 6
+#define CONFIG_ESP_WIFI_NVS_ENABLED 1
+#define CONFIG_ESP_WIFI_SOFTAP_BEACON_MAX_LEN 752
+#define CONFIG_ESP_WIFI_MGMT_SBUF_NUM 32
+#define CONFIG_ESP_WIFI_IRAM_OPT 1
+#define CONFIG_ESP_WIFI_EXTRA_IRAM_OPT 1
+#define CONFIG_ESP_WIFI_RX_IRAM_OPT 1
+#define CONFIG_ESP_WIFI_ENABLE_WPA3_SAE 1
+#define CONFIG_ESP_WIFI_ENABLE_SAE_H2E 1
+#define CONFIG_ESP_WIFI_ENABLE_SAE_PK 1
+#define CONFIG_ESP_WIFI_SOFTAP_SAE_SUPPORT 1
+#define CONFIG_ESP_WIFI_ENABLE_WPA3_OWE_STA 1
+#define CONFIG_ESP_WIFI_WPA3_COMPATIBLE_SUPPORT 1
+#define CONFIG_ESP_WIFI_SLP_IRAM_OPT 1
+#define CONFIG_ESP_WIFI_SLP_DEFAULT_MIN_ACTIVE_TIME 50
+#define CONFIG_ESP_WIFI_BSS_MAX_IDLE_SUPPORT 1
+#define CONFIG_ESP_WIFI_SLP_DEFAULT_MAX_ACTIVE_TIME 10
+#define CONFIG_ESP_WIFI_SLP_DEFAULT_WAIT_BROADCAST_DATA_TIME 15
+#define CONFIG_ESP_WIFI_STA_DISCONNECTED_PM_ENABLE 1
+#define CONFIG_ESP_WIFI_GMAC_SUPPORT 1
+#define CONFIG_ESP_WIFI_SOFTAP_SUPPORT 1
+#define CONFIG_ESP_WIFI_ESPNOW_MAX_ENCRYPT_NUM 7
+#define CONFIG_ESP_WIFI_MBEDTLS_CRYPTO 1
+#define CONFIG_ESP_WIFI_MBEDTLS_TLS_CLIENT 1
+#define CONFIG_ESP_WIFI_TX_HETB_QUEUE_NUM 3
+#define CONFIG_ESP_WIFI_ENTERPRISE_SUPPORT 1
+#define CONFIG_ESP_COREDUMP_ENABLE_TO_NONE 1
+#define CONFIG_FATFS_VOLUME_COUNT 2
+#define CONFIG_FATFS_LFN_HEAP 1
+#define CONFIG_FATFS_SECTOR_4096 1
+#define CONFIG_FATFS_CODEPAGE_437 1
+#define CONFIG_FATFS_CODEPAGE 437
+#define CONFIG_FATFS_MAX_LFN 255
+#define CONFIG_FATFS_API_ENCODING_ANSI_OEM 1
+#define CONFIG_FATFS_FS_LOCK 0
+#define CONFIG_FATFS_TIMEOUT_MS 10000
+#define CONFIG_FATFS_PER_FILE_CACHE 1
+#define CONFIG_FATFS_USE_STRFUNC_NONE 1
+#define CONFIG_FATFS_VFS_FSTAT_BLKSIZE 0
+#define CONFIG_FATFS_LINK_LOCK 1
+#define CONFIG_FATFS_USE_DYN_BUFFERS 1
+#define CONFIG_FATFS_DONT_TRUST_FREE_CLUSTER_CNT 0
+#define CONFIG_FATFS_DONT_TRUST_LAST_ALLOC 0
+#define CONFIG_FREERTOS_UNICORE 1
+#define CONFIG_FREERTOS_HZ 100
+#define CONFIG_FREERTOS_OPTIMIZED_SCHEDULER 1
+#define CONFIG_FREERTOS_CHECK_STACKOVERFLOW_CANARY 1
+#define CONFIG_FREERTOS_THREAD_LOCAL_STORAGE_POINTERS 1
+#define CONFIG_FREERTOS_IDLE_TASK_STACKSIZE 1536
+#define CONFIG_FREERTOS_MAX_TASK_NAME_LEN 16
+#define CONFIG_FREERTOS_USE_TIMERS 1
+#define CONFIG_FREERTOS_TIMER_SERVICE_TASK_NAME "Tmr Svc"
+#define CONFIG_FREERTOS_TIMER_TASK_NO_AFFINITY 1
+#define CONFIG_FREERTOS_TIMER_SERVICE_TASK_CORE_AFFINITY 0x7FFFFFFF
+#define CONFIG_FREERTOS_TIMER_TASK_PRIORITY 1
+#define CONFIG_FREERTOS_TIMER_TASK_STACK_DEPTH 2048
+#define CONFIG_FREERTOS_TIMER_QUEUE_LENGTH 10
+#define CONFIG_FREERTOS_QUEUE_REGISTRY_SIZE 0
+#define CONFIG_FREERTOS_TASK_NOTIFICATION_ARRAY_ENTRIES 1
+#define CONFIG_FREERTOS_TASK_FUNCTION_WRAPPER 1
+#define CONFIG_FREERTOS_TLSP_DELETION_CALLBACKS 1
+#define CONFIG_FREERTOS_CHECK_MUTEX_GIVEN_BY_OWNER 1
+#define CONFIG_FREERTOS_ISR_STACKSIZE 1536
+#define CONFIG_FREERTOS_INTERRUPT_BACKTRACE 1
+#define CONFIG_FREERTOS_TICK_SUPPORT_SYSTIMER 1
+#define CONFIG_FREERTOS_CORETIMER_SYSTIMER_LVL1 1
+#define CONFIG_FREERTOS_SYSTICK_USES_SYSTIMER 1
+#define CONFIG_FREERTOS_PORT 1
+#define CONFIG_FREERTOS_NO_AFFINITY 0x7FFFFFFF
+#define CONFIG_FREERTOS_SUPPORT_STATIC_ALLOCATION 1
+#define CONFIG_FREERTOS_DEBUG_OCDAWARE 1
+#define CONFIG_FREERTOS_NUMBER_OF_CORES 1
+#define CONFIG_HAL_ASSERTION_EQUALS_SYSTEM 1
+#define CONFIG_HAL_DEFAULT_ASSERTION_LEVEL 2
+#define CONFIG_HAL_SYSTIMER_USE_ROM_IMPL 1
+#define CONFIG_HAL_WDT_USE_ROM_IMPL 1
+#define CONFIG_HAL_GPIO_USE_ROM_IMPL 1
+#define CONFIG_HEAP_POISONING_DISABLED 1
+#define CONFIG_HEAP_TRACING_OFF 1
+#define CONFIG_HEAP_TLSF_USE_ROM_IMPL 1
+#define CONFIG_IEEE802154_ENABLED 1
+#define CONFIG_IEEE802154_RX_BUFFER_SIZE 20
+#define CONFIG_IEEE802154_CCA_ED 1
+#define CONFIG_IEEE802154_CCA_MODE 1
+#define CONFIG_IEEE802154_CCA_THRESHOLD -75
+#define CONFIG_IEEE802154_PENDING_TABLE_SIZE 20
+#define CONFIG_IEEE802154_INTERFACE_NUM 1
+#define CONFIG_IEEE802154_TIMING_OPTIMIZATION 1
+#define CONFIG_LOG_VERSION_1 1
+#define CONFIG_LOG_VERSION 1
+#define CONFIG_LOG_DEFAULT_LEVEL_INFO 1
+#define CONFIG_LOG_DEFAULT_LEVEL 3
+#define CONFIG_LOG_MAXIMUM_EQUALS_DEFAULT 1
+#define CONFIG_LOG_MAXIMUM_LEVEL 3
+#define CONFIG_LOG_DYNAMIC_LEVEL_CONTROL 1
+#define CONFIG_LOG_TAG_LEVEL_IMPL_CACHE_AND_LINKED_LIST 1
+#define CONFIG_LOG_TAG_LEVEL_CACHE_BINARY_MIN_HEAP 1
+#define CONFIG_LOG_TAG_LEVEL_IMPL_CACHE_SIZE 31
+#define CONFIG_LOG_TIMESTAMP_SOURCE_RTOS 1
+#define CONFIG_LOG_MODE_TEXT_EN 1
+#define CONFIG_LOG_MODE_TEXT 1
+#define CONFIG_LOG_IN_IRAM 1
+#define CONFIG_LWIP_ENABLE 1
+#define CONFIG_LWIP_LOCAL_HOSTNAME "espressif"
+#define CONFIG_LWIP_TCPIP_TASK_PRIO 18
+#define CONFIG_LWIP_DNS_SUPPORT_MDNS_QUERIES 1
+#define CONFIG_LWIP_TIMERS_ONDEMAND 1
+#define CONFIG_LWIP_ND6 1
+#define CONFIG_LWIP_MAX_SOCKETS 10
+#define CONFIG_LWIP_SO_REUSE 1
+#define CONFIG_LWIP_SO_REUSE_RXTOALL 1
+#define CONFIG_LWIP_IP_DEFAULT_TTL 64
+#define CONFIG_LWIP_IP4_FRAG 1
+#define CONFIG_LWIP_IP6_FRAG 1
+#define CONFIG_LWIP_IP_REASS_MAX_PBUFS 10
+#define CONFIG_LWIP_IPV6_DUP_DETECT_ATTEMPTS 1
+#define CONFIG_LWIP_ESP_GRATUITOUS_ARP 1
+#define CONFIG_LWIP_GARP_TMR_INTERVAL 60
+#define CONFIG_LWIP_ESP_MLDV6_REPORT 1
+#define CONFIG_LWIP_MLDV6_TMR_INTERVAL 40
+#define CONFIG_LWIP_TCPIP_RECVMBOX_SIZE 32
+#define CONFIG_LWIP_DHCP_DOES_ARP_CHECK 1
+#define CONFIG_LWIP_DHCP_DISABLE_VENDOR_CLASS_ID 1
+#define CONFIG_LWIP_DHCP_OPTIONS_LEN 69
+#define CONFIG_LWIP_NUM_NETIF_CLIENT_DATA 0
+#define CONFIG_LWIP_DHCP_COARSE_TIMER_SECS 1
+#define CONFIG_LWIP_DHCPS 1
+#define CONFIG_LWIP_DHCPS_REPORT_CLIENT_HOSTNAME 1
+#define CONFIG_LWIP_DHCPS_LEASE_UNIT 60
+#define CONFIG_LWIP_DHCPS_MAX_STATION_NUM 8
+#define CONFIG_LWIP_DHCPS_MAX_HOSTNAME_LEN 64
+#define CONFIG_LWIP_DHCPS_STATIC_ENTRIES 1
+#define CONFIG_LWIP_IPV4 1
+#define CONFIG_LWIP_IPV6 1
+#define CONFIG_LWIP_IPV6_NUM_ADDRESSES 3
+#define CONFIG_LWIP_NETIF_LOOPBACK 1
+#define CONFIG_LWIP_LOOPBACK_MAX_PBUFS 8
+#define CONFIG_LWIP_MAX_ACTIVE_TCP 16
+#define CONFIG_LWIP_MAX_LISTENING_TCP 16
+#define CONFIG_LWIP_TCP_HIGH_SPEED_RETRANSMISSION 1
+#define CONFIG_LWIP_TCP_MAXRTX 12
+#define CONFIG_LWIP_TCP_SYNMAXRTX 12
+#define CONFIG_LWIP_TCP_MSS 1440
+#define CONFIG_LWIP_TCP_TMR_INTERVAL 250
+#define CONFIG_LWIP_TCP_MSL 60000
+#define CONFIG_LWIP_TCP_FIN_WAIT_TIMEOUT 20000
+#define CONFIG_LWIP_TCP_SND_BUF_DEFAULT 5760
+#define CONFIG_LWIP_TCP_WND_DEFAULT 5760
+#define CONFIG_LWIP_TCP_RECVMBOX_SIZE 6
+#define CONFIG_LWIP_TCP_ACCEPTMBOX_SIZE 6
+#define CONFIG_LWIP_TCP_QUEUE_OOSEQ 1
+#define CONFIG_LWIP_TCP_OOSEQ_TIMEOUT 6
+#define CONFIG_LWIP_TCP_OOSEQ_MAX_PBUFS 4
+#define CONFIG_LWIP_TCP_OVERSIZE_MSS 1
+#define CONFIG_LWIP_TCP_RTO_TIME 1500
+#define CONFIG_LWIP_MAX_UDP_PCBS 16
+#define CONFIG_LWIP_UDP_RECVMBOX_SIZE 6
+#define CONFIG_LWIP_CHECKSUM_CHECK_ICMP 1
+#define CONFIG_LWIP_TCPIP_TASK_STACK_SIZE 3072
+#define CONFIG_LWIP_TCPIP_TASK_AFFINITY_NO_AFFINITY 1
+#define CONFIG_LWIP_TCPIP_TASK_AFFINITY 0x7FFFFFFF
+#define CONFIG_LWIP_IPV6_MEMP_NUM_ND6_QUEUE 3
+#define CONFIG_LWIP_IPV6_ND6_NUM_NEIGHBORS 5
+#define CONFIG_LWIP_IPV6_ND6_NUM_PREFIXES 5
+#define CONFIG_LWIP_IPV6_ND6_NUM_ROUTERS 3
+#define CONFIG_LWIP_IPV6_ND6_NUM_DESTINATIONS 10
+#define CONFIG_LWIP_ICMP 1
+#define CONFIG_LWIP_MAX_RAW_PCBS 16
+#define CONFIG_LWIP_SNTP_MAX_SERVERS 1
+#define CONFIG_LWIP_SNTP_UPDATE_DELAY 3600000
+#define CONFIG_LWIP_SNTP_STARTUP_DELAY 1
+#define CONFIG_LWIP_SNTP_MAXIMUM_STARTUP_DELAY 5000
+#define CONFIG_LWIP_DNS_MAX_HOST_IP 1
+#define CONFIG_LWIP_DNS_MAX_SERVERS 3
+#define CONFIG_LWIP_BRIDGEIF_MAX_PORTS 7
+#define CONFIG_LWIP_ESP_LWIP_ASSERT 1
+#define CONFIG_LWIP_HOOK_TCP_ISN_DEFAULT 1
+#define CONFIG_LWIP_HOOK_IP6_ROUTE_NONE 1
+#define CONFIG_LWIP_HOOK_ND6_GET_GW_NONE 1
+#define CONFIG_LWIP_HOOK_IP6_SELECT_SRC_ADDR_NONE 1
+#define CONFIG_LWIP_HOOK_DHCP_EXTRA_OPTION_NONE 1
+#define CONFIG_LWIP_HOOK_NETCONN_EXT_RESOLVE_NONE 1
+#define CONFIG_LWIP_HOOK_DNS_EXT_RESOLVE_NONE 1
+#define CONFIG_LWIP_HOOK_IP6_INPUT_DEFAULT 1
+#define CONFIG_MBEDTLS_VER_4_X_SUPPORT 1
+#define CONFIG_MBEDTLS_COMPILER_OPTIMIZATION_SIZE 1
+#define CONFIG_MBEDTLS_FS_IO 1
+#define CONFIG_MBEDTLS_THREADING_C 1
+#define CONFIG_MBEDTLS_THREADING_PTHREAD 1
+#define CONFIG_MBEDTLS_ERROR_STRINGS 1
+#define CONFIG_MBEDTLS_VERSION_C 1
+#define CONFIG_MBEDTLS_HAVE_TIME 1
+#define CONFIG_MBEDTLS_INTERNAL_MEM_ALLOC 1
+#define CONFIG_MBEDTLS_ASYMMETRIC_CONTENT_LEN 1
+#define CONFIG_MBEDTLS_SSL_IN_CONTENT_LEN 16384
+#define CONFIG_MBEDTLS_SSL_OUT_CONTENT_LEN 4096
+#define CONFIG_MBEDTLS_SELF_TEST 1
+#define CONFIG_MBEDTLS_X509_USE_C 1
+#define CONFIG_MBEDTLS_PEM_PARSE_C 1
+#define CONFIG_MBEDTLS_PEM_WRITE_C 1
+#define CONFIG_MBEDTLS_PK_C 1
+#define CONFIG_MBEDTLS_PK_PARSE_C 1
+#define CONFIG_MBEDTLS_PK_WRITE_C 1
+#define CONFIG_MBEDTLS_X509_CRL_PARSE_C 1
+#define CONFIG_MBEDTLS_X509_CRT_PARSE_C 1
+#define CONFIG_MBEDTLS_X509_CSR_PARSE_C 1
+#define CONFIG_MBEDTLS_X509_RSASSA_PSS_SUPPORT 1
+#define CONFIG_MBEDTLS_ASN1_PARSE_C 1
+#define CONFIG_MBEDTLS_ASN1_WRITE_C 1
+#define CONFIG_MBEDTLS_CERTIFICATE_BUNDLE 1
+#define CONFIG_MBEDTLS_CERTIFICATE_BUNDLE_DEFAULT_FULL 1
+#define CONFIG_MBEDTLS_CERTIFICATE_BUNDLE_MAX_CERTS 200
+#define CONFIG_MBEDTLS_TLS_ENABLED 1
+#define CONFIG_MBEDTLS_SSL_PROTO_TLS1_2 1
+#define CONFIG_MBEDTLS_TLS_SERVER 1
+#define CONFIG_MBEDTLS_TLS_CLIENT 1
+#define CONFIG_MBEDTLS_TLS_SERVER_AND_CLIENT 1
+#define CONFIG_MBEDTLS_SSL_CACHE_C 1
+#define CONFIG_MBEDTLS_SSL_ALL_ALERT_MESSAGES 1
+#define CONFIG_MBEDTLS_KEY_EXCHANGE_RSA 1
+#define CONFIG_MBEDTLS_KEY_EXCHANGE_ELLIPTIC_CURVE 1
+#define CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_RSA 1
+#define CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA 1
+#define CONFIG_MBEDTLS_SSL_SERVER_NAME_INDICATION 1
+#define CONFIG_MBEDTLS_SSL_ALPN 1
+#define CONFIG_MBEDTLS_SSL_MAX_FRAGMENT_LENGTH 1
+#define CONFIG_MBEDTLS_SSL_RENEGOTIATION 1
+#define CONFIG_MBEDTLS_CLIENT_SSL_SESSION_TICKETS 1
+#define CONFIG_MBEDTLS_SERVER_SSL_SESSION_TICKETS 1
+#define CONFIG_MBEDTLS_AES_C 1
+#define CONFIG_MBEDTLS_CCM_C 1
+#define CONFIG_MBEDTLS_CIPHER_MODE_CBC 1
+#define CONFIG_MBEDTLS_CIPHER_MODE_CFB 1
+#define CONFIG_MBEDTLS_CIPHER_MODE_CTR 1
+#define CONFIG_MBEDTLS_CIPHER_MODE_OFB 1
+#define CONFIG_MBEDTLS_CIPHER_MODE_XTS 1
+#define CONFIG_MBEDTLS_GCM_C 1
+#define CONFIG_MBEDTLS_AES_ROM_TABLES 1
+#define CONFIG_MBEDTLS_CMAC_C 1
+#define CONFIG_MBEDTLS_BIGNUM_C 1
+#define CONFIG_MBEDTLS_RSA_C 1
+#define CONFIG_MBEDTLS_ECP_C 1
+#define CONFIG_MBEDTLS_ECP_DP_SECP256R1_ENABLED 1
+#define CONFIG_MBEDTLS_ECP_DP_SECP384R1_ENABLED 1
+#define CONFIG_MBEDTLS_ECP_DP_SECP521R1_ENABLED 1
+#define CONFIG_MBEDTLS_ECP_DP_SECP256K1_ENABLED 1
+#define CONFIG_MBEDTLS_ECP_DP_BP256R1_ENABLED 1
+#define CONFIG_MBEDTLS_ECP_DP_BP384R1_ENABLED 1
+#define CONFIG_MBEDTLS_ECP_DP_BP512R1_ENABLED 1
+#define CONFIG_MBEDTLS_ECP_DP_CURVE25519_ENABLED 1
+#define CONFIG_MBEDTLS_ECP_NIST_OPTIM 1
+#define CONFIG_MBEDTLS_ECDH_C 1
+#define CONFIG_MBEDTLS_ECDSA_C 1
+#define CONFIG_MBEDTLS_PK_PARSE_EC_EXTENDED 1
+#define CONFIG_MBEDTLS_PK_PARSE_EC_COMPRESSED 1
+#define CONFIG_MBEDTLS_ECDSA_DETERMINISTIC 1
+#define CONFIG_MBEDTLS_MD_C 1
+#define CONFIG_MBEDTLS_MD5_C 1
+#define CONFIG_MBEDTLS_SHA1_C 1
+#define CONFIG_MBEDTLS_SHA256_C 1
+#define CONFIG_MBEDTLS_SHA384_C 1
+#define CONFIG_MBEDTLS_SHA512_C 1
+#define CONFIG_MBEDTLS_ROM_MD5 1
+#define CONFIG_MBEDTLS_HARDWARE_ECC 1
+#define CONFIG_MBEDTLS_ECC_OTHER_CURVES_SOFT_FALLBACK 1
+#define CONFIG_MBEDTLS_HARDWARE_SHA 1
+#define CONFIG_MBEDTLS_HARDWARE_MPI 1
+#define CONFIG_MBEDTLS_LARGE_KEY_SOFTWARE_MPI 1
+#define CONFIG_MBEDTLS_MPI_USE_INTERRUPT 1
+#define CONFIG_MBEDTLS_MPI_INTERRUPT_LEVEL 0
+#define CONFIG_MBEDTLS_HARDWARE_AES 1
+#define CONFIG_MBEDTLS_GCM_SUPPORT_NON_AES_CIPHER 1
+#define CONFIG_MBEDTLS_AES_USE_INTERRUPT 1
+#define CONFIG_MBEDTLS_AES_INTERRUPT_LEVEL 0
+#define CONFIG_MBEDTLS_AES_HW_SMALL_DATA_LEN_OPTIM 1
+#define CONFIG_MBEDTLS_HARDWARE_RSA_DS_PERIPHERAL 1
+#define CONFIG_MBEDTLS_CTR_DRBG_C 1
+#define CONFIG_MBEDTLS_HMAC_DRBG_C 1
+#define CONFIG_MBEDTLS_BASE64_C 1
+#define CONFIG_MBEDTLS_PKCS5_C 1
+#define CONFIG_MBEDTLS_PKCS7_C 1
+#define CONFIG_MBEDTLS_PKCS1_V15 1
+#define CONFIG_MBEDTLS_PKCS1_V21 1
+#define CONFIG_ESP_PROTOCOMM_SUPPORT_SECURITY_VERSION_2 1
+#define CONFIG_ESP_PROTOCOMM_SUPPORT_SECURITY_PATCH_VERSION 1
+#define CONFIG_PTHREAD_TASK_PRIO_DEFAULT 5
+#define CONFIG_PTHREAD_TASK_STACK_SIZE_DEFAULT 3072
+#define CONFIG_PTHREAD_STACK_MIN 768
+#define CONFIG_PTHREAD_TASK_CORE_DEFAULT -1
+#define CONFIG_PTHREAD_TASK_NAME_DEFAULT "pthread"
+#define CONFIG_SD_ENABLE_SDIO_SUPPORT 1
+#define CONFIG_MMU_PAGE_SIZE_32KB 1
+#define CONFIG_MMU_PAGE_MODE "32KB"
+#define CONFIG_MMU_PAGE_SIZE 0x8000
+#define CONFIG_SPI_FLASH_BROWNOUT_RESET_XMC 1
+#define CONFIG_SPI_FLASH_BROWNOUT_RESET 1
+#define CONFIG_SPI_FLASH_SUSPEND_TSUS_VAL_US 50
+#define CONFIG_SPI_FLASH_PLACE_FUNCTIONS_IN_IRAM 1
+#define CONFIG_SPI_FLASH_DANGEROUS_WRITE_ABORTS 1
+#define CONFIG_SPI_FLASH_YIELD_DURING_ERASE 1
+#define CONFIG_SPI_FLASH_ERASE_YIELD_DURATION_MS 20
+#define CONFIG_SPI_FLASH_ERASE_YIELD_TICKS 1
+#define CONFIG_SPI_FLASH_WRITE_CHUNK_SIZE 8192
+#define CONFIG_SPI_FLASH_VENDOR_XMC_SUPPORT_ENABLED 1
+#define CONFIG_SPI_FLASH_VENDOR_GD_SUPPORT_ENABLED 1
+#define CONFIG_SPI_FLASH_SUPPORT_GD_CHIP 1
+#define CONFIG_SPI_FLASH_ENABLE_ENCRYPTED_READ_WRITE 1
+#define CONFIG_SPIFFS_MAX_PARTITIONS 3
+#define CONFIG_SPIFFS_CACHE 1
+#define CONFIG_SPIFFS_CACHE_WR 1
+#define CONFIG_SPIFFS_PAGE_CHECK 1
+#define CONFIG_SPIFFS_GC_MAX_RUNS 10
+#define CONFIG_SPIFFS_PAGE_SIZE 256
+#define CONFIG_SPIFFS_OBJ_NAME_LEN 32
+#define CONFIG_SPIFFS_USE_MAGIC 1
+#define CONFIG_SPIFFS_USE_MAGIC_LENGTH 1
+#define CONFIG_SPIFFS_META_LENGTH 4
+#define CONFIG_SPIFFS_USE_MTIME 1
+#define CONFIG_WS_TRANSPORT 1
+#define CONFIG_WS_BUFFER_SIZE 1024
+#define CONFIG_UNITY_ENABLE_FLOAT 1
+#define CONFIG_UNITY_ENABLE_DOUBLE 1
+#define CONFIG_UNITY_ENABLE_IDF_TEST_RUNNER 1
+#define CONFIG_VFS_SUPPORT_IO 1
+#define CONFIG_VFS_SUPPORT_DIR 1
+#define CONFIG_VFS_SUPPORT_SELECT 1
+#define CONFIG_VFS_SUPPRESS_SELECT_DEBUG_OUTPUT 1
+#define CONFIG_VFS_MAX_COUNT 8
+#define CONFIG_VFS_SEMIHOSTFS_MAX_MOUNT_POINTS 1
+#define CONFIG_VFS_INITIALIZE_DEV_NULL 1
+#define CONFIG_WL_SECTOR_SIZE_4096 1
+#define CONFIG_WL_SECTOR_SIZE 4096
+
+/* List of deprecated options */
+#define CONFIG_BROWNOUT_DET CONFIG_ESP_BROWNOUT_DET
+#define CONFIG_BROWNOUT_DET_LVL CONFIG_ESP_BROWNOUT_DET_LVL
+#define CONFIG_BROWNOUT_DET_LVL_SEL_7 CONFIG_ESP_BROWNOUT_DET_LVL_SEL_7
+#define CONFIG_COMPILER_OPTIMIZATION_DEFAULT CONFIG_COMPILER_OPTIMIZATION_DEBUG
+#define CONFIG_COMPILER_OPTIMIZATION_LEVEL_DEBUG CONFIG_COMPILER_OPTIMIZATION_DEBUG
+#define CONFIG_CONSOLE_UART CONFIG_ESP_CONSOLE_UART
+#define CONFIG_CONSOLE_UART_BAUDRATE CONFIG_ESP_CONSOLE_UART_BAUDRATE
+#define CONFIG_CONSOLE_UART_DEFAULT CONFIG_ESP_CONSOLE_UART_DEFAULT
+#define CONFIG_CONSOLE_UART_NUM CONFIG_ESP_CONSOLE_UART_NUM
+#define CONFIG_ESP32_ENABLE_COREDUMP_TO_NONE CONFIG_ESP_COREDUMP_ENABLE_TO_NONE
+#define CONFIG_ESP32_PHY_CALIBRATION_AND_DATA_STORAGE CONFIG_ESP_PHY_CALIBRATION_AND_DATA_STORAGE
+#define CONFIG_ESP32_PHY_MAX_TX_POWER CONFIG_ESP_PHY_MAX_TX_POWER
+#define CONFIG_ESP32_PHY_MAX_WIFI_TX_POWER CONFIG_ESP_PHY_MAX_WIFI_TX_POWER
+#define CONFIG_ESP32_PTHREAD_STACK_MIN CONFIG_PTHREAD_STACK_MIN
+#define CONFIG_ESP32_PTHREAD_TASK_CORE_DEFAULT CONFIG_PTHREAD_TASK_CORE_DEFAULT
+#define CONFIG_ESP32_PTHREAD_TASK_NAME_DEFAULT CONFIG_PTHREAD_TASK_NAME_DEFAULT
+#define CONFIG_ESP32_PTHREAD_TASK_PRIO_DEFAULT CONFIG_PTHREAD_TASK_PRIO_DEFAULT
+#define CONFIG_ESP32_PTHREAD_TASK_STACK_SIZE_DEFAULT CONFIG_PTHREAD_TASK_STACK_SIZE_DEFAULT
+#define CONFIG_ESP32_WIFI_AMPDU_RX_ENABLED CONFIG_ESP_WIFI_AMPDU_RX_ENABLED
+#define CONFIG_ESP32_WIFI_AMPDU_TX_ENABLED CONFIG_ESP_WIFI_AMPDU_TX_ENABLED
+#define CONFIG_ESP32_WIFI_DYNAMIC_RX_BUFFER_NUM CONFIG_ESP_WIFI_DYNAMIC_RX_BUFFER_NUM
+#define CONFIG_ESP32_WIFI_DYNAMIC_TX_BUFFER CONFIG_ESP_WIFI_DYNAMIC_TX_BUFFER
+#define CONFIG_ESP32_WIFI_DYNAMIC_TX_BUFFER_NUM CONFIG_ESP_WIFI_DYNAMIC_TX_BUFFER_NUM
+#define CONFIG_ESP32_WIFI_ENABLED CONFIG_ESP_WIFI_ENABLED
+#define CONFIG_ESP32_WIFI_ENABLE_WPA3_OWE_STA CONFIG_ESP_WIFI_ENABLE_WPA3_OWE_STA
+#define CONFIG_ESP32_WIFI_ENABLE_WPA3_SAE CONFIG_ESP_WIFI_ENABLE_WPA3_SAE
+#define CONFIG_ESP32_WIFI_IRAM_OPT CONFIG_ESP_WIFI_IRAM_OPT
+#define CONFIG_ESP32_WIFI_MGMT_SBUF_NUM CONFIG_ESP_WIFI_MGMT_SBUF_NUM
+#define CONFIG_ESP32_WIFI_NVS_ENABLED CONFIG_ESP_WIFI_NVS_ENABLED
+#define CONFIG_ESP32_WIFI_RX_BA_WIN CONFIG_ESP_WIFI_RX_BA_WIN
+#define CONFIG_ESP32_WIFI_RX_IRAM_OPT CONFIG_ESP_WIFI_RX_IRAM_OPT
+#define CONFIG_ESP32_WIFI_SOFTAP_BEACON_MAX_LEN CONFIG_ESP_WIFI_SOFTAP_BEACON_MAX_LEN
+#define CONFIG_ESP32_WIFI_STATIC_RX_BUFFER_NUM CONFIG_ESP_WIFI_STATIC_RX_BUFFER_NUM
+#define CONFIG_ESP32_WIFI_SW_COEXIST_ENABLE CONFIG_ESP_COEX_SW_COEXIST_ENABLE
+#define CONFIG_ESP32_WIFI_TX_BA_WIN CONFIG_ESP_WIFI_TX_BA_WIN
+#define CONFIG_ESP32_WIFI_TX_BUFFER_TYPE CONFIG_ESP_WIFI_TX_BUFFER_TYPE
+#define CONFIG_ESP_GRATUITOUS_ARP CONFIG_LWIP_ESP_GRATUITOUS_ARP
+#define CONFIG_ESP_SYSTEM_BROWNOUT_INTR CONFIG_ESP_BROWNOUT_USE_INTR
+#define CONFIG_ESP_SYSTEM_MEMPROT_FEATURE CONFIG_ESP_SYSTEM_MEMPROT
+#define CONFIG_ESP_SYSTEM_MEMPROT_FEATURE_VIA_TEE CONFIG_ESP_SYSTEM_MEMPROT
+#define CONFIG_ESP_SYSTEM_PMP_IDRAM_SPLIT CONFIG_ESP_SYSTEM_MEMPROT
+#define CONFIG_ESP_SYSTEM_PM_POWER_DOWN_CPU CONFIG_PM_POWER_DOWN_CPU_IN_LIGHT_SLEEP
+#define CONFIG_ESP_TASK_WDT CONFIG_ESP_TASK_WDT_INIT
+#define CONFIG_ESP_WIFI_SW_COEXIST_ENABLE CONFIG_ESP_COEX_SW_COEXIST_ENABLE
+#define CONFIG_FLASHMODE_DIO CONFIG_ESPTOOLPY_FLASHMODE_DIO
+#define CONFIG_GARP_TMR_INTERVAL CONFIG_LWIP_GARP_TMR_INTERVAL
+#define CONFIG_GDBSTUB_MAX_TASKS CONFIG_ESP_GDBSTUB_MAX_TASKS
+#define CONFIG_GDBSTUB_SUPPORT_TASKS CONFIG_ESP_GDBSTUB_SUPPORT_TASKS
+#define CONFIG_INT_WDT CONFIG_ESP_INT_WDT
+#define CONFIG_INT_WDT_TIMEOUT_MS CONFIG_ESP_INT_WDT_TIMEOUT_MS
+#define CONFIG_IPC_TASK_STACK_SIZE CONFIG_ESP_IPC_TASK_STACK_SIZE
+#define CONFIG_LOG_BOOTLOADER_LEVEL CONFIG_BOOTLOADER_LOG_LEVEL
+#define CONFIG_LOG_BOOTLOADER_LEVEL_INFO CONFIG_BOOTLOADER_LOG_LEVEL_INFO
+#define CONFIG_MAIN_TASK_STACK_SIZE CONFIG_ESP_MAIN_TASK_STACK_SIZE
+#define CONFIG_MONITOR_BAUD CONFIG_ESPTOOLPY_MONITOR_BAUD
+#define CONFIG_NEWLIB_STDIN_LINE_ENDING_CR CONFIG_LIBC_STDIN_LINE_ENDING_CR
+#define CONFIG_NEWLIB_STDOUT_LINE_ENDING_CRLF CONFIG_LIBC_STDOUT_LINE_ENDING_CRLF
+#define CONFIG_NEWLIB_TIME_SYSCALL_USE_RTC_HRT CONFIG_LIBC_TIME_SYSCALL_USE_RTC_HRT
+#define CONFIG_OPTIMIZATION_ASSERTIONS_ENABLED CONFIG_COMPILER_OPTIMIZATION_ASSERTIONS_ENABLE
+#define CONFIG_OPTIMIZATION_ASSERTION_LEVEL CONFIG_COMPILER_OPTIMIZATION_ASSERTION_LEVEL
+#define CONFIG_OPTIMIZATION_LEVEL_DEBUG CONFIG_COMPILER_OPTIMIZATION_DEBUG
+#define CONFIG_PERIPH_CTRL_FUNC_IN_IRAM CONFIG_ESP_PERIPH_CTRL_FUNC_IN_IRAM
+#define CONFIG_POST_EVENTS_FROM_IRAM_ISR CONFIG_ESP_EVENT_POST_FROM_IRAM_ISR
+#define CONFIG_POST_EVENTS_FROM_ISR CONFIG_ESP_EVENT_POST_FROM_ISR
+#define CONFIG_SEMIHOSTFS_MAX_MOUNT_POINTS CONFIG_VFS_SEMIHOSTFS_MAX_MOUNT_POINTS
+#define CONFIG_SPI_FLASH_WRITING_DANGEROUS_REGIONS_ABORTS CONFIG_SPI_FLASH_DANGEROUS_WRITE_ABORTS
+#define CONFIG_STACK_CHECK_NONE CONFIG_COMPILER_STACK_CHECK_MODE_NONE
+#define CONFIG_SUPPRESS_SELECT_DEBUG_OUTPUT CONFIG_VFS_SUPPRESS_SELECT_DEBUG_OUTPUT
+#define CONFIG_SW_COEXIST_ENABLE CONFIG_ESP_COEX_SW_COEXIST_ENABLE
+#define CONFIG_SYSTEM_EVENT_QUEUE_SIZE CONFIG_ESP_SYSTEM_EVENT_QUEUE_SIZE
+#define CONFIG_SYSTEM_EVENT_TASK_STACK_SIZE CONFIG_ESP_SYSTEM_EVENT_TASK_STACK_SIZE
+#define CONFIG_TASK_WDT CONFIG_ESP_TASK_WDT_INIT
+#define CONFIG_TASK_WDT_CHECK_IDLE_TASK_CPU0 CONFIG_ESP_TASK_WDT_CHECK_IDLE_TASK_CPU0
+#define CONFIG_TASK_WDT_TIMEOUT_S CONFIG_ESP_TASK_WDT_TIMEOUT_S
+#define CONFIG_TCPIP_RECVMBOX_SIZE CONFIG_LWIP_TCPIP_RECVMBOX_SIZE
+#define CONFIG_TCPIP_TASK_AFFINITY CONFIG_LWIP_TCPIP_TASK_AFFINITY
+#define CONFIG_TCPIP_TASK_AFFINITY_NO_AFFINITY CONFIG_LWIP_TCPIP_TASK_AFFINITY_NO_AFFINITY
+#define CONFIG_TCPIP_TASK_STACK_SIZE CONFIG_LWIP_TCPIP_TASK_STACK_SIZE
+#define CONFIG_TCP_MAXRTX CONFIG_LWIP_TCP_MAXRTX
+#define CONFIG_TCP_MSL CONFIG_LWIP_TCP_MSL
+#define CONFIG_TCP_MSS CONFIG_LWIP_TCP_MSS
+#define CONFIG_TCP_OVERSIZE_MSS CONFIG_LWIP_TCP_OVERSIZE_MSS
+#define CONFIG_TCP_QUEUE_OOSEQ CONFIG_LWIP_TCP_QUEUE_OOSEQ
+#define CONFIG_TCP_RECVMBOX_SIZE CONFIG_LWIP_TCP_RECVMBOX_SIZE
+#define CONFIG_TCP_SND_BUF_DEFAULT CONFIG_LWIP_TCP_SND_BUF_DEFAULT
+#define CONFIG_TCP_SYNMAXRTX CONFIG_LWIP_TCP_SYNMAXRTX
+#define CONFIG_TCP_WND_DEFAULT CONFIG_LWIP_TCP_WND_DEFAULT
+#define CONFIG_TIMER_QUEUE_LENGTH CONFIG_FREERTOS_TIMER_QUEUE_LENGTH
+#define CONFIG_TIMER_TASK_PRIORITY CONFIG_FREERTOS_TIMER_TASK_PRIORITY
+#define CONFIG_TIMER_TASK_STACK_DEPTH CONFIG_FREERTOS_TIMER_TASK_STACK_DEPTH
+#define CONFIG_TIMER_TASK_STACK_SIZE CONFIG_ESP_TIMER_TASK_STACK_SIZE
+#define CONFIG_UDP_RECVMBOX_SIZE CONFIG_LWIP_UDP_RECVMBOX_SIZE
+#define CONFIG_WPA_MBEDTLS_CRYPTO CONFIG_ESP_WIFI_MBEDTLS_CRYPTO
+#define CONFIG_WPA_MBEDTLS_TLS_CLIENT CONFIG_ESP_WIFI_MBEDTLS_TLS_CLIENT
+
+// ====== FILE: ./src/kernel.h ======
+#pragma once
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
+#include "esp_timer.h"
+#include "freertos/semphr.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <stddef.h>
+#include "list.h"
+
+void sys_heartbeat(subsys_id_t subsys);//рапорт о работе
+
+int create_task(const char* name, TaskFunction_t func,void *arg,
+                uint32_t stack_bytes, UBaseType_t priority,
+                TaskHandle_t *out_handle, subsys_id_t subsys_id);//создание задачи
+
+int kill_task(TaskHandle_t handle);//уничтожение задачи
+
+int kill_subsystem(subsys_id_t subsys_id);//уничтожение подсистемы
+
+void start();//стартовая функция
+
+void supervisor(void *pvParameters);//главная задача супервизора
+
+
+int create_queue(UBaseType_t len_queue, UBaseType_t item_size,
+                QueueHandle_t *out_queue);//создание очереди
+// ====== FILE: ./src/subsystems.h ======
+/*Данные файлы subsystem являются тестовыми,некими полигонами и нечего общего с основной частью в виде ядра и т.д не имеют*/
+#pragma once
+
+#include "driver/gpio.h"
+#include "list.h"
+
+#define BUTTON_PIN GPIO_NUM_15
+
+//void IRAM_ATTR button_isr_handler(void *arg);
+void hard(void *pvParameters);
+void power(void *pvParameters);//тестовая задача
+void display(void *pvParameters);
+void lora(void *pvParameters);
+
+// ====== FILE: ./src/config.h ======
+#pragma once
+
+            /*  kernel  */
+#define SUBSYS_COUNT                   4
+#define HEARTBEAT_TIMEOUT_MS           5000
+
+            /*  list  */
+#define TASKS_MAX                      15
+
+        /*  drivers/ili9341  */
+#define DISP_MOSI_NUM                  11
+#define DISP_SCLK_NUM                  12
+#define DISP_RESET_NUM                 5
+#define DISP_DC_NUM                    4
+#define DISP_CS_NUM                    18
+#define DISP_MAX_TRANSFER_SZ           15000
+#define DISP_FREQ                      60000000
+
+        /*  drivers/sx127x  */
+#define SX_MOSI_NUM                    5
+#define SX_MISO_NUM                    4
+#define SX_SCLK_NUM                    6
+#define SX_RESET_NUM                   1
+#define SX_CS_NUM                      7
+#define SX_FREQ                        4000000
+
+       /*  drivers/dq27441_g1  */
+#define BQ_SCL_NUM                     22
+#define BQ_SDA_NUM                     21
+#define BQ_I2C_FREQ                    100000
+// ====== FILE: ./src/kernel.c ======
+#include "config.h"
+#include "esp_log.h"
+#include "kernel.h"
+#include "subsystems.h"
+#include "subsystems/lora_tdma/tdma.h"
+
+
+
+TaskHandle_t *disp = NULL;
+
+typedef struct {
+    uint64_t last_seen_ms;
+    bool is_monitored;
+} subsys_health_t;//структура жизненного состаяния подсистемы
+
+static const char *TAG_KERNEL = "KERNEL";
+
+// 2. Спинлок ядра для синхронизации в SMP (ESP32-S3)
+static portMUX_TYPE kernel_spinlock = portMUX_INITIALIZER_UNLOCKED;
+
+static subsys_health_t subsys_health[SUBSYS_COUNT] = {0};
+
+void sys_heartbeat(subsys_id_t subsys){
+    if (subsys <= SUBSYS_CORE || subsys >= SUBSYS_COUNT) {
+        return;
+    }
+
+    uint64_t now_ms = esp_timer_get_time() / 1000;
+
+    portENTER_CRITICAL(&kernel_spinlock);
+    subsys_health[subsys].last_seen_ms = now_ms;
+    subsys_health[subsys].is_monitored = true;
+    portEXIT_CRITICAL(&kernel_spinlock);
+}
+
+int create_task(const char* name, TaskFunction_t func, void *arg, uint32_t stack_bytes, UBaseType_t priority, TaskHandle_t *out_handle, subsys_id_t subsys_id){
+    TaskHandle_t created_handle = NULL;
+    BaseType_t res = xTaskCreate(
+        func,
+        name,
+        stack_bytes,
+        arg,
+        priority,
+        &created_handle   
+    );
+    if (res != pdPASS) {
+        return -1;
+    }
+    int status = task_add(name, func, stack_bytes, priority, created_handle, subsys_id);
+    if (status == -1){
+        vTaskDelete(created_handle);
+        return -1;
+    }
+    if (out_handle != NULL) {
+        *out_handle = created_handle;
+    }
+    return 1;
+    
+}
+int kill_task(TaskHandle_t handle){
+    if(handle == NULL){
+        return -1;
+    }
+    int status = task_delete(handle);
+    if (status == -1){
+        return -1;
+    }
+    vTaskDelete(handle);
+    return 1;
+    
+}
+int kill_subsystem(subsys_id_t subsystem_id){
+    if (subsystem_id == SUBSYS_CORE){
+        return -1;
+    }
+    TaskHandle_t targets[TASKS_MAX];
+    int count = 0;
+    list_tasks_t *tasks = list_get();
+    for (int i = 0;i < TASKS_MAX;i++){
+        if (tasks[i].handle != NULL && tasks[i].subsys_id == subsystem_id){
+            targets[count++] = tasks[i].handle;
+        }
+    }
+    for (int i = 0;i < count;i++){
+        kill_task(targets[i]);
+    }
+    return count;
+}
+
+void start(void){//возможно перемешение стартовой функции в main.c
+    create_task("LoRa",tdma,NULL,15000,1,disp,SUBSYS_LORA);
+}
+
+void supervisor(void *pvParameters){
+    (void)pvParameters;
+
+    for (;;) {
+        vTaskDelay(pdMS_TO_TICKS(1000));
+
+        uint64_t now_ms = esp_timer_get_time() / 1000;
+
+        for (int i = 1; i < SUBSYS_COUNT; i++) {
+            portENTER_CRITICAL(&kernel_spinlock);
+            bool monitored = subsys_health[i].is_monitored;
+            uint64_t last = subsys_health[i].last_seen_ms;
+            portEXIT_CRITICAL(&kernel_spinlock);
+
+            if (monitored && (now_ms - last > HEARTBEAT_TIMEOUT_MS)) {
+                ESP_LOGI(TAG_KERNEL, "Subsystem %d hung! Heartbeat timed out (%llu ms). Killing...", 
+                         i, now_ms - last);
+
+                // Отключаем мониторинг, чтобы не спамить повторным киллом
+                portENTER_CRITICAL(&kernel_spinlock);
+                subsys_health[i].is_monitored = false;
+                portEXIT_CRITICAL(&kernel_spinlock);
+
+                // Прибиваем все дочерние таски зависшего модуля
+                kill_subsystem((subsys_id_t)i);
+            }
+        }
+    }
+
+}
+
+int create_queue(UBaseType_t queue_len, UBaseType_t item_size, QueueHandle_t *out_queue) {
+    if (out_queue == NULL || queue_len == 0 || item_size == 0) {
+        return -1;
+    }
+
+    QueueHandle_t q = xQueueCreate(queue_len, item_size);
+    if (q == NULL) {
+        ESP_LOGE(TAG_KERNEL, "Failed to allocate FreeRTOS queue");
+        return -1;
+    }
+
+    *out_queue = q;
+    return 1;
+}
+
+// ====== FILE: ./src/font5x7.h ======
+#pragma once
+
+#include <stdint.h>
+
+static const uint8_t font[]  = {
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x3E, 0x5B, 0x4F, 0x5B, 0x3E, 0x3E, 0x6B,
+    0x4F, 0x6B, 0x3E, 0x1C, 0x3E, 0x7C, 0x3E, 0x1C, 0x18, 0x3C, 0x7E, 0x3C,
+    0x18, 0x1C, 0x57, 0x7D, 0x57, 0x1C, 0x1C, 0x5E, 0x7F, 0x5E, 0x1C, 0x00,
+    0x18, 0x3C, 0x18, 0x00, 0xFF, 0xE7, 0xC3, 0xE7, 0xFF, 0x00, 0x18, 0x24,
+    0x18, 0x00, 0xFF, 0xE7, 0xDB, 0xE7, 0xFF, 0x30, 0x48, 0x3A, 0x06, 0x0E,
+    0x26, 0x29, 0x79, 0x29, 0x26, 0x40, 0x7F, 0x05, 0x05, 0x07, 0x40, 0x7F,
+    0x05, 0x25, 0x3F, 0x5A, 0x3C, 0xE7, 0x3C, 0x5A, 0x7F, 0x3E, 0x1C, 0x1C,
+    0x08, 0x08, 0x1C, 0x1C, 0x3E, 0x7F, 0x14, 0x22, 0x7F, 0x22, 0x14, 0x5F,
+    0x5F, 0x00, 0x5F, 0x5F, 0x06, 0x09, 0x7F, 0x01, 0x7F, 0x00, 0x66, 0x89,
+    0x95, 0x6A, 0x60, 0x60, 0x60, 0x60, 0x60, 0x94, 0xA2, 0xFF, 0xA2, 0x94,
+    0x08, 0x04, 0x7E, 0x04, 0x08, 0x10, 0x20, 0x7E, 0x20, 0x10, 0x08, 0x08,
+    0x2A, 0x1C, 0x08, 0x08, 0x1C, 0x2A, 0x08, 0x08, 0x1E, 0x10, 0x10, 0x10,
+    0x10, 0x0C, 0x1E, 0x0C, 0x1E, 0x0C, 0x30, 0x38, 0x3E, 0x38, 0x30, 0x06,
+    0x0E, 0x3E, 0x0E, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5F,
+    0x00, 0x00, 0x00, 0x07, 0x00, 0x07, 0x00, 0x14, 0x7F, 0x14, 0x7F, 0x14,
+    0x24, 0x2A, 0x7F, 0x2A, 0x12, 0x23, 0x13, 0x08, 0x64, 0x62, 0x36, 0x49,
+    0x56, 0x20, 0x50, 0x00, 0x08, 0x07, 0x03, 0x00, 0x00, 0x1C, 0x22, 0x41,
+    0x00, 0x00, 0x41, 0x22, 0x1C, 0x00, 0x2A, 0x1C, 0x7F, 0x1C, 0x2A, 0x08,
+    0x08, 0x3E, 0x08, 0x08, 0x00, 0x80, 0x70, 0x30, 0x00, 0x08, 0x08, 0x08,
+    0x08, 0x08, 0x00, 0x00, 0x60, 0x60, 0x00, 0x20, 0x10, 0x08, 0x04, 0x02,
+    0x3E, 0x51, 0x49, 0x45, 0x3E, 0x00, 0x42, 0x7F, 0x40, 0x00, 0x72, 0x49,
+    0x49, 0x49, 0x46, 0x21, 0x41, 0x49, 0x4D, 0x33, 0x18, 0x14, 0x12, 0x7F,
+    0x10, 0x27, 0x45, 0x45, 0x45, 0x39, 0x3C, 0x4A, 0x49, 0x49, 0x31, 0x41,
+    0x21, 0x11, 0x09, 0x07, 0x36, 0x49, 0x49, 0x49, 0x36, 0x46, 0x49, 0x49,
+    0x29, 0x1E, 0x00, 0x00, 0x14, 0x00, 0x00, 0x00, 0x40, 0x34, 0x00, 0x00,
+    0x00, 0x08, 0x14, 0x22, 0x41, 0x14, 0x14, 0x14, 0x14, 0x14, 0x00, 0x41,
+    0x22, 0x14, 0x08, 0x02, 0x01, 0x59, 0x09, 0x06, 0x3E, 0x41, 0x5D, 0x59,
+    0x4E, 0x7C, 0x12, 0x11, 0x12, 0x7C, 0x7F, 0x49, 0x49, 0x49, 0x36, 0x3E,
+    0x41, 0x41, 0x41, 0x22, 0x7F, 0x41, 0x41, 0x41, 0x3E, 0x7F, 0x49, 0x49,
+    0x49, 0x41, 0x7F, 0x09, 0x09, 0x09, 0x01, 0x3E, 0x41, 0x41, 0x51, 0x73,
+    0x7F, 0x08, 0x08, 0x08, 0x7F, 0x00, 0x41, 0x7F, 0x41, 0x00, 0x20, 0x40,
+    0x41, 0x3F, 0x01, 0x7F, 0x08, 0x14, 0x22, 0x41, 0x7F, 0x40, 0x40, 0x40,
+    0x40, 0x7F, 0x02, 0x1C, 0x02, 0x7F, 0x7F, 0x04, 0x08, 0x10, 0x7F, 0x3E,
+    0x41, 0x41, 0x41, 0x3E, 0x7F, 0x09, 0x09, 0x09, 0x06, 0x3E, 0x41, 0x51,
+    0x21, 0x5E, 0x7F, 0x09, 0x19, 0x29, 0x46, 0x26, 0x49, 0x49, 0x49, 0x32,
+    0x03, 0x01, 0x7F, 0x01, 0x03, 0x3F, 0x40, 0x40, 0x40, 0x3F, 0x1F, 0x20,
+    0x40, 0x20, 0x1F, 0x3F, 0x40, 0x38, 0x40, 0x3F, 0x63, 0x14, 0x08, 0x14,
+    0x63, 0x03, 0x04, 0x78, 0x04, 0x03, 0x61, 0x59, 0x49, 0x4D, 0x43, 0x00,
+    0x7F, 0x41, 0x41, 0x41, 0x02, 0x04, 0x08, 0x10, 0x20, 0x00, 0x41, 0x41,
+    0x41, 0x7F, 0x04, 0x02, 0x01, 0x02, 0x04, 0x40, 0x40, 0x40, 0x40, 0x40,
+    0x00, 0x03, 0x07, 0x08, 0x00, 0x20, 0x54, 0x54, 0x78, 0x40, 0x7F, 0x28,
+    0x44, 0x44, 0x38, 0x38, 0x44, 0x44, 0x44, 0x28, 0x38, 0x44, 0x44, 0x28,
+    0x7F, 0x38, 0x54, 0x54, 0x54, 0x18, 0x00, 0x08, 0x7E, 0x09, 0x02, 0x18,
+    0xA4, 0xA4, 0x9C, 0x78, 0x7F, 0x08, 0x04, 0x04, 0x78, 0x00, 0x44, 0x7D,
+    0x40, 0x00, 0x20, 0x40, 0x40, 0x3D, 0x00, 0x7F, 0x10, 0x28, 0x44, 0x00,
+    0x00, 0x41, 0x7F, 0x40, 0x00, 0x7C, 0x04, 0x78, 0x04, 0x78, 0x7C, 0x08,
+    0x04, 0x04, 0x78, 0x38, 0x44, 0x44, 0x44, 0x38, 0xFC, 0x18, 0x24, 0x24,
+    0x18, 0x18, 0x24, 0x24, 0x18, 0xFC, 0x7C, 0x08, 0x04, 0x04, 0x08, 0x48,
+    0x54, 0x54, 0x54, 0x24, 0x04, 0x04, 0x3F, 0x44, 0x24, 0x3C, 0x40, 0x40,
+    0x20, 0x7C, 0x1C, 0x20, 0x40, 0x20, 0x1C, 0x3C, 0x40, 0x30, 0x40, 0x3C,
+    0x44, 0x28, 0x10, 0x28, 0x44, 0x4C, 0x90, 0x90, 0x90, 0x7C, 0x44, 0x64,
+    0x54, 0x4C, 0x44, 0x00, 0x08, 0x36, 0x41, 0x00, 0x00, 0x00, 0x77, 0x00,
+    0x00, 0x00, 0x41, 0x36, 0x08, 0x00, 0x02, 0x01, 0x02, 0x04, 0x02, 0x3C,
+    0x26, 0x23, 0x26, 0x3C, 0x1E, 0xA1, 0xA1, 0x61, 0x12, 0x3A, 0x40, 0x40,
+    0x20, 0x7A, 0x38, 0x54, 0x54, 0x55, 0x59, 0x21, 0x55, 0x55, 0x79, 0x41,
+    0x22, 0x54, 0x54, 0x78, 0x42, // a-umlaut
+    0x21, 0x55, 0x54, 0x78, 0x40, 0x20, 0x54, 0x55, 0x79, 0x40, 0x0C, 0x1E,
+    0x52, 0x72, 0x12, 0x39, 0x55, 0x55, 0x55, 0x59, 0x39, 0x54, 0x54, 0x54,
+    0x59, 0x39, 0x55, 0x54, 0x54, 0x58, 0x00, 0x00, 0x45, 0x7C, 0x41, 0x00,
+    0x02, 0x45, 0x7D, 0x42, 0x00, 0x01, 0x45, 0x7C, 0x40, 0x7D, 0x12, 0x11,
+    0x12, 0x7D, // A-umlaut
+    0xF0, 0x28, 0x25, 0x28, 0xF0, 0x7C, 0x54, 0x55, 0x45, 0x00, 0x20, 0x54,
+    0x54, 0x7C, 0x54, 0x7C, 0x0A, 0x09, 0x7F, 0x49, 0x32, 0x49, 0x49, 0x49,
+    0x32, 0x3A, 0x44, 0x44, 0x44, 0x3A, // o-umlaut
+    0x32, 0x4A, 0x48, 0x48, 0x30, 0x3A, 0x41, 0x41, 0x21, 0x7A, 0x3A, 0x42,
+    0x40, 0x20, 0x78, 0x00, 0x9D, 0xA0, 0xA0, 0x7D, 0x3D, 0x42, 0x42, 0x42,
+    0x3D, // O-umlaut
+    0x3D, 0x40, 0x40, 0x40, 0x3D, 0x3C, 0x24, 0xFF, 0x24, 0x24, 0x48, 0x7E,
+    0x49, 0x43, 0x66, 0x2B, 0x2F, 0xFC, 0x2F, 0x2B, 0xFF, 0x09, 0x29, 0xF6,
+    0x20, 0xC0, 0x88, 0x7E, 0x09, 0x03, 0x20, 0x54, 0x54, 0x79, 0x41, 0x00,
+    0x00, 0x44, 0x7D, 0x41, 0x30, 0x48, 0x48, 0x4A, 0x32, 0x38, 0x40, 0x40,
+    0x22, 0x7A, 0x00, 0x7A, 0x0A, 0x0A, 0x72, 0x7D, 0x0D, 0x19, 0x31, 0x7D,
+    0x26, 0x29, 0x29, 0x2F, 0x28, 0x26, 0x29, 0x29, 0x29, 0x26, 0x30, 0x48,
+    0x4D, 0x40, 0x20, 0x38, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08,
+    0x38, 0x2F, 0x10, 0xC8, 0xAC, 0xBA, 0x2F, 0x10, 0x28, 0x34, 0xFA, 0x00,
+    0x00, 0x7B, 0x00, 0x00, 0x08, 0x14, 0x2A, 0x14, 0x22, 0x22, 0x14, 0x2A,
+    0x14, 0x08, 0x55, 0x00, 0x55, 0x00, 0x55, 
+    0xAA, 0x55, 0xAA, 0x55, 0xAA,
+    0xFF, 0x55, 0xFF, 0x55, 0xFF,
+    0x00, 0x00, 0x00, 0xFF, 0x00, 0x10, 0x10, 0x10, 0xFF, 0x00, 0x14, 0x14,
+    0x14, 0xFF, 0x00, 0x10, 0x10, 0xFF, 0x00, 0xFF, 0x10, 0x10, 0xF0, 0x10,
+    0xF0, 0x14, 0x14, 0x14, 0xFC, 0x00, 0x14, 0x14, 0xF7, 0x00, 0xFF, 0x00,
+    0x00, 0xFF, 0x00, 0xFF, 0x14, 0x14, 0xF4, 0x04, 0xFC, 0x14, 0x14, 0x17,
+    0x10, 0x1F, 0x10, 0x10, 0x1F, 0x10, 0x1F, 0x14, 0x14, 0x14, 0x1F, 0x00,
+    0x10, 0x10, 0x10, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x1F, 0x10, 0x10, 0x10,
+    0x10, 0x1F, 0x10, 0x10, 0x10, 0x10, 0xF0, 0x10, 0x00, 0x00, 0x00, 0xFF,
+    0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0xFF, 0x10, 0x00,
+    0x00, 0x00, 0xFF, 0x14, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0x00, 0x1F,
+    0x10, 0x17, 0x00, 0x00, 0xFC, 0x04, 0xF4, 0x14, 0x14, 0x17, 0x10, 0x17,
+    0x14, 0x14, 0xF4, 0x04, 0xF4, 0x00, 0x00, 0xFF, 0x00, 0xF7, 0x14, 0x14,
+    0x14, 0x14, 0x14, 0x14, 0x14, 0xF7, 0x00, 0xF7, 0x14, 0x14, 0x14, 0x17,
+    0x14, 0x10, 0x10, 0x1F, 0x10, 0x1F, 0x14, 0x14, 0x14, 0xF4, 0x14, 0x10,
+    0x10, 0xF0, 0x10, 0xF0, 0x00, 0x00, 0x1F, 0x10, 0x1F, 0x00, 0x00, 0x00,
+    0x1F, 0x14, 0x00, 0x00, 0x00, 0xFC, 0x14, 0x00, 0x00, 0xF0, 0x10, 0xF0,
+    0x10, 0x10, 0xFF, 0x10, 0xFF, 0x14, 0x14, 0x14, 0xFF, 0x14, 0x10, 0x10,
+    0x10, 0x1F, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x10, 0xFF, 0xFF, 0xFF, 0xFF,
+    0xFF, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0xFF, 0xFF, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x38, 0x44, 0x44,
+    0x38, 0x44, 0xFC, 0x4A, 0x4A, 0x4A, 0x34, // sharp-s or beta
+    0x7E, 0x02, 0x02, 0x06, 0x06, 0x02, 0x7E, 0x02, 0x7E, 0x02, 0x63, 0x55,
+    0x49, 0x41, 0x63, 0x38, 0x44, 0x44, 0x3C, 0x04, 0x40, 0x7E, 0x20, 0x1E,
+    0x20, 0x06, 0x02, 0x7E, 0x02, 0x02, 0x99, 0xA5, 0xE7, 0xA5, 0x99, 0x1C,
+    0x2A, 0x49, 0x2A, 0x1C, 0x4C, 0x72, 0x01, 0x72, 0x4C, 0x30, 0x4A, 0x4D,
+    0x4D, 0x30, 0x30, 0x48, 0x78, 0x48, 0x30, 0xBC, 0x62, 0x5A, 0x46, 0x3D,
+    0x3E, 0x49, 0x49, 0x49, 0x00, 0x7E, 0x01, 0x01, 0x01, 0x7E, 0x2A, 0x2A,
+    0x2A, 0x2A, 0x2A, 0x44, 0x44, 0x5F, 0x44, 0x44, 0x40, 0x51, 0x4A, 0x44,
+    0x40, 0x40, 0x44, 0x4A, 0x51, 0x40, 0x00, 0x00, 0xFF, 0x01, 0x03, 0xE0,
+    0x80, 0xFF, 0x00, 0x00, 0x08, 0x08, 0x6B, 0x6B, 0x08, 0x36, 0x12, 0x36,
+    0x24, 0x36, 0x06, 0x0F, 0x09, 0x0F, 0x06, 0x00, 0x00, 0x18, 0x18, 0x00,
+    0x00, 0x00, 0x10, 0x10, 0x00, 0x30, 0x40, 0xFF, 0x01, 0x01, 0x00, 0x1F,
+    0x01, 0x01, 0x1E, 0x00, 0x19, 0x1D, 0x17, 0x12, 0x00, 0x3C, 0x3C, 0x3C,
+    0x3C, 0x00, 0x00, 0x00, 0x00, 0x00 // #255 NBSP
+};
+
+// ====== FILE: ./src/subsystems/lora_tdma/lora_packet.h ======
+#pragma once
+
+#include <stdio.h>
+#include <stddef.h>
+#include <stdint.h>
+
+typedef struct __attribute__((packed)) {
+    uint8_t id_recipient;
+    uint8_t id_sender;
+    uint8_t type_paket;
+    uint16_t flags;
+    uint8_t num_packet;
+    uint8_t crc;
+    uint8_t payload_len;
+    uint8_t payload[];
+
+} packet_handle_t;
+
+// ====== FILE: ./src/subsystems/lora_tdma/tdma.c ======
+#include "esp_timer.h"
+#include <stdint.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
+#include "esp_log.h"
+#include "driver/gpio.h"
+#include "esp_attr.h"
+#include "drivers/sx127x.h"
+#include "subsystems/lora_tdma/tdma.h"
+#include "subsystems/lora_tdma/lora_packet.h"
+
+#define DIO_NUM          2             // Пин DIO0 от SX127x (согласно config.h / распиновке)
+#define TIME_SLOT_US     500000ULL     // Длительность одного слота: 500 мс (0.5 сек)
+#define NUM_NODES        3             // Всего нод в тестовой сети
+#define MY_NODE_ID       1             // ID этой ноды (поменяй на 0 для второй платы)
+
+#define EVT_SLOT_TICK    (1UL << 0)
+#define EVT_DIO0_IRQ     (1UL << 1)
+
+static const char *TAG = "TDMA_LOG";
+static TaskHandle_t s_tdma_task_hdl = NULL;
+static esp_timer_handle_t s_slot_timer = NULL;
+static volatile uint32_t s_current_slot = 0;
+
+// Аппаратное прерывание от DIO0 (выполняется в IRAM за пару микросекунд)
+static void IRAM_ATTR gpio_isr_handler(void *arg){
+    (void)arg;
+    BaseType_t woken = pdFALSE;
+    if (s_tdma_task_hdl != NULL) {
+        xTaskNotifyFromISR(s_tdma_task_hdl, EVT_DIO0_IRQ, eSetBits, &woken);
+        if (woken == pdTRUE) {
+            portYIELD_FROM_ISR();
+        }
+    }
+}
+
+// Колбэк аппаратного таймера слотов
+static void slot_timer_callback(void *arg) {
+    (void)arg;
+    if (s_tdma_task_hdl != NULL) {
+        xTaskNotify(s_tdma_task_hdl, EVT_SLOT_TICK, eSetBits);
+    }
+}
+
+void tdma(void *pvParameters){
+    (void)pvParameters;
+
+    // 1. Инициализация пина DIO0 на прерывание по переднему фронту (0 -> 1)
+    gpio_config_t g_conf = {
+        .intr_type = GPIO_INTR_POSEDGE,
+        .pin_bit_mask = (1ULL << DIO_NUM),
+        .mode = GPIO_MODE_INPUT,
+        .pull_down_en = GPIO_PULLDOWN_ENABLE,
+        .pull_up_en = GPIO_PULLUP_DISABLE
+    };
+    gpio_config(&g_conf);
+    gpio_install_isr_service(ESP_INTR_FLAG_IRAM);
+    gpio_isr_handler_add(DIO_NUM, gpio_isr_handler, NULL);
+
+    // 2. Инициализация радиомодуля LoRa
+    lora_config_t conf = {
+        .bw_idx = 7,             // 125 кГц[cite: 2]
+        .cr_idx = 5,             // 4/5[cite: 2]
+        .crc_on = true,          // CRC включен[cite: 2]
+        .freq = 433,             // 433 МГц[cite: 2]
+        .sf = 7                  // SF7[cite: 2]
+    };
+    lora_init(&conf);
+
+    int ver = lora_reg_read(0x42);
+    if (ver != 0x12){
+        for (;;){
+            ESP_LOGI(TAG, "Error read register VER=0x%02x", ver);
+            vTaskDelay(pdMS_TO_TICKS(1000));
+        }
+    }
+
+    // Сохраняем хэндл задачи для прерываний
+    s_tdma_task_hdl = xTaskGetCurrentTaskHandle();
+
+    // 3. Запускаем периодический таймер слотов
+    const esp_timer_create_args_t timer_args = {
+        .callback = &slot_timer_callback,
+        .name = "tdma_timer"
+    };
+    esp_timer_create(&timer_args, &s_slot_timer);
+    esp_timer_start_periodic(s_slot_timer, TIME_SLOT_US);
+
+    // 4. Подготавливаем тестовый пакет с твоей структурой packet_handle_t[cite: 2]
+    uint8_t data[] = {0xDE, 0xAD, 0xBE, 0xEF};
+    uint8_t tx_buffer[sizeof(packet_handle_t) + sizeof(data)];
+    packet_handle_t *paket = (packet_handle_t *)tx_buffer;
+    paket->id_recipient = 0xFF; // Всем
+    paket->id_sender    = MY_NODE_ID;
+    paket->type_paket   = 0x01;
+    paket->flags        = 0xFFFF;
+    paket->num_packet   = 0;
+    paket->crc          = 0x00; 
+    paket->payload_len  = sizeof(data);
+    memcpy(paket->payload, data, sizeof(data));
+    size_t total_tx_size = sizeof(packet_handle_t) + paket->payload_len;
+
+    uint8_t rx_message[256];
+    uint32_t notifications = 0;
+
+    // Переводим рацию в непрерывный приём при старте
+    lora_start_rx_continuous();
+    ESP_LOGI(TAG, "TDMA запущен. Node ID = %d, Мой слот TX = %d", MY_NODE_ID, MY_NODE_ID % NUM_NODES);
+
+    for (;;){
+        // Ждем событие от таймера слота или прерывания DIO0
+        xTaskNotifyWait(0x00, 0xFFFFFFFFUL, &notifications, portMAX_DELAY);
+
+        // --- Обработка прерывания от чипа LoRa (DIO0) ---
+        if (notifications & EVT_DIO0_IRQ) {
+            int guard = 5;
+            while (gpio_get_level(DIO_NUM) == 1 && (guard-- > 0)) {
+                uint8_t irq = lora_reg_read(0x12);
+                if (irq == 0) break;
+
+                ESP_LOGI(TAG, "[DIO0] Сработал IRQ(0x12)=0x%02x", irq);
+
+                // 1. Если завершилась наша передача (TxDone = 0x08)
+                if (irq & IRQ_TX_DONE_MASK) {
+                    lora_reg_write(0x12, IRQ_TX_DONE_MASK); // Сбрасываем только флаг TX
+                    ESP_LOGI(TAG, "[DIO0] Пакет успешно улетел в эфир! Возврат в RX.");
+                    lora_start_rx_continuous();
+                }
+
+                // 2. Если принят пакет из эфира (RxDone = 0x40)
+                if (irq & IRQ_RX_DONE_MASK) {
+                    // НЕ сбрасываем 0x12 здесь — его сама проверит и сбросит lora_receive_packet()!
+                    int len = lora_receive_packet(rx_message, sizeof(rx_message));
+                    if (len > 0) {
+                        packet_handle_t *incoming = (packet_handle_t *)rx_message;
+                        ESP_LOGI(TAG, ">>> [DIO0] ПРИНЯТ ПАКЕТ от Node 0x%02x | №%u | длина %d байт | RSSI=%d dBm",
+                                 incoming->id_sender, incoming->num_packet, len, lora_packet_rssi());
+
+                        // Автосинхронизация слотов по эфиру: подстраиваемся под Node 0
+                        if (MY_NODE_ID != 0 && incoming->id_sender == 0) {
+                            s_current_slot = 1; // Следующий слот после Node 0 — это слот 1
+                            esp_timer_stop(s_slot_timer);
+                            esp_timer_start_periodic(s_slot_timer, TIME_SLOT_US);
+                        }
+                    } else if (len == -1) {
+                        ESP_LOGW(TAG, "[DIO0] Ошибка CRC, пакет отброшен.");
+                    }
+                }
+
+                // На случай любых других побочных флагов (например, ValidHeader 0x10)
+                uint8_t rem = lora_reg_read(0x12);
+                if (rem != 0) {
+                    lora_reg_write(0x12, rem);
+                }
+            }
+        }
+
+        // --- Обработка смены тайм-слота ---
+        if (notifications & EVT_SLOT_TICK) {
+            // Рассчитываем номер текущего слота на основе глобального счётчика
+            uint32_t active_nod = s_current_slot % NUM_NODES;
+
+            if (active_nod == MY_NODE_ID) {
+                // Наступил наш слот — отправляем пакет асинхронно
+                ESP_LOGI(TAG, "--- Слот %lu (Мой TX) ---", (unsigned long)s_current_slot);
+                paket->num_packet++;
+                lora_send_packet_async(tx_buffer, total_tx_size);
+            } else {
+                // Чужой слот — убеждаемся, что мы в режиме приёма
+                uint8_t opmode = lora_reg_read(0x01);
+                if (opmode != 0x85) { // 0x85 = LoRa + RX_CONTINUOUS
+                    lora_start_rx_continuous();
+                }
+            }
+
+            s_current_slot++;
+        }
+    }
+}
+// ====== FILE: ./src/subsystems/lora_tdma/tdma.h ======
+#pragma once
+
+void tdma(void *pvParameters);
+
+// ====== FILE: ./src/subsystems/lora_tdma/lora_packet.c ======
+
+// ====== FILE: ./src/subsystem.c ======
+#include <stdint.h>
+#include <stdio.h>
+#include "stdint.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
+#include "esp_log.h"
+#include "subsystems.h"
+#include "esp_attr.h"
+#include "list.h"
+#include "drivers/ili9341.h"
+#include "drivers/sx127x.h"
+#include "subsystems/lora_tdma/lora_packet.h"
+
+static const char *TAG = "POWER_LOG";
+
+void hard(void *pvParameters){
+    for (;;){
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
+
+void power(void *pvParameters) {
+    (void)pvParameters; // Глушим варнинг о неиспользуемом аргументе
+
+    for (;;) {
+        // Забираем УКАЗАТЕЛЬ на массив
+        list_tasks_t *task_list = list_get();
+
+        ESP_LOGI(TAG, "--- Active Tasks Dump ---");
+
+        for (int i = 0; i < TASKS_MAX; i++) {
+            // Проверяем, что слот реально занят таской, чтобы не читать пустую память
+            if (task_list[i].name != NULL && task_list[i].handle != NULL) {
+                ESP_LOGI(TAG, "[Slot %d] Name: %s | Func: %p | Stack: %lu | Prio: %u",
+                         i,
+                         task_list[i].name,
+                         (void *)task_list[i].func,
+                         (unsigned long)task_list[i].stack_bytes,
+                         (unsigned int)task_list[i].priority);
+            }
+        }
+
+        // Задержка на весь дамп: спим 2 секунды перед следующим выводом
+        vTaskDelay(pdMS_TO_TICKS(2000));
+    }
+}
+
+void display(void *pvParameters){
+    display_init();
+    display_fill_screen(0x0000);
+    display_fill_rect(20,50,140,170,0xFFFF);
+    display_fill_rect(21,51,139,169,0x0000);
+    display_fill_circle(250,100,50,0xF800);
+    display_draw_line(20,210,200,20,0x07E0);
+    display_draw_string(100,200,"Hello,World!",0xFFFF,0x0000, 2);
+    for (;;){
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
+
+void lora(void *pvParameters){
+    lora_config_t conf = {
+    .bw_idx = 7,             // 7 соответствует полосе 125 кГц
+    .cr_idx = 5,             // 5 соответствует кодированию 4/5 (библиотека сама вычтет 4)
+    .crc_on = true,          // Включит CRC (в коде сработает условие 1 << 2)
+    .freq = 433,             // Частота 433 МГц (в Герцах)
+    .sf = 7                  // Коэффициент SF7 (оптимально для тестов)
+    };
+    lora_init(&conf);
+    int ver = lora_reg_read(0x42);
+    if (ver != 0x12){
+        for (;;){
+            ESP_LOGI(TAG, "Error read register");
+            vTaskDelay(pdMS_TO_TICKS(1000));
+        }
+    }
+    uint8_t data[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+    // 1. Выделяем сплошной кусок памяти: Заголовок + Данные
+    // tx_buffer физически занимает 8 + 10 = 18 байт
+    uint8_t tx_buffer[sizeof(packet_handle_t) + sizeof(data)];
+
+    // 2. Накладываем "трафарет" нашей структуры на начало буфера
+    packet_handle_t *paket = (packet_handle_t *)tx_buffer;
+
+    // 3. Заполняем заголовок
+    paket->id_recipient = 0x02;
+    paket->id_sender = 0x01;
+    paket->type_paket = 0x01;
+    paket->flags = 0xFFFF;
+    paket->num_packet = 0;
+    paket->crc = 0xFF; // Заглушка, по-хорошему тут вызов calc_crc8()
+    paket->payload_len = sizeof(data);
+
+    // 4. Физически копируем данные в хвост структуры (в flexible array)
+    memcpy(paket->payload, data, sizeof(data));
+
+    // Полный размер пакета для отправки (8 байт заголовка + 10 байт данных)
+    size_t total_tx_size = sizeof(packet_handle_t) + paket->payload_len;
+    for (;;){
+         ESP_LOGI(TAG, "SEND");
+        lora_send_packet(tx_buffer,total_tx_size);
+         ESP_LOGI(TAG, "OK");
+        vTaskDelay(pdMS_TO_TICKS(1000));
+
+    }
+
+}
+
+// ====== FILE: ./src/main.c ======
+#include "kernel.h"
+
+void app_main(void) {
+    start();
+}
+
+// ====== FILE: ./src/list.h ======
+#pragma once
+
+#include "config.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
+
+
+typedef enum {
+    SUBSYS_CORE = 0,    // Само ядро
+    SUBSYS_POWER,       // Контроль батареи, зарядка, сон
+    SUBSYS_LORA,        // Радиостек (RX, TX)
+    SUBSYS_SENSORS      // Датчики
+} subsys_id_t;
+
+typedef struct list_all_task {
+    const char* name;
+    TaskFunction_t func;
+    uint32_t stack_bytes;
+    UBaseType_t priority;
+    TaskHandle_t handle;
+    subsys_id_t subsys_id;
+
+} list_tasks_t;//структура таблицы задач
+
+int task_add(const char* name,TaskFunction_t func,
+            uint32_t stack_bytes, UBaseType_t priority, 
+            TaskHandle_t out_handle, subsys_id_t subsys_id);//добавление задачи в таблицу
+
+int task_delete(TaskHandle_t out_handle);//удаление задачи из таблицы
+
+list_tasks_t *list_get(void);//передача таблицы 
+
+
+
+// ====== FILE: ./src/list.c ======
+#include <string.h>
+#include "list.h"
+
+list_tasks_t list[TASKS_MAX] = {0};//создание блока структуры list
+
+static portMUX_TYPE kernel_spinlock = portMUX_INITIALIZER_UNLOCKED;
+static uint8_t num = 0;//счет задач
+
+
+int task_add(const char* name,TaskFunction_t func, uint32_t stack,UBaseType_t priority,TaskHandle_t out_handle, subsys_id_t subsys_id){//добавление задачи в список
+    if (num >= TASKS_MAX){
+        return -1;
+    }
+    list[num].name = name;
+    list[num].func = func;
+    list[num].stack_bytes = stack;
+    list[num].priority = priority;
+    list[num].handle = out_handle;
+    list[num].subsys_id = subsys_id;
+    num++;
+    return 1;
+    
+}
+
+int task_delete(TaskHandle_t out_handle){
+    if (out_handle == NULL) {
+        return -1;
+    }
+    portENTER_CRITICAL(&kernel_spinlock);
+    int found_idx = -1;
+    for (int i = 0; i < num; i++) {
+        if (list[i].handle == out_handle) {
+            found_idx = i;
+            break;
+        }
+    }
+    if (found_idx == -1) {
+        portEXIT_CRITICAL(&kernel_spinlock);
+        return -1;
+    }
+    for (int i = found_idx; i < num - 1; i++) {
+        list[i] = list[i + 1];
+    }
+    memset(&list[num - 1], 0, sizeof(list_tasks_t));
+    num--;
+    portEXIT_CRITICAL(&kernel_spinlock);
+    return 0;
+
+
+
+
+}
+
+list_tasks_t *list_get(void){//выгрузка списка задач 
+    return list;
+}
+// ====== FILE: ./src/CMakeLists.txt ======
+# This file was automatically generated for projects
+# without default 'CMakeLists.txt' file.
+
+FILE(GLOB_RECURSE app_sources ${CMAKE_SOURCE_DIR}/src/*.*)
+
+idf_component_register(SRCS ${app_sources})
+
+// ====== FILE: ./src/drivers/sx127x.h ======
+#pragma once
+
+#include <stddef.h>
+#include <stdbool.h>
+
+#define DIO0_RX_DONE                   0x00  // DIO0 -> RxDone
+#define DIO0_TX_DONE                   0x40  // DIO0 -> TxDone
+
+#define MODE_RX_CONTINUOUS             0x05
+#define IRQ_TX_DONE_MASK               0x08
+#define IRQ_PAYLOAD_CRC_ERROR_MASK     0x20
+#define IRQ_RX_DONE_MASK               0x40
+
+typedef struct {
+    int freq;
+    int bw_idx;
+    int cr_idx;
+    int sf;
+    bool crc_on;
+} lora_config_t;
+
+
+void lora_reg_write(int reg, int data);
+
+int lora_reg_read(int reg);
+
+void lora_idle(void);
+
+void lora_sleep(void);
+
+void lora_receive(void);
+
+void lora_set_preamble_length(long length);
+
+int lora_init(lora_config_t *config);
+
+void lora_send_packet(uint8_t *buf, int size);
+
+int lora_receive_packet(uint8_t *buf, int size);
+
+int lora_packet_rssi(void);
+
+float lora_packet_snr(void);
+
+void lora_close(void);
+
+void lora_start_rx_continuous(void);
+
+void lora_send_packet_async(uint8_t *buf, int size);
+// ====== FILE: ./src/drivers/ili9341.h ======
+#pragma once
+
+
+void display_init(void);
+
+void display_cmd(uint8_t cmd);
+
+void display_data_byte(uint8_t data);
+
+void display_data(void *data, size_t len);
+
+void display_set_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
+
+void display_fill_screen(uint16_t color);
+
+void display_fill_rect(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
+
+void display_fill_circle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t color);
+
+void display_draw_line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color);
+
+void display_draw_char(int16_t x, int16_t y, char c, uint16_t color, uint16_t bg, uint8_t size);
+
+void display_draw_string(int16_t x, int16_t y, const char *str, uint16_t color, uint16_t bg, uint8_t size);
+// ====== FILE: ./src/drivers/bq27441_g1.c ======
+#include <stdio.h>
+#include <string.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include "esp_rom_sys.h"
+#include "esp_system.h"
+#include "driver/i2c.h"
+#include "config.h"
+#include "soc/gpio_struct.h"
+
+/*  Standard register   */
+
+// Read Of Write Register in 2-byte chunks
+
+#define REG_CONTROL                              0x00
+#define REG_TEMPERATURE                          0x02
+#define REG_VOLTAGE                              0x04
+#define REG_FLAGS                                0x06
+#define REG_NOMINAL_AVAILABLE_CAPACITY           0x08
+#define REG_FULL_AVAILABLE_CAPACITY              0x0A
+#define REG_REMAINING_CAPACITY                   0x0C
+#define REG_FULL_CHARGE_CAPACITY                 0x0E
+#define REG_AVERAGE_CURRENT                      0x10
+#define REG_STANDBY_CURRENT                      0x12
+#define REG_MAX_LOAD_CURRENT                     0x14
+#define REG_AVERAGE_POWER                        0x18
+#define REG_STATE_OF_CHARGE                      0x1C
+#define REG_INTERNAL_TEMPERATURE                 0x1E
+#define REG_STATE_OF_HEALTH                      0x20
+#define REG_REMAINING_CAPACITY_UNFILTERED        0x28
+#define REG_REMAINING_CAPACITY_FILTERED          0x2A
+#define REG_FULL_CHARGE_CAPACITY_UNFILTERED      0x2C
+#define REG_FULL_CHARGE_CAPACITY_FILTERED        0x2E
+#define REG_STATE_OF_CHARGE_UNFILTERED           0x30
+#define REG_TRUE_REMAINING_CAPACITY              0x6A
+
+
+
+
+#define I2C_MASTER_PORT                         I2C_NUM_0
+#define BQ27441_ADDR                            0x55 // Базовый 7-битный адрес чипа
+
+
+int bq_reg_write(uint8_t reg, uint16_t *data, size_t size){
+    int size_buff =  1 + size * 2;
+    uint8_t buff[size_buff];
+
+    buff[0] = reg;
+    int a = 0;
+    for (int i = 1; i < size_buff; i+=2){
+        buff[1 + (a * 2)]     = (uint8_t)(data[a] & 0xFF);
+        buff[1 + (a * 2) + 1] = (uint8_t)((data[a] >> 8) & 0xFF);
+        a++;
+    }
+
+    esp_err_t err = i2c_master_write_to_device(I2C_MASTER_PORT, BQ27441_ADDR, buff, size_buff, pdMS_TO_TICKS(100));
+      if (err == ESP_OK){
+        return 1;
+    }else{
+        return -1;
+    }
+}
+
+int bq_reg_read(uint8_t reg){
+    uint8_t data[2] = {0};
+    esp_err_t err =  i2c_master_write_read_device(I2C_MASTER_PORT, BQ27441_ADDR, &reg, 1, data, 2, pdMS_TO_TICKS(100));
+    if (err == ESP_OK){
+        return (data[1] << 8) | data[0];
+    }else{
+        return -1;
+    }
+
+}
+void bq_init(){
+    i2c_config_t conf = {
+        .mode = I2C_MODE_MASTER,
+        .sda_io_num = BQ_SDA_NUM,
+        .scl_io_num = BQ_SCL_NUM,
+        .sda_pullup_en = GPIO_PULLUP_ENABLE, // Включаем внутренние подтяжки ESP32
+        .scl_pullup_en = GPIO_PULLUP_ENABLE, // (но лучше иметь внешние резисторы на плате)
+        .master.clk_speed = BQ_I2C_FREQ,
+    };
+    i2c_param_config(I2C_MASTER_PORT, &conf);
+    i2c_driver_install(I2C_MASTER_PORT, conf.mode, 0, 0, 0);
+    int flags = bq_reg_read(REG_FLAGS);
+
+    //if (flags == -1){
+    //   return -1;
+    //}
+    /*  Написать функции для создания дефолтного снапшота (на основе макросов и наружнего конфига),
+        выгрузки снапшота из RAM чипа питания и загрузки снапшота в RAM чипа питания    */
+    
+    
+}
+
+// ====== FILE: ./src/drivers/ds18b20.c ======
+#include "driver/gpio.h"
+#include "esp_rom_sys.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
+#define DS18B20_PIN  GPIO_NUM_4
+
+static portMUX_TYPE ds_mux = portMUX_INITIALIZER_UNLOCKED;
+
+
+bool ds18b20_reset(void){
+    bool presence = false;
+    
+    portENTER_CRITICAL(&ds_mux);
+    gpio_set_level(DS18B20_PIN, 0);       
+    portEXIT_CRITICAL(&ds_mux);
+    esp_rom_delay_us(480);                
+
+    portENTER_CRITICAL(&ds_mux);
+    gpio_set_level(DS18B20_PIN, 1);      
+    esp_rom_delay_us(70);                 
+    presence = (gpio_get_level(DS18B20_PIN) == 0);
+    portEXIT_CRITICAL(&ds_mux);
+
+    esp_rom_delay_us(410);             
+    return presence;
+}
+
+
+void ds18b20_write_bit(uint8_t bit){
+    portENTER_CRITICAL(&ds_mux);
+    gpio_set_level(DS18B20_PIN, 0);
+    if (bit) {
+        esp_rom_delay_us(6);             
+        gpio_set_level(DS18B20_PIN, 1);
+        portEXIT_CRITICAL(&ds_mux);
+        esp_rom_delay_us(64);
+    } else {
+        esp_rom_delay_us(60);            
+        gpio_set_level(DS18B20_PIN, 1);
+        portEXIT_CRITICAL(&ds_mux);
+        esp_rom_delay_us(10);
+    }
+}
+
+
+uint8_t ds18b20_read_bit(void){
+    uint8_t bit = 0;
+    portENTER_CRITICAL(&ds_mux);
+    gpio_set_level(DS18B20_PIN, 0);      
+    esp_rom_delay_us(2);
+    gpio_set_level(DS18B20_PIN, 1);       
+    esp_rom_delay_us(10);                
+    bit = gpio_get_level(DS18B20_PIN);
+    portEXIT_CRITICAL(&ds_mux);
+    esp_rom_delay_us(55);
+    return bit;
+}
+
+
+void ds18b20_write_byte(uint8_t data){
+    for (int i = 0; i < 8; i++) {
+        ds18b20_write_bit(data & 0x01);
+        data >>= 1;
+    }
+}
+
+
+uint8_t ds18b20_read_byte(void){
+    uint8_t data = 0;
+    for (int i = 0; i < 8; i++) {
+        if (ds18b20_read_bit()) {
+            data |= (1 << i);
+        }
+    }
+    return data;
+}
+
+float ds18b20_read_temp(void){
+    if (!ds18b20_reset()) {
+        return -999.0f; 
+    }
+    ds18b20_write_byte(0xCC);
+    ds18b20_write_byte(0x44);
+
+    vTaskDelay(pdMS_TO_TICKS(750));
+
+    if (!ds18b20_reset()) {
+        return -999.0f;
+    }
+    ds18b20_write_byte(0xCC); // Skip ROM
+    ds18b20_write_byte(0xBE); // Read Scratchpad
+
+    uint8_t lsb = ds18b20_read_byte();
+    uint8_t msb = ds18b20_read_byte();
+    int16_t raw_temp = (int16_t)((msb << 8) | lsb);
+
+    return (float)raw_temp * 0.0625f;
+}
+
+int ds18b20_init(void){
+    gpio_config_t gpio_conf = {
+        .pin_bit_mask = (1ULL << DS18B20_PIN),
+        .mode = GPIO_MODE_INPUT_OUTPUT_OD, 
+        .pull_up_en = GPIO_PULLUP_ENABLE, 
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE   
+    };
+    gpio_config(&gpio_conf);
+    gpio_set_level(DS18B20_PIN, 1);
+    return 1;
+
+}
+// ====== FILE: ./src/drivers/ili9341.c ======
+#include <stdio.h>
+#include <string.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include "driver/gpio.h"        
+#include "driver/spi_master.h"
+#include "esp_heap_caps.h"
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include "config.h"
+#include "font5x7.h"
+
+
+static spi_device_handle_t spi_dev;
+uint8_t cmd;
+
+void display_cmd(uint8_t cmd) {
+    gpio_set_level(DISP_DC_NUM, 0); 
+
+    spi_transaction_t t = {
+        .length = 8,        
+        .tx_buffer = &cmd   
+    };
+    spi_device_polling_transmit(spi_dev, &t);
+}
+
+void display_data_byte(uint8_t data) {
+    gpio_set_level(DISP_DC_NUM, 1); 
+    spi_transaction_t t = {
+        .flags = SPI_TRANS_USE_TXDATA,
+        .length = 8,
+        .tx_data = { data }
+    };
+    spi_device_polling_transmit(spi_dev, &t);
+}
+
+void display_data(void *data, size_t len){
+    gpio_set_level(DISP_DC_NUM, 1); 
+
+    spi_transaction_t t_data = {
+        .length = len * 8, 
+        .tx_buffer = data
+    };
+    spi_device_transmit(spi_dev, &t_data);
+}
+
+void display_init(void){
+    gpio_config_t gpio_conf = {
+        .pin_bit_mask = (1ULL << DISP_DC_NUM) | (1ULL << DISP_RESET_NUM),
+        .mode = GPIO_MODE_OUTPUT,            
+        .pull_up_en = GPIO_PULLUP_DISABLE,     
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE       
+    };
+    gpio_config(&gpio_conf);
+    gpio_set_level(DISP_DC_NUM,0);
+    gpio_set_level(DISP_RESET_NUM,1);
+
+    spi_bus_config_t buscfg = {
+        .mosi_io_num = DISP_MOSI_NUM,
+        .sclk_io_num = DISP_SCLK_NUM,
+        .quadwp_io_num = -1,
+        .quadhd_io_num = -1,
+        .max_transfer_sz = DISP_MAX_TRANSFER_SZ
+    };
+    spi_bus_initialize(SPI2_HOST, &buscfg, SPI_DMA_CH_AUTO);
+
+    spi_device_interface_config_t devcfg = {
+        .clock_speed_hz = DISP_FREQ,
+        .mode = 0,
+        .spics_io_num = DISP_CS_NUM,
+        .queue_size = 7
+    };
+    spi_bus_add_device(SPI2_HOST, &devcfg, &spi_dev);
+    
+    display_cmd(0x11);
+    display_cmd(0x36);              // MADCTL
+    display_data_byte(0x28);        // Альбомная ориентация (MV = 1) + BGR
+    vTaskDelay(pdMS_TO_TICKS(120));
+    display_cmd(0x3A);
+    display_data_byte(0x55);
+    display_cmd(0x29);
+    vTaskDelay(pdMS_TO_TICKS(20));
+    
+}
+
+void display_set_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
+    uint8_t caset[4] = { (uint8_t)(x0 >> 8), (uint8_t)(x0 & 0xFF), (uint8_t)(x1 >> 8), (uint8_t)(x1 & 0xFF) };
+    uint8_t raset[4] = { (uint8_t)(y0 >> 8), (uint8_t)(y0 & 0xFF), (uint8_t)(y1 >> 8), (uint8_t)(y1 & 0xFF) };
+
+    display_cmd(0x2A); 
+    display_data(caset, 4);
+
+    display_cmd(0x2B); 
+    display_data(raset, 4);
+
+    display_cmd(0x2C); 
+}
+
+
+void display_fill_screen(uint16_t color) {
+    display_set_window(0, 0, 319, 239);
+
+    const size_t chunk_pixels = 320 * 20;
+    const size_t chunk_bytes = chunk_pixels * sizeof(uint16_t);
+
+    uint16_t *line_buf = (uint16_t *)heap_caps_malloc(chunk_bytes, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
+    if (!line_buf) {
+        printf("Error DMA memory!\n");
+        return;
+    }
+
+    uint16_t swapped_color = (color >> 8) | (color << 8);
+    for (size_t i = 0; i < chunk_pixels; i++) {
+        line_buf[i] = swapped_color;
+    }
+
+    for (int i = 0; i < 12; i++) {
+        display_data(line_buf, chunk_bytes);
+    }
+
+    free(line_buf);
+}
+
+void display_fill_rect(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color) {
+    if (x0 > x1 || y0 > y1) return;
+
+    display_set_window(x0, y0, x1, y1);
+
+    size_t w = (size_t)(x1 - x0 + 1);
+    size_t h = (size_t)(y1 - y0 + 1);
+    size_t total_pixels = w * h;
+
+    #define CHUNK_PIXELS 64
+    static uint16_t chunk[CHUNK_PIXELS];
+
+    uint16_t swapped_color = (color >> 8) | (color << 8);
+    for (size_t i = 0; i < CHUNK_PIXELS; i++) {
+        chunk[i] = swapped_color;
+    }
+
+    while (total_pixels > 0) {
+        size_t to_send = (total_pixels > CHUNK_PIXELS) ? CHUNK_PIXELS : total_pixels;
+        display_data(chunk, to_send * sizeof(uint16_t));
+        total_pixels -= to_send;
+    }
+}
+
+void display_fill_circle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t color) {
+    int16_t x = 0;
+    int16_t y = r;
+    int16_t d = 3 - 2 * r;
+
+    while (y >= x) {
+        // Горизонтальные линии между симметричными точками
+        display_fill_rect(x0 - x, y0 + y, x0 + x, y0 + y, color);
+        display_fill_rect(x0 - x, y0 - y, x0 + x, y0 - y, color);
+        display_fill_rect(x0 - y, y0 + x, x0 + y, y0 + x, color);
+        display_fill_rect(x0 - y, y0 - x, x0 + y, y0 - x, color);
+
+        if (d < 0) {
+            d += 4 * x + 6;
+        } else {
+            d += 4 * (x - y) + 10;
+            y--;
+        }
+        x++;
+    }
+
+}
+
+void display_draw_line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color) {
+    // Строгие горизонтальные и вертикальные линии выгоднее лить сразу пачкой
+    if (y0 == y1) {
+        if (x0 > x1) { int16_t t = x0; x0 = x1; x1 = t; }
+        display_fill_rect(x0, y0, x1, y0, color);
+        return;
+    }
+    if (x0 == x1) {
+        if (y0 > y1) { int16_t t = y0; y0 = y1; y1 = t; }
+        display_fill_rect(x0, y0, x0, y1, color);
+        return;
+    }
+
+    // Алгоритм Брезенхема для произвольного наклона
+    int16_t dx = abs(x1 - x0);
+    int16_t sx = (x0 < x1) ? 1 : -1;
+    int16_t dy = -abs(y1 - y0);
+    int16_t sy = (y0 < y1) ? 1 : -1;
+    int16_t err = dx + dy;
+
+    for (;;) {
+        // Ставим один пиксель
+        display_fill_rect(x0, y0, x0, y0, color);
+
+        if (x0 == x1 && y0 == y1) break;
+
+        int16_t e2 = 2 * err;
+        if (e2 >= dy) {
+            err += dy;
+            x0 += sx;
+        }
+        if (e2 <= dx) {
+            err += dx;
+            y0 += sy;
+        }
+    }
+}
+
+void display_draw_char(int16_t x, int16_t y, char c, uint16_t color, uint16_t bg, uint8_t size) {
+   
+    const uint8_t *bitmap = &font[(uint8_t)c * 5];
+
+    
+    for (int8_t i = 0; i < 5; i++) {
+        uint8_t line = bitmap[i]; 
+
+        
+        for (int8_t j = 0; j < 8; j++) {
+            if (line & 0x01) {
+               
+                if (size == 1) {
+                    display_fill_rect(x + i, y + j, x + i, y + j, color);
+                } else {
+                    display_fill_rect(x + i * size, y + j * size, x + (i + 1) * size - 1, y + (j + 1) * size - 1, color);
+                }
+            } else if (bg != color) {
+                
+                if (size == 1) {
+                    display_fill_rect(x + i, y + j, x + i, y + j, bg);
+                } else {
+                    display_fill_rect(x + i * size, y + j * size, x + (i + 1) * size - 1, y + (j + 1) * size - 1, bg);
+                }
+            }
+            line >>= 1;
+        }
+    }
+
+   
+    if (bg != color) {
+        display_fill_rect(x + 5 * size, y, x + 6 * size - 1, y + 8 * size - 1, bg);
+    }
+}
+void display_draw_string(int16_t x, int16_t y, const char *str, uint16_t color, uint16_t bg, uint8_t size) {
+    int16_t cursor_x = x;
+    int16_t cursor_y = y;
+
+    while (*str) {
+        if (*str == '\n') {
+            cursor_y += 8 * size + 2; 
+            cursor_x = x;
+        } else {
+            display_draw_char(cursor_x, cursor_y, *str, color, bg, size);
+            cursor_x += 6 * size;    
+        }
+        str++;
+    }
+}
+// ====== FILE: ./src/drivers/sx127x.c ======
+#include <stdio.h>
+#include <string.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include "esp_rom_sys.h"
+#include "esp_system.h"
+#include "driver/spi_master.h"
+#include "soc/gpio_struct.h"
+#include "driver/gpio.h"
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include "config.h"
+#include <drivers/sx127x.h>
+
+
+/*
+ * Register definitions
+ */
+#define REG_FIFO                       0x00
+#define REG_OP_MODE                    0x01
+#define REG_FRF_MSB                    0x06
+#define REG_FRF_MID                    0x07
+#define REG_FRF_LSB                    0x08
+#define REG_PA_CONFIG                  0x09
+#define REG_LNA                        0x0c
+#define REG_FIFO_ADDR_PTR              0x0d
+#define REG_FIFO_TX_BASE_ADDR          0x0e
+#define REG_FIFO_RX_BASE_ADDR          0x0f
+#define REG_FIFO_RX_CURRENT_ADDR       0x10
+#define REG_IRQ_FLAGS                  0x12
+#define REG_RX_NB_BYTES                0x13
+#define REG_PKT_SNR_VALUE              0x19
+#define REG_PKT_RSSI_VALUE             0x1a
+#define REG_MODEM_CONFIG_1             0x1d
+#define REG_MODEM_CONFIG_2             0x1e
+#define REG_PREAMBLE_MSB               0x20
+#define REG_PREAMBLE_LSB               0x21
+#define REG_PAYLOAD_LENGTH             0x22
+#define REG_MODEM_CONFIG_3             0x26
+#define REG_RSSI_WIDEBAND              0x2c
+#define REG_DETECTION_OPTIMIZE         0x31
+#define REG_DETECTION_THRESHOLD        0x37
+#define REG_SYNC_WORD                  0x39
+#define REG_DIO_MAPPING_1              0x40
+#define REG_VERSION                    0x42
+
+
+/*
+ * Transceiver modes
+ */
+#define MODE_LONG_RANGE_MODE           0x80
+#define MODE_SLEEP                     0x00
+#define MODE_STDBY                     0x01
+#define MODE_TX                        0x03
+#define MODE_RX_CONTINUOUS             0x05
+#define MODE_RX_SINGLE                 0x06
+
+/*
+ * PA configuration
+ */
+#define PA_BOOST                       0x80
+
+/*
+ * IRQ masks
+ */
+#define IRQ_TX_DONE_MASK               0x08
+#define IRQ_PAYLOAD_CRC_ERROR_MASK     0x20
+#define IRQ_RX_DONE_MASK               0x40
+
+#define PA_OUTPUT_RFO_PIN              0
+#define PA_OUTPUT_PA_BOOST_PIN         1
+
+#define TIMEOUT_RESET                  100
+
+
+static spi_device_handle_t spi_dev;
+
+//static int __implicit;
+static long __frequency;
+
+void lora_reg_write(int reg, int data){
+    /*
+     * Write register
+     */
+    uint8_t out[2] = {0x80 | reg, data};
+    uint8_t in[2];
+
+    spi_transaction_t t = {
+        .flags = 0,
+        .length = 8 * sizeof(out),
+        .tx_buffer = out,
+        .rx_buffer = in
+    };
+    spi_device_polling_transmit(spi_dev, &t);
+}
+
+int lora_reg_read(int reg){
+    /*
+     * Read register
+     */
+    uint8_t out[2] = {reg, 0xFF};
+    uint8_t in[2];
+
+    spi_transaction_t t = {
+        .flags = 0,
+        .length = 8 * sizeof(out),
+        .tx_buffer = out,
+        .rx_buffer = in
+    };
+    spi_device_polling_transmit(spi_dev, &t);
+    return in[1];
+}
+
+void lora_idle(void){
+    lora_reg_write(REG_OP_MODE, 0x81);
+}
+
+void lora_sleep(void){
+   lora_reg_write(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_SLEEP);
+}
+
+/**
+ * Sets the radio transceiver in receive mode.
+ * Incoming packets will be received.
+ */
+void lora_receive(void){
+   lora_reg_write(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_RX_CONTINUOUS);
+}
+
+void lora_set_preamble_length(long length){
+   lora_reg_write(REG_PREAMBLE_MSB, (uint8_t)(length >> 8));
+   lora_reg_write(REG_PREAMBLE_LSB, (uint8_t)(length >> 0));
+}
+
+int lora_init(lora_config_t *config){
+    /*
+     * Initialization SPI device and LoRa chip
+     */
+    gpio_config_t gpio_conf = {
+        .pin_bit_mask = (1ULL << SX_RESET_NUM),
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE
+    };
+    gpio_config(&gpio_conf);
+    gpio_set_level(SX_RESET_NUM,0);
+    esp_rom_delay_us(200);
+    gpio_set_level(SX_RESET_NUM,1);
+    esp_rom_delay_us(5000);
+
+    spi_bus_config_t buscfg = {
+        .mosi_io_num = SX_MOSI_NUM,
+        .miso_io_num = SX_MISO_NUM,
+        .sclk_io_num = SX_SCLK_NUM,
+        .quadwp_io_num = -1,
+        .quadhd_io_num = -1,
+        .max_transfer_sz = 257
+    };
+    spi_bus_initialize(SPI2_HOST, &buscfg, SPI_DMA_CH_AUTO);
+
+    spi_device_interface_config_t devcfg = {
+        .clock_speed_hz = SX_FREQ,
+        .mode = 0,
+        .spics_io_num = SX_CS_NUM,
+        .queue_size = 7
+    };
+    spi_bus_add_device(SPI2_HOST, &devcfg, &spi_dev);
+    uint32_t frf = (uint32_t)(((uint64_t)config->freq * 1000000ULL << 19) / 32000000ULL);
+    __frequency = config->freq;
+
+    uint8_t freq_msb = (uint8_t)(frf >> 16);
+    uint8_t freq_mid = (uint8_t)(frf >> 8);
+    uint8_t freq_lsb = (uint8_t)(frf >> 0);
+    uint8_t bw_cr = (config->bw_idx << 4) | ((config->cr_idx - 4) << 1) | 0x00;
+    uint8_t sf = (config->sf << 4) | (config->crc_on ? (1 << 2) : 0);
+
+    /*  initialization and frequency adjustment  */
+
+    lora_reg_write(REG_OP_MODE, 0x80);                      //включаем лору и переводим спящий режим
+    lora_reg_write(REG_FRF_MSB, freq_msb);                  //freq msb
+    lora_reg_write(REG_FRF_MID, freq_mid);                  //freq mid
+    lora_reg_write(REG_FRF_LSB, freq_lsb);                  //freq lsb
+    lora_reg_write(REG_PA_CONFIG, 0x8F);                    //pa config
+    lora_reg_write(REG_MODEM_CONFIG_1, bw_cr);              //BW и CR
+    lora_reg_write(REG_MODEM_CONFIG_2, sf);                 //SF
+    lora_reg_write(REG_MODEM_CONFIG_3, 0x04);               //AGS
+    lora_reg_write(REG_SYNC_WORD, 0x12);                    //Sync Word
+    lora_reg_write(REG_FIFO_TX_BASE_ADDR, 0x00);            //tx FIFO
+    lora_reg_write(REG_FIFO_RX_BASE_ADDR, 0x00);            //rx FIFO
+    lora_idle();
+
+    return 1;
+}
+
+
+
+void lora_send_packet(uint8_t *buf, int size){
+   /*
+    * Transfer data to radio.
+    */
+   lora_idle();
+   lora_reg_write(REG_FIFO_ADDR_PTR, 0);
+
+   for(int i=0; i<size; i++)
+      lora_reg_write(REG_FIFO, *buf++);
+
+   lora_reg_write(REG_PAYLOAD_LENGTH, size);
+
+   /*
+    * Start transmission and wait for conclusion.
+    */
+   lora_reg_write(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_TX);
+   while((lora_reg_read(REG_IRQ_FLAGS) & IRQ_TX_DONE_MASK) == 0)
+      vTaskDelay(pdMS_TO_TICKS(2));
+
+   lora_reg_write(REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
+}
+
+int lora_receive_packet(uint8_t *buf, int size) {
+    int len = 0;
+    int irq = lora_reg_read(REG_IRQ_FLAGS);
+
+    // Если пакет еще не принят — сразу выходим, ничего не трогая
+    if ((irq & IRQ_RX_DONE_MASK) == 0) {
+        return 0;
+    }
+
+    // Сбрасываем флаги прерываний (запись единицы сбрасывает бит)
+    lora_reg_write(REG_IRQ_FLAGS, irq);
+
+    // Проверяем ошибку контрольной суммы
+    if ((irq & IRQ_PAYLOAD_CRC_ERROR_MASK) != 0) {
+        // Ошибка CRC — битый пакет
+        return -1;
+    }
+
+    // Выставляем FIFO на начало принятого пакета
+    lora_reg_write(REG_FIFO_ADDR_PTR, lora_reg_read(REG_FIFO_RX_CURRENT_ADDR));
+
+    // Считываем реальный размер принятого пакета
+    len = lora_reg_read(REG_RX_NB_BYTES);
+    if (len > size) len = size;
+
+    for (int i = 0; i < len; i++) {
+        buf[i] = (uint8_t)lora_reg_read(REG_FIFO);
+    }
+
+    return len;
+}
+/**
+ * Return last packet's RSSI.
+ */
+int lora_packet_rssi(void){
+   return (lora_reg_read(REG_PKT_RSSI_VALUE) - (__frequency < 868E6 ? 164 : 157));
+}
+
+/**
+ * Return last packet's SNR (signal to noise ratio).
+ */
+float lora_packet_snr(void){
+   return ((int8_t)lora_reg_read(REG_PKT_SNR_VALUE)) * 0.25;
+}
+
+/**
+ * Shutdown hardware.
+ */
+void lora_close(void){
+   lora_sleep();
+}
+
+void lora_start_rx_continuous(void) {
+    lora_idle();
+    lora_reg_write(REG_IRQ_FLAGS, 0xFF);        
+    lora_reg_write(REG_DIO_MAPPING_1, 0x00);      // DIO0 -> RxDone
+    lora_reg_write(REG_FIFO_RX_BASE_ADDR, 0x00);
+    lora_reg_write(REG_FIFO_ADDR_PTR, 0x00);
+    lora_reg_write(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_RX_CONTINUOUS); // 0x85
+}
+
+void lora_send_packet_async(uint8_t *buf, int size) {
+    lora_idle();
+    lora_reg_write(REG_IRQ_FLAGS, 0xFF);         
+    lora_reg_write(REG_DIO_MAPPING_1, 0x40);      // DIO0 -> TxDone 
+
+    lora_reg_write(REG_FIFO_TX_BASE_ADDR, 0x00);
+    lora_reg_write(REG_FIFO_ADDR_PTR, 0x00);
+    for (int i = 0; i < size; i++) {
+        lora_reg_write(REG_FIFO, *buf++);
+    }
+    lora_reg_write(REG_PAYLOAD_LENGTH, size);
+
+    lora_reg_write(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_TX);
+}
+
+// ====== FILE: ./src/drivers/ds18b20.h ======
+#pragma once
+
+#include <stdbool.h>
+#include <stdint.h>
+
+
+bool ds18b20_reset(void);
+
+void ds18b20_write_bit(uint8_t bit);
+
+uint8_t ds18b20_read_bit(void);
+
+void ds18b20_write_byte(uint8_t data);
+
+uint8_t ds18b20_read_byte(void);
+
+float ds18b20_read_temp(void);
+
+int ds18b20_init(void);
+// ====== FILE: ./src/drivers/bq27441_g1.h ======
+
+// ====== FILE: ./CMakeLists.txt ======
+cmake_minimum_required(VERSION 3.16.0)
+include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+project(esp_idf)
