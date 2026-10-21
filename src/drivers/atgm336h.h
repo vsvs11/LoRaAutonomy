@@ -2,26 +2,35 @@
 #define ATGM336H_H
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <stddef.h>
-#include "driver/uart.h"
-#include "driver/gpio.h"
 
-#define ATGM336H_UART_PORT      UART_NUM_1
-#define ATGM336H_TX_PIN         GPIO_NUM_17
-#define ATGM336H_RX_PIN         GPIO_NUM_16
-#define ATGM336H_BAUD_RATE      9600
-#define ATGM336H_RX_BUF_SIZE    1024
+typedef struct {
+    int baud_rate;
+    int nav_mode;       // 1: GPS, 2: BDS, 3: GPS+BDS, 4: GLONASS, 5: GPS+GLONASS, 7: ALL
+    int update_rate_hz; // 1, 2, 5, 10 Hz
+} atgm_config_t;
 
-// Стандартные команды управления CASIC (PCAS) для ATGM336H
-#define ATGM_CMD_HOT_START      "$PCAS10,0*1C\r\n"
-#define ATGM_CMD_WARM_START     "$PCAS10,1*1D\r\n"
-#define ATGM_CMD_COLD_START     "$PCAS10,2*1E\r\n"
+int atgm_init(atgm_config_t *config);
 
-#define ATGM_CMD_MODE_GPS_BDS   "$PCAS04,3*1A\r\n"
-#define ATGM_CMD_MODE_ALL       "$PCAS04,7*1E\r\n"
+void atgm_send_cmd(const char *cmd);
 
-int atgm_init(void);
-int atgm_write(const uint8_t *data, size_t size);
-int atgm_read(uint8_t *data, size_t max_size, uint32_t timeout_ms);
+int atgm_receive_packet(uint8_t *buf, int size);
+
+int atgm_receive_line(char *buf, int max_size);
+
+void atgm_set_mode(int nav_mode);
+
+void atgm_set_update_rate(int rate_hz);
+
+void atgm_set_baudrate(int baud);
+
+void atgm_reset(int reset_type);
+
+void atgm_sleep(void);
+
+void atgm_wakeup(void);
+
+void atgm_close(void);
 
 #endif // ATGM336H_H
