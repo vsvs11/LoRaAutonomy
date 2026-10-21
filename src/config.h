@@ -28,3 +28,11 @@
 #define BQ_SCL_NUM                     22
 #define BQ_SDA_NUM                     21
 #define BQ_I2C_FREQ                    100000
+
+        /*  drivers/atgm336h  */
+#define ATGM_UART_PORT                 1
+#define ATGM_TX_NUM                    17
+#define ATGM_RX_NUM                    16
+#define ATGM_RESET_NUM                 -1
+#define ATGM_ONOFF_NUM                 -1
+#define ATGM_RX_BUF_SIZE               1024
