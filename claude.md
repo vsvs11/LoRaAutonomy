@@ -24,6 +24,7 @@
 - `src/drivers/bq27441_g1.c` - драйвер BQ27441 (батарейный контроллер)
 - `src/drivers/bq27441_g1.h` - заголовочный файл для BQ27441 (пустой)
 - `src/list.c` - управление списком задач FreeRTOS
+- `src/kernel.c` - ядро системы (супервизор, управление задачами)
 - `src/config.h` - конфигурация пинов и параметров
 
 ## Подсистемы (subsys_id_t)
@@ -46,14 +47,25 @@
 - REG_REMAINING_CAPACITY (0x0C)
 - И другие...
 
+## Функции ядра (kernel.c)
+- `sys_heartbeat(subsys_id_t)` - отправка heartbeat от подсистемы
+- `create_task()` - создание задачи с регистрацией в списке
+- `kill_task()` - удаление задачи
+- `kill_subsystem()` - удаление всех задач подсистемы
+- `supervisor()` - watchdog задача, проверяет heartbeat каждую секунду
+- `start()` - запуск начальных задач (сейчас только LoRa TDMA)
+- `create_queue()` - создание очереди FreeRTOS
+
 ## Заметки
 - Используется FreeRTOS
 - I2C для связи с BQ27441 (I2C_NUM_0, адрес: 0x55)
 - В `bq27441_g1.c` есть незавершенная функция `bq_init()` - нужно реализовать работу со снапшотами
-- В `list.c` используется spinlock для thread-safety при удалении задач
+- В `list.c` и `kernel.c` используется spinlock для thread-safety
 - `bq27441_g1.h` пустой - нужно добавить объявления функций
 - Все файлы из summaries считаются read-only до явного добавления в чат
 - Максимум задач в списке: TASKS_MAX = 15
+- Таймаут heartbeat: HEARTBEAT_TIMEOUT_MS = 5000 мс
+- Супервизор не может убить SUBSYS_CORE
 
 ## История коммитов
 - 16b4033 - (no commit message provided)
