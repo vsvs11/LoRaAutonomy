@@ -29,6 +29,11 @@
 #define BQ_SDA_NUM                     21
 #define BQ_I2C_FREQ                    100000
 
+        /*  drivers/ds3231  */
+#define DS_SCL_NUM                     22
+#define DS_SDA_NUM                     21
+#define DS_I2C_FREQ                    100000
+
         /*  drivers/atgm336h  */
 #define ATGM_UART_PORT                 1
 #define ATGM_TX_NUM                    17
