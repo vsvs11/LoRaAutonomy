@@ -30,27 +30,32 @@ Unlike monolithic firmware solutions, LoRaAutonomy focuses on:
 ## 📂 Project Structure
 
 ```text
-├── docs/             # Protocol frames, task lifecycle, and architecture specifications
+├── docs/                             # Protocol frames, task lifecycle, and architecture specifications
 ├── src/
 |   ├── drivers/
-|   |   ├── atmg336h.c    #ATMG336H gps driver
-|   |   ├── atmg336h.h    #ATMG336H gps interface
-|   |   ├── bq27441_g1.c  #BQ27441_G1 power management driver
-|   |   ├── bq27441_g1.h  #BQ27441_G1 power management interface
-|   |   ├── ili9341.c     #ILI9341 display driver
-|   |   ├── ili9341.h     #ILI9341 display interface
-|   |   ├── ds3231.c      #RTC time driver
-|   |   ├── ds3231.h      #RTC time interface
-|   |   ├── sx127x.c      #LoRa driver
-|   |   ├── sx127x.h      #LoRa interface
-|   |   ├── ds18b20.c     #Termometer driver
-|   |   └── ds18b20.h     #Termometer interface
-│   ├── kernel.c          # Subsystem task scheduler and memory manager
-│   ├── kernel.h          # Kernel interface and lifecycle declarations
-│   ├── list.c / .h       # Active task tracking structures
-│   ├── subsystems.h      # Subsystem masks and definitions
-│   └── main.c            # Hardware init and core bootloader
-├── platformio.ini        # PlatformIO build matrix
+|   |   ├── atmg336h.c                #ATMG336H gps driver
+|   |   ├── atmg336h.h                #ATMG336H gps interface
+|   |   ├── bq27441_g1.c              #BQ27441_G1 power management driver
+|   |   ├── bq27441_g1.h              #BQ27441_G1 power management interface
+|   |   ├── ili9341.c                 #ILI9341 display driver
+|   |   ├── ili9341.h                 #ILI9341 display interface
+|   |   ├── ds3231.c                  #RTC time driver
+|   |   ├── ds3231.h                  #RTC time interface
+|   |   ├── sx127x.c                  #LoRa driver
+|   |   ├── sx127x.h                  #LoRa interface
+|   |   ├── ds18b20.c                 #Termometer driver
+|   |   └── ds18b20.h                 #Termometer interface
+|   ├── subsystems/
+|   |   ├── lora_tdma/
+|   |   |   ├── lora_packet.h         #LoRa packet struct
+|   |   |   ├── tdma.c / .h           #LoRa TDMA protocol
+|   |   |   └── lota_tasks.c / .h     #LoRa Tasks manager 
+│   ├── kernel.c                      #Subsystem task scheduler and memory manager
+│   ├── kernel.h                      #Kernel interface and lifecycle declarations
+│   ├── list.c / .h                   #Active task tracking structures
+│   ├── subsystems.h                  #Subsystem masks and definitions
+│   └── main.c                        #Hardware init and core bootloader
+├── platformio.ini                    #PlatformIO build matrix
 └── README.md
 ```
 
