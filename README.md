@@ -33,8 +33,14 @@ Unlike monolithic firmware solutions, LoRaAutonomy focuses on:
 ├── docs/             # Protocol frames, task lifecycle, and architecture specifications
 ├── src/
 |   ├── drivers/
+|   |   ├── atmg336h.c    #ATMG336H gps driver
+|   |   ├── atmg336h.h    #ATMG336H gps interface
+|   |   ├── bq27441_g1.c  #BQ27441_G1 power management driver
+|   |   ├── bq27441_g1.h  #BQ27441_G1 power management interface
 |   |   ├── ili9341.c     #ILI9341 display driver
-|   |   ├── ili9341.h     # ILI9341 display interface
+|   |   ├── ili9341.h     #ILI9341 display interface
+|   |   ├── ds3231.c      #RTC time driver
+|   |   ├── ds3231.h      #RTC time interface
 |   |   ├── sx127x.c      #LoRa driver
 |   |   ├── sx127x.h      #LoRa interface
 |   |   ├── ds18b20.c     #Termometer driver
