@@ -11,3 +11,4 @@ void hard(void *pvParameters);
 void power(void *pvParameters);//тестовая задача
 void display(void *pvParameters);
 void lora(void *pvParameters);
+void gps_manager_task(void *pvParameters);
