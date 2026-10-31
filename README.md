@@ -122,4 +122,4 @@ If you find this project interesting and want to support hardware prototyping (c
 ## 💬 Community & Devlog
 
 * **Telegram Devlog:** [t.me/lora_autonomy](https://t.me/lora_autonomy) *(Development logs, hardware testing, and discussions)*
-* **License:** Distributed under the MIT License.
+* **License:** Distributed under the GPL License.
