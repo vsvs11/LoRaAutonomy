@@ -5,7 +5,10 @@
 #include <stdint.h>
 
 typedef struct {
-    uint8_t len;
-    uint8_t id_recipient;
-    uint8_t data[];
+    char* name;
+    int num;
+    int priority;
 } packet_queue_t;
+int queue_add(packet_queue_t task);
+
+void view_queue();

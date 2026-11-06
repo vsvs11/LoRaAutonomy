@@ -15,11 +15,12 @@
 #include "drivers/atgm336h.h"
 #include "esp_timer.h"
 #include "driver/uart.h"
+#include "subsystems/lora_tdma/lora_tasks.h"
 
 // Глобальная метка секундного фронта
 static volatile int64_t g_last_pps_us = 0;
 
-static const char *TAG = "POWER_LOG";
+static const char *TAG = "TEST_LOG";
 static const char *GPS_TAG = "GPS_NODE";
 
 void hard(void *pvParameters){
@@ -190,5 +191,20 @@ void gps_manager_task(void *pvParameters) {
         printf(" Stats        : Sentences=%lu, Checksum Errors=%lu\n",
                (unsigned long)nav.rx_sentences, (unsigned long)nav.crc_errors);
         printf("============================================================\n");
+    }
+}
+
+void packet_task(void *pvParameters){
+    int a = 0;
+    for (;;){
+        
+        packet_queue_t queue = {
+        .name = "eblan",
+        .num = a++
+        };
+        int err = queue_add(queue);
+        ESP_LOGI(TAG, "%d", err);
+        view_queue();
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
