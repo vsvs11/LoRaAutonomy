@@ -2,7 +2,7 @@
 
 > A lightweight, modular operating environment and autonomous mesh networking stack for ESP32 and STM32 microcontrollers running FreeRTOS.
 
-[![License: Apache-2-0](https://img.shields.io/badge/License-Apache-2-0-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-Apache_2.0-orange.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Platform](https://img.shields.io/badge/Platform-ESP--IDF%20%7C%20FreeRTOS-green.svg)](https://github.com/espressif/esp-idf)
 [![Hardware](https://img.shields.io/badge/Hardware-ESP32%20%2F%20STM32%20%2F%20LoRa-orange.svg)]()
 
