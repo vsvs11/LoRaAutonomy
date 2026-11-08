@@ -1,6 +1,6 @@
 # 📡 LoRaAutonomy
 
-> A lightweight, modular operating environment and autonomous mesh networking stack for ESP32 and RP2040 microcontrollers running FreeRTOS / ESP-IDF.
+> A lightweight, modular operating environment and autonomous mesh networking stack for ESP32 and STM32 microcontrollers running FreeRTOS.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-ESP--IDF%20%7C%20FreeRTOS-green.svg)](https://github.com/espressif/esp-idf)
@@ -13,7 +13,7 @@
 **LoRaAutonomy** is an open-source decentralized networking stack designed for resilient, off-grid telemetry and packet routing.
 
 Unlike monolithic firmware solutions, LoRaAutonomy focuses on:
-- **Modular Microkernel Core:** Strict task lifecycle management (`create_task`, `kill_task`, `kill_subsystem`).
+- **Modular Microkernel Core:** Strict task lifecycle management (`create_task`, `kill_task`).
 - **Subsystem Isolation:** Core subsystems run in decoupled FreeRTOS tasks to prevent network stack panics from crashing peripheral handlers.
 - **Low Overhead:** Pure C implementation targeting deterministic execution on resource-constrained embedded targets.
 
@@ -21,8 +21,8 @@ Unlike monolithic firmware solutions, LoRaAutonomy focuses on:
 
 ## 🛠 Target Hardware
 
-* **Primary MCU:** ESP32 / ESP32-S3 (ESP-IDF)
-* **RF Transceivers:** Semtech SX1262 / SX1276 / SX1278 (SPI)
+* **Primary MCU:** ESP32 family, coming soon STM32 family
+* **RF Transceivers:** SX1276 / SX1278, coming soon sx1262
 * **Operating System:** FreeRTOS (SMP configuration on dual-core targets)
 
 ---
@@ -52,7 +52,6 @@ Unlike monolithic firmware solutions, LoRaAutonomy focuses on:
 |   |   |   └── lota_tasks.c / .h     #LoRa Tasks manager 
 │   ├── kernel.c                      #Subsystem task scheduler and memory manager
 │   ├── kernel.h                      #Kernel interface and lifecycle declarations
-│   ├── list.c / .h                   #Active task tracking structures
 │   ├── subsystems.h                  #Subsystem masks and definitions
 │   └── main.c                        #Hardware init and core bootloader
 ├── platformio.ini                    #PlatformIO build matrix
@@ -65,12 +64,11 @@ Unlike monolithic firmware solutions, LoRaAutonomy focuses on:
 
 **Current Stage: Early Core Development**
 
-- [x] Basic task dispatcher and subsystem registry (`kill_subsystem`, task list traversal)
-- [ ] SPI hardware abstraction layer for Semtech LoRa transceivers
+- [x] Basic task dispatcher and subsystem registry
+- [X] SPI hardware abstraction layer for Semtech LoRa transceivers
 - [ ] Network frame specification (Addressing, Hop limits, CRC16)
 - [ ] Dynamic packet routing algorithm for multi-hop mesh
-- [ ] RP2040 UART/SPI inter-chip bridge protocol
-- [ ] Non-volatile configuration storage (NVS)
+- [ ] working with external storage devices (SD, NAND Flash, etc.)
 
 ---
 
