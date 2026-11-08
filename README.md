@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-ESP--IDF%20%7C%20FreeRTOS-green.svg)](https://github.com/espressif/esp-idf)
-[![Hardware](https://img.shields.io/badge/Hardware-ESP32%20%2F%20RP2040%20%2F%20LoRa-orange.svg)]()
+[![Hardware](https://img.shields.io/badge/Hardware-ESP32%20%2F%20STM32%20%2F%20LoRa-orange.svg)]()
 
 ---
 
